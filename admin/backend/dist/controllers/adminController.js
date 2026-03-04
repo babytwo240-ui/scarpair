@@ -1,4 +1,4 @@
-﻿"use strict";
+"use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getSystemLogs = exports.getAllReports = exports.getAllPostRatings = exports.getAllUserRatings = exports.deleteWasteCategory = exports.updateWasteCategory = exports.createWasteCategory = exports.getWasteCategories = exports.getStatistics = exports.deleteMaterial = exports.updateMaterial = exports.createMaterial = exports.getMaterialById = exports.getAllMaterials = exports.login = void 0;
 const jwt_1 = require("../config/jwt");

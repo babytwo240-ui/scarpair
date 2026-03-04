@@ -1,4 +1,4 @@
-﻿"use strict";
+"use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteUser = exports.toggleUserVerification = exports.getUserById = exports.getAllUsers = void 0;
 const models_1 = require("../models");
@@ -176,7 +176,7 @@ const toggleUserVerification = async (req, res) => {
                     title: notificationTitle,
                     message: notificationMessage
                 })
-            }).catch(err => console.log('â„¹ï¸  Notification creation attempt:', err.message));
+            });
         }
         catch (notificationError) {
         }

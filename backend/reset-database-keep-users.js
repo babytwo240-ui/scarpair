@@ -38,7 +38,9 @@ async function resetDatabase() {
       'reviews',
       'notifications',
       'collections',
-      'waste_posts'
+      'waste_posts',
+      'materials',
+      'password_audits'
     ];
 
     console.log('📋 Clearing the following tables:');
@@ -71,9 +73,15 @@ async function resetDatabase() {
     console.log(`📊 Remaining Data:`);
     console.log(`   - Users: ${userCount[0][0].count}`);
 
+    const wasteCategoryCount = await sequelize.query('SELECT COUNT(*) as count FROM waste_categories');
+    console.log(`   - Waste Categories: ${wasteCategoryCount[0][0].count}`);
+
+    console.log(`\n📊 Cleared Tables (should be 0):`);
     const tables_to_check = [
-      'waste_posts', 'collections', 'feedbacks', 'reports',
-      'user_ratings', 'post_ratings', 'notifications'
+      'waste_posts', 'collections', 'conversations', 'messages', 
+      'feedbacks', 'reports', 'user_ratings', 'post_ratings', 
+      'notifications', 'post_messages', 'reviews', 'materials',
+      'password_audits', 'system_logs'
     ];
 
     for (const table of tables_to_check) {

@@ -5,6 +5,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
+// Ensure NODE_ENV defaults to production if not explicitly set
+const NODE_ENV = process.env.NODE_ENV || 'production';
 const DATABASE_DIALECT = (process.env.DB_DIALECT || 'postgres');
 const config = {
     development: {
@@ -14,7 +16,7 @@ const config = {
         host: process.env.DB_HOST || 'localhost',
         port: parseInt(process.env.DB_PORT || '5432'),
         dialect: DATABASE_DIALECT,
-        logging: console.log
+        logging: NODE_ENV === 'development' ? console.log : false
     },
     production: {
         username: process.env.DB_USER || '',
