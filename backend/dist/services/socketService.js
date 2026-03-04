@@ -9,11 +9,20 @@ const rateLimiter_1 = require("../middleware/rateLimiter");
 const models_1 = require("../models");
 const userJwt_1 = require("../config/userJwt");
 function initializeSocket(io) {
+    // Middleware to authenticate socket connections
+    // Important: In polling mode, token may not be available immediately
+    // so we allow connection without token and authenticate on first event
     io.use(async (socket, next) => {
         try {
-            const token = socket.handshake.auth.token;
+            const token = socket.handshake.auth?.token;
+            // If no token provided, allow connection
+            // Authentication will happen on first real event (conversation:join, etc)
+            // This is necessary for polling mode on Render
             if (!token) {
-                return next(new Error('No token provided'));
+                // Mark as unauthenticated but allow connection
+                socket.userId = undefined;
+                next();
+                return;
             }
             const decoded = (0, userJwt_1.verifyUserToken)(token);
             if (!decoded) {
@@ -25,34 +34,48 @@ function initializeSocket(io) {
             next();
         }
         catch (error) {
-            next(new Error('Authentication failed'));
+            // Allow connection to proceed, real auth happens per-event
+            next();
         }
     });
     io.on('connection', async (socket) => {
-        socket.on('error', (error) => {
-        });
-        socket.join(`user:${socket.userId}`);
-        try {
-            await redis_1.default.hset(`user:${socket.userId}:sockets`, socket.id, new Date().toISOString());
-            await redis_1.default.expire(`user:${socket.userId}:sockets`, 30 * 24 * 60 * 60);
-        }
-        catch (redisError) {
-        }
-        try {
-            io.emit('user:online', {
-                userId: socket.userId,
-                timestamp: new Date()
-            });
-        }
-        catch (broadcastError) {
-        }
-        try {
-            await redis_1.default.setex(`user:online:${socket.userId}`, 300, JSON.stringify({
-                socketId: socket.id,
-                lastSeen: new Date().getTime()
-            }));
-        }
-        catch (redisError) {
+        // Require authentication for actual operations
+        const requireAuth = (cb) => {
+            if (!socket.userId) {
+                socket.emit('error', 'Not authenticated. Please login first.');
+                if (cb)
+                    cb(false);
+                return false;
+            }
+            if (cb)
+                cb(true);
+            return true;
+        };
+        // Only setup online presence if authenticated
+        if (socket.userId) {
+            try {
+                await redis_1.default.hset(`user:${socket.userId}:sockets`, socket.id, new Date().toISOString());
+                await redis_1.default.expire(`user:${socket.userId}:sockets`, 30 * 24 * 60 * 60);
+            }
+            catch (redisError) {
+            }
+            socket.join(`user:${socket.userId}`);
+            try {
+                io.emit('user:online', {
+                    userId: socket.userId,
+                    timestamp: new Date()
+                });
+            }
+            catch (broadcastError) {
+            }
+            try {
+                await redis_1.default.setex(`user:online:${socket.userId}`, 300, JSON.stringify({
+                    socketId: socket.id,
+                    lastSeen: new Date().getTime()
+                }));
+            }
+            catch (redisError) {
+            }
         }
         socket.on('error', (error) => {
         });

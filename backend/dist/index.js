@@ -57,7 +57,8 @@ logger.info(`🚀 Starting Scrapair Backend Server...`);
 logger.info(`📋 Environment: ${process.env.NODE_ENV || 'development'}`);
 logger.info(`🔧 Port: ${PORT}`);
 // ✅ Trust proxy (needed for Render and other reverse proxies)
-app.set('trust proxy', true);
+// Use numeric value (1) instead of true to avoid express-rate-limit validation issues
+app.set('trust proxy', 1);
 const corsOrigins = (process.env.CORS_ORIGINS || 'http://localhost:3000,http://localhost:5173').split(',').map(origin => origin.trim());
 app.use((0, cors_1.default)({
     origin: corsOrigins,
@@ -82,7 +83,7 @@ app.use((0, helmet_1.default)({
 app.use(morganConfig_1.default);
 logger.info('📝 HTTP request logging enabled');
 // ✅ Global rate limiting (100 requests per 15 minutes)
-// When behind a proxy (Render), configure to use X-Forwarded-For header
+// When behind a proxy (Render), express-rate-limit will automatically use X-Forwarded-For
 const globalLimiter = (0, express_rate_limit_1.default)({
     windowMs: 15 * 60 * 1000,
     max: 100,
@@ -93,6 +94,8 @@ const globalLimiter = (0, express_rate_limit_1.default)({
         // Skip rate limiting for health checks and status endpoints
         return req.path === '/api/health' || req.path === '/health';
     }
+    // Note: express-rate-limit automatically respects app.set('trust proxy')
+    // and will use X-Forwarded-For header when Express is configured for proxy (trust proxy: 1)
 });
 app.use('/api/', globalLimiter);
 // ✅ Cache control headers for API responses

@@ -144,6 +144,25 @@ export const deleteWastePost = async (req: Request, res: Response): Promise<any>
       return res.status(403).json({ message: 'You can only delete your own posts' });
     }
 
+    // Check if there are active collections for this post
+    const Collection = (sequelize as any).models.Collection;
+    const activeCollections = await Collection.count({
+      where: {
+        postId: id,
+        status: {
+          [Op.in]: ['pending', 'approved', 'scheduled', 'confirmed']
+        }
+      }
+    });
+
+    if (activeCollections > 0) {
+      return res.status(400).json({ 
+        message: 'Cannot delete waste post with active collection requests. Please cancel all pending requests first.',
+        activeCollections
+      });
+    }
+
+    // Safe to delete - no active collections
     await wastePost.destroy();
 
     res.status(200).json({
