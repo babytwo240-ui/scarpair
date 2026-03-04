@@ -33,6 +33,8 @@ const deleteUserWithCascade = async (userId, userType, sequelizeInstance) => {
         const Report = models.Report;
         const SystemLog = models.SystemLog;
         const PasswordAudit = models.PasswordAudit;
+        const Material = models.Material;
+        const PostRating = models.PostRating;
         // Step 1: Delete all user ratings
         if (UserRating) {
             const ratingsDeleted = await UserRating.destroy({
@@ -175,7 +177,38 @@ const deleteUserWithCascade = async (userId, userType, sequelizeInstance) => {
             });
             deletedCount.collections += collectionsDeleted;
         }
-        // Step 12: Delete all waste posts (business only)
+        // Step 12: Delete all Material posts (business only)
+        if (userType === 'business' && Material) {
+            const materialsDeleted = await Material.destroy({
+                where: { businessUserId: userId },
+                transaction
+            });
+            deletedCount.postMessages += materialsDeleted; // Reuse field for material count
+        }
+        // Step 13: Delete post ratings before waste posts
+        if (PostRating) {
+            // Get all waste post IDs for this user
+            const allUserPostIds = await WastePost.findAll({
+                where: { businessId: userId },
+                attributes: ['id'],
+                transaction,
+                raw: true
+            });
+            if (allUserPostIds && allUserPostIds.length > 0) {
+                const postIds = allUserPostIds.map((p) => p.id);
+                await PostRating.destroy({
+                    where: { postId: postIds },
+                    transaction
+                });
+            }
+        }
+        // Step 14: Clear approvedRecyclerId from waste posts (don't delete the posts)
+        // For recyclers: clear posts where they were approved
+        // For businesses: clear posts where they were approved as recycler
+        if (WastePost) {
+            await WastePost.update({ approvedRecyclerId: null }, { where: { approvedRecyclerId: userId }, transaction });
+        }
+        // Step 15: Delete all waste posts (business only)
         if (userType === 'business') {
             const postsDeleted = await WastePost.destroy({
                 where: { businessId: userId },
@@ -183,7 +216,7 @@ const deleteUserWithCascade = async (userId, userType, sequelizeInstance) => {
             });
             deletedCount.wastePosts += postsDeleted;
         }
-        // Step 13: Delete the user
+        // Step 16: Delete the user
         const userDeleted = await User.destroy({
             where: { id: userId },
             transaction
