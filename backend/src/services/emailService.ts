@@ -1,4 +1,5 @@
 import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 
 interface EmailLog {
   to: string;
@@ -10,10 +11,20 @@ interface EmailLog {
 
 const sentEmails: EmailLog[] = [];
 let transporter: any = null;
+let resend: Resend | null = null;
 
 // Initialize email transporter based on environment
 const initializeEmailService = async () => {
-  if (process.env.EMAIL_SERVICE === 'ethereal') {
+  if (process.env.EMAIL_SERVICE === 'resend') {
+    try {
+      // Initialize Resend client
+      resend = new Resend(process.env.RESEND_API_KEY);
+      console.log('✅ Resend email service initialized');
+    } catch (error: any) {
+      console.error('❌ Resend initialization failed:', error.message);
+      resend = null;
+    }
+  } else if (process.env.EMAIL_SERVICE === 'ethereal') {
     try {
       // For Ethereal - use credentials from .env
       transporter = nodemailer.createTransport({
@@ -64,19 +75,33 @@ export const sendVerificationEmail = async (
       type: 'verification'
     });
 
-    if (transporter) {
+    const htmlContent = `
+      <h2>Verify Your Email</h2>
+      <p>Your verification code is:</p>
+      <h1 style="color: #007bff; font-size: 36px; font-weight: bold;">${code}</h1>
+      <p>This code will expire in 15 minutes.</p>
+      <p>If you didn't request this, please ignore this email.</p>
+    `;
+
+    if (resend) {
+      // Send via Resend
+      const result = await resend.emails.send({
+        from: process.env.EMAIL_FROM || 'noreply@scrapair.com',
+        to: email,
+        subject: 'Email Verification - Scrapair',
+        html: htmlContent,
+      });
+      
+      console.log(`\n📧 [RESEND EMAIL] Verification sent to: ${email}`);
+      console.log(`   Code: ${code}`);
+      console.log(`   Status: Success\n`);
+    } else if (transporter) {
       // Send via Ethereal
       const info = await transporter.sendMail({
         from: process.env.EMAIL_FROM || 'noreply@scrapair.com',
         to: email,
         subject: 'Email Verification - Scrapair',
-        html: `
-          <h2>Verify Your Email</h2>
-          <p>Your verification code is:</p>
-          <h1 style="color: #007bff; font-size: 36px; font-weight: bold;">${code}</h1>
-          <p>This code will expire in 15 minutes.</p>
-          <p>If you didn't request this, please ignore this email.</p>
-        `,
+        html: htmlContent,
       });
       
       console.log(`\n📧 [ETHEREAL EMAIL] Verification sent to: ${email}`);
@@ -112,21 +137,36 @@ export const sendPasswordResetEmail = async (
     const frontendUrl = process.env.FRONTEND_BASE_URL || 'http://localhost:3000';
     const resetLink = `${frontendUrl}/reset-password?token=${code}`;
 
-    if (transporter) {
+    const htmlContent = `
+      <h2>Reset Your Password</h2>
+      <p>Click the link below to reset your password:</p>
+      <p><a href="${resetLink}" style="display: inline-block; background-color: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold;">Reset Password</a></p>
+      <p>Or copy this link: <code>${resetLink}</code></p>
+      <p style="font-size: 12px; color: #666;">Your reset code is: <strong>${code}</strong></p>
+      <p>This link will expire in 1 hour.</p>
+      <p>If you didn't request this, please ignore this email.</p>
+    `;
+
+    if (resend) {
+      // Send via Resend
+      const result = await resend.emails.send({
+        from: process.env.EMAIL_FROM || 'noreply@scrapair.com',
+        to: email,
+        subject: 'Password Reset Request - Scrapair',
+        html: htmlContent,
+      });
+      
+      console.log(`\n📧 [RESEND EMAIL] Password reset sent to: ${email}`);
+      console.log(`   Code: ${code}`);
+      console.log(`   Reset Link: ${resetLink}`);
+      console.log(`   Status: Success\n`);
+    } else if (transporter) {
       // Send via Ethereal
       const info = await transporter.sendMail({
         from: process.env.EMAIL_FROM || 'noreply@scrapair.com',
         to: email,
         subject: 'Password Reset Request - Scrapair',
-        html: `
-          <h2>Reset Your Password</h2>
-          <p>Click the link below to reset your password:</p>
-          <p><a href="${resetLink}" style="display: inline-block; background-color: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold;">Reset Password</a></p>
-          <p>Or copy this link: <code>${resetLink}</code></p>
-          <p style="font-size: 12px; color: #666;">Your reset code is: <strong>${code}</strong></p>
-          <p>This link will expire in 1 hour.</p>
-          <p>If you didn't request this, please ignore this email.</p>
-        `,
+        html: htmlContent,
       });
       
       console.log(`\n📧 [ETHEREAL EMAIL] Password reset sent to: ${email}`);
@@ -160,18 +200,31 @@ export const sendAccountVerifiedEmail = async (
       type: 'verified'
     });
 
-    if (transporter) {
+    const htmlContent = `
+      <h2>Welcome to Scrapair!</h2>
+      <p>Hi ${userName},</p>
+      <p>Your account has been verified and is now active.</p>
+      <p>You can now log in and start using Scrapair.</p>
+    `;
+
+    if (resend) {
+      // Send via Resend
+      const result = await resend.emails.send({
+        from: process.env.EMAIL_FROM || 'noreply@scrapair.com',
+        to: email,
+        subject: 'Account Verified - Scrapair',
+        html: htmlContent,
+      });
+      
+      console.log(`\n📧 [RESEND EMAIL] Account verified notification sent to: ${email}`);
+      console.log(`   Status: Success\n`);
+    } else if (transporter) {
       // Send via Ethereal
       const info = await transporter.sendMail({
         from: process.env.EMAIL_FROM || 'noreply@scrapair.com',
         to: email,
         subject: 'Account Verified - Scrapair',
-        html: `
-          <h2>Welcome to Scrapair!</h2>
-          <p>Hi ${userName},</p>
-          <p>Your account has been verified and is now active.</p>
-          <p>You can now log in and start using Scrapair.</p>
-        `,
+        html: htmlContent,
       });
       
       console.log(`\n📧 [ETHEREAL EMAIL] Account verified notification sent to: ${email}`);
@@ -201,19 +254,32 @@ export const sendAccountDeletedEmail = async (
       type: 'deleted'
     });
 
-    if (transporter) {
+    const htmlContent = `
+      <h2>Account Deletion Confirmed</h2>
+      <p>Hi ${userName},</p>
+      <p>Your account has been successfully deleted.</p>
+      <p>All your data has been removed from our systems.</p>
+      <p>If you have any questions, please contact us.</p>
+    `;
+
+    if (resend) {
+      // Send via Resend
+      const result = await resend.emails.send({
+        from: process.env.EMAIL_FROM || 'noreply@scrapair.com',
+        to: email,
+        subject: 'Account Deleted - Scrapair',
+        html: htmlContent,
+      });
+      
+      console.log(`\n📧 [RESEND EMAIL] Account deletion confirmation sent to: ${email}`);
+      console.log(`   Status: Success\n`);
+    } else if (transporter) {
       // Send via Ethereal
       const info = await transporter.sendMail({
         from: process.env.EMAIL_FROM || 'noreply@scrapair.com',
         to: email,
         subject: 'Account Deleted - Scrapair',
-        html: `
-          <h2>Account Deletion Confirmed</h2>
-          <p>Hi ${userName},</p>
-          <p>Your account has been successfully deleted.</p>
-          <p>All your data has been removed from our systems.</p>
-          <p>If you have any questions, please contact us.</p>
-        `,
+        html: htmlContent,
       });
       
       console.log(`\n📧 [ETHEREAL EMAIL] Account deletion confirmation sent to: ${email}`);
