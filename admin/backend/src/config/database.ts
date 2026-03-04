@@ -1,8 +1,6 @@
 import dotenv from 'dotenv';
 
 dotenv.config();
-
-// Ensure NODE_ENV defaults to production if not explicitly set
 const NODE_ENV = process.env.NODE_ENV || 'production';
 
 interface DatabaseConfig {

@@ -1,6 +1,5 @@
 import jwt, { Secret, SignOptions } from 'jsonwebtoken';
 
-// Admin credentials (hardcoded for now - can be moved to database later)
 interface AdminCredentials {
   username: string;
   password: string;
@@ -21,7 +20,6 @@ interface AdminPayload {
 }
 
 /**
- * Verify admin credentials
  * @param {string} username
  * @param {string} password
  * @returns {boolean}
@@ -31,9 +29,8 @@ const verifyCredentials = (username: string, password: string): boolean => {
 };
 
 /**
- * Generate JWT token
- * @param {AdminPayload} payload - Token payload
- * @returns {string} JWT token
+ * @param {AdminPayload} payload 
+ * @returns {string} 
  */
 const generateToken = (payload: AdminPayload): string => {
   const options: SignOptions = { expiresIn: JWT_EXPIRATION } as any;
@@ -41,9 +38,8 @@ const generateToken = (payload: AdminPayload): string => {
 };
 
 /**
- * Verify JWT token
  * @param {string} token
- * @returns {AdminPayload | null} Decoded token or null if invalid
+ * @returns {AdminPayload | null} 
  */
 const verifyToken = (token: string): AdminPayload | null => {
   try {

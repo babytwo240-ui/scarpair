@@ -2,9 +2,6 @@
 import { verifyCredentials, generateToken } from '../config/jwt';
 import { sequelize } from '../models';
 
-/**
- * Admin Login
- */
 const login = (req: Request, res: Response): any => {
   try {
     const { username, password } = req.body;
@@ -40,9 +37,6 @@ const login = (req: Request, res: Response): any => {
   }
 };
 
-/**
- * Get all materials (Admin view)
- */
 const getAllMaterials = async (req: Request, res: Response): Promise<any> => {
   try {
     const Material = (sequelize as any).models.Material;
@@ -66,10 +60,6 @@ const getAllMaterials = async (req: Request, res: Response): Promise<any> => {
     res.status(500).json({ error: 'Failed to fetch materials' });
   }
 };
-
-/**
- * Get material by ID
- */
 const getMaterialById = async (req: Request, res: Response): Promise<any> => {
   try {
     const { id } = req.params;
@@ -96,9 +86,6 @@ const getMaterialById = async (req: Request, res: Response): Promise<any> => {
   }
 };
 
-/**
- * Create new material (Admin)
- */
 const createMaterial = async (req: Request, res: Response): Promise<any> => {
   try {
     const { businessUserId, materialType, quantity, unit, description, contactEmail, status, isRecommendedForArtists } = req.body;
@@ -133,10 +120,6 @@ const createMaterial = async (req: Request, res: Response): Promise<any> => {
     res.status(500).json({ error: 'Failed to create material' });
   }
 };
-
-/**
- * Update material by ID
- */
 const updateMaterial = async (req: Request, res: Response): Promise<any> => {
   try {
     const { id } = req.params;
@@ -172,9 +155,6 @@ const updateMaterial = async (req: Request, res: Response): Promise<any> => {
   }
 };
 
-/**
- * Delete material by ID
- */
 const deleteMaterial = async (req: Request, res: Response): Promise<any> => {
   try {
     const { id } = req.params;
@@ -198,10 +178,6 @@ const deleteMaterial = async (req: Request, res: Response): Promise<any> => {
     res.status(500).json({ error: 'Failed to delete material' });
   }
 };
-
-/**
- * Get statistics
- */
 const getStatistics = async (req: Request, res: Response): Promise<any> => {
   try {
     const User = (sequelize as any).models.User;

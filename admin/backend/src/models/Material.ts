@@ -102,7 +102,6 @@ module.exports = (sequelize: Sequelize): ModelStatic<MaterialInstance> => {
     }
   ) as any;
 
-  // Association with User
   (Material as any).associate = (models: any) => {
     Material.belongsTo(models.User, {
       foreignKey: 'businessUserId',

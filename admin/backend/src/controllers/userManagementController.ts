@@ -1,15 +1,9 @@
 ﻿import { Request, Response } from 'express';
 import { sequelize } from '../models';
-
-/**
- * Get all users from database
- * Admin can filter by type (business/recycler) and verification status
- */
 const getAllUsers = async (req: Request, res: Response): Promise<any> => {
   try {
     const { type, verified, page = 1, limit = 10, search = '' } = req.query;
 
-    // Query users directly from database
     const User = (sequelize as any).models.User;
     
     if (!User) {
@@ -17,14 +11,11 @@ const getAllUsers = async (req: Request, res: Response): Promise<any> => {
     }
     const whereClause: any = {};
     
-    // Build filters
     if (type) {
       whereClause.type = type;
     }
 
     if (verified !== undefined && verified !== '') {
-      // Note: isVerified field may not exist in base migration
-      // This filter is kept for future compatibility
       const isVerified = verified === 'true';
       whereClause['isVerified'] = isVerified;
     }
@@ -38,9 +29,7 @@ const getAllUsers = async (req: Request, res: Response): Promise<any> => {
       ];
     }
 
-    // Fetch total count
     const totalCount = await User.count({ where: whereClause });
-    // Fetch paginated users
     const pageNum = parseInt(page as string) || 1;
     const limitNum = parseInt(limit as string) || 10;
     const offset = (pageNum - 1) * limitNum;
@@ -91,9 +80,6 @@ const getAllUsers = async (req: Request, res: Response): Promise<any> => {
   }
 };
 
-/**
- * Get single user details from database
- */
 const getUserById = async (req: Request, res: Response): Promise<any> => {
   try {
     const { id } = req.params;
@@ -141,10 +127,6 @@ const getUserById = async (req: Request, res: Response): Promise<any> => {
     res.status(500).json({ error: 'Failed to fetch user details', details: error.message });
   }
 };
-
-/**
- * Toggle user verification status and notify user
- */
 const toggleUserVerification = async (req: Request, res: Response): Promise<any> => {
   try {
     const { id } = req.params;
@@ -161,9 +143,7 @@ const toggleUserVerification = async (req: Request, res: Response): Promise<any>
       return res.status(404).json({ error: 'User not found' });
     }
 
-    // Update isVerified field in database
     await user.update({ isVerified });
-    // Send notification to user (async, don't block response)
     const notificationMessage = isVerified
       ? 'Your account has been verified by the admin. You can now post materials and waste.'
       : 'Your account verification has been removed by the admin.';
@@ -172,7 +152,6 @@ const toggleUserVerification = async (req: Request, res: Response): Promise<any>
       ? 'Account Verified'
       : 'Account Unverified';
 
-    // Try to create notification on main backend (non-blocking)
     try {
       const mainBackendUrl = process.env.MAIN_BACKEND_URL;
       if (!mainBackendUrl) {
@@ -211,10 +190,6 @@ const toggleUserVerification = async (req: Request, res: Response): Promise<any>
     res.status(500).json({ error: 'Failed to update user verification status', details: error.message });
   }
 };
-
-/**
- * Delete user by admin
- */
 const deleteUser = async (req: Request, res: Response): Promise<any> => {
   try {
     const { id } = req.params;
@@ -229,7 +204,6 @@ const deleteUser = async (req: Request, res: Response): Promise<any> => {
     const userId = user.id;
     const userName = user.email;
 
-    // Delete the user
     await user.destroy();
 
     res.status(200).json({

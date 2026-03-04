@@ -1,4 +1,3 @@
-// Shared mock database (in production, this would be a real database)
 interface AdminMaterial {
   id: number;
   businessName?: string;
@@ -31,9 +30,6 @@ interface Statistics {
 let materialsDatabase: AdminMaterial[] = [];
 let materialId = 1;
 
-/**
- * Initialize database with sample data
- */
 const initializeDatabase = (): void => {
   materialsDatabase = [
     {
@@ -57,26 +53,13 @@ const initializeDatabase = (): void => {
   ];
 };
 
-// Initialize on load
 initializeDatabase();
-
-/**
- * Get all materials
- */
 const getAllMaterials = (): AdminMaterial[] => {
   return materialsDatabase;
 };
-
-/**
- * Get material by ID
- */
 const getMaterialById = (id: number): AdminMaterial | null => {
   return materialsDatabase.find((m) => m.id === id) || null;
 };
-
-/**
- * Create material
- */
 const createMaterial = (material: MaterialInput): AdminMaterial => {
   const newMaterial: AdminMaterial = {
     id: materialId++,
@@ -87,10 +70,6 @@ const createMaterial = (material: MaterialInput): AdminMaterial => {
   materialsDatabase.push(newMaterial);
   return newMaterial;
 };
-
-/**
- * Update material by ID
- */
 const updateMaterial = (id: number, updates: MaterialUpdate): AdminMaterial | null => {
   const index = materialsDatabase.findIndex((m) => m.id === id);
   if (index > -1) {
@@ -99,10 +78,6 @@ const updateMaterial = (id: number, updates: MaterialUpdate): AdminMaterial | nu
   }
   return null;
 };
-
-/**
- * Delete material by ID
- */
 const deleteMaterial = (id: number): AdminMaterial | null => {
   const index = materialsDatabase.findIndex((m) => m.id === id);
   if (index > -1) {
@@ -111,10 +86,6 @@ const deleteMaterial = (id: number): AdminMaterial | null => {
   }
   return null;
 };
-
-/**
- * Get statistics
- */
 const getStatistics = (): Statistics => {
   const materialTypes: Record<string, number> = {};
   materialsDatabase.forEach((m) => {

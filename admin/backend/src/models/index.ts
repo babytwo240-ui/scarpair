@@ -3,7 +3,6 @@ import dotenv from 'dotenv';
 import path from 'path';
 import config from '../config/database';
 
-// Load the correct .env file
 const envFile = process.env.NODE_ENV === 'production' ? '.env.production' : '.env.local';
 dotenv.config({ path: path.join(__dirname, '..', '..', envFile) });
 
@@ -29,7 +28,6 @@ const sequelize = new Sequelize(
       timestamps: true,
       underscored: false
     },
-    // SSL settings for Supabase connection pooler
     dialectOptions: {
       ssl: {
         require: true,
@@ -39,7 +37,6 @@ const sequelize = new Sequelize(
   }
 );
 
-// Import models
 const User = require('./User')(sequelize);
 const Material = require('./Material')(sequelize);
 const AdminUser = require('./AdminUser')(sequelize);
@@ -49,7 +46,6 @@ const UserRating = require('./UserRating')(sequelize);
 const PostRating = require('./PostRating')(sequelize);
 const SystemLog = require('./SystemLog')(sequelize);
 
-// Register models on sequelize.models
 (sequelize as any).models = {
   User,
   Material,
@@ -61,7 +57,6 @@ const SystemLog = require('./SystemLog')(sequelize);
   SystemLog
 };
 
-// Initialize models with sequelize instance
 const models: any = {
   User,
   Material,
@@ -73,24 +68,19 @@ const models: any = {
   SystemLog
 };
 
-// Set up associations
 Object.keys(models).forEach((key) => {
   if (models[key].associate) {
     models[key].associate(models);
   }
 });
 
-// Sync models with database (only in development, and non-blocking)
 if (process.env.NODE_ENV === 'development') {
-  // Don't sync - table already exists from main backend migrations
-  // Just verify connection is working
   sequelize.authenticate()
     .then(() => {
     })
     .catch((err: any) => {
     });
 } else {
-  // In production, skip auto-sync to avoid startup delays
 }
 
 export { sequelize, User, Material, AdminUser, WasteCategory, Report, UserRating, PostRating, SystemLog };

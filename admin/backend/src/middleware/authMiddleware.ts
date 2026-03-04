@@ -9,9 +9,6 @@ declare global {
   }
 }
 
-/**
- * Middleware to authenticate JWT tokens
- */
 const authenticate = (req: Request, res: Response, next: NextFunction): any => {
   try {
     const authHeader = req.headers['authorization'];
@@ -22,7 +19,6 @@ const authenticate = (req: Request, res: Response, next: NextFunction): any => {
       });
     }
 
-    // Extract token from "Bearer <token>"
     const token = authHeader.split(' ')[1];
 
     if (!token) {
@@ -39,7 +35,6 @@ const authenticate = (req: Request, res: Response, next: NextFunction): any => {
       });
     }
 
-    // Attach decoded token to request
     req.admin = decoded;
     next();
   } catch (error) {

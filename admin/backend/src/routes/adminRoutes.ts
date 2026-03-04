@@ -5,11 +5,7 @@ import { authenticate } from '../middleware/authMiddleware';
 import { sequelize } from '../models';
 
 const router = express.Router();
-
-// Public routes
 router.post('/login', adminController.login);
-
-// DEBUG: Test database connection (remove in production)
 router.get('/debug/db-status', async (req: any, res: any) => {
   try {
     const User = (sequelize as any).models.User;
@@ -34,37 +30,23 @@ router.get('/debug/db-status', async (req: any, res: any) => {
     });
   }
 });
-
-// Protected routes (requires authentication)
 router.get('/materials', authenticate, adminController.getAllMaterials);
 router.get('/materials/:id', authenticate, adminController.getMaterialById);
 router.post('/materials', authenticate, adminController.createMaterial);
 router.put('/materials/:id', authenticate, adminController.updateMaterial);
 router.delete('/materials/:id', authenticate, adminController.deleteMaterial);
-
-// User Management Routes
 router.get('/users', authenticate, userManagementController.getAllUsers);
 router.get('/users/:id', authenticate, userManagementController.getUserById);
 router.put('/users/:id/verify', authenticate, userManagementController.toggleUserVerification);
 router.delete('/users/:id', authenticate, userManagementController.deleteUser);
-
-// Waste Categories Routes
 router.get('/categories', authenticate, adminController.getWasteCategories);
 router.post('/categories', authenticate, adminController.createWasteCategory);
 router.put('/categories/:categoryId', authenticate, adminController.updateWasteCategory);
 router.delete('/categories/:categoryId', authenticate, adminController.deleteWasteCategory);
-
-// Ratings Routes
 router.get('/ratings/users', authenticate, adminController.getAllUserRatings);
 router.get('/ratings/posts', authenticate, adminController.getAllPostRatings);
-
-// Reports Routes
 router.get('/reports', authenticate, adminController.getAllReports);
-
-// System Logs Routes
 router.get('/logs', authenticate, adminController.getSystemLogs);
-
-// Statistics
 router.get('/statistics', authenticate, adminController.getStatistics);
 
 export default router;
