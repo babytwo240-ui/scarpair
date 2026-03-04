@@ -218,7 +218,7 @@ const deleteUserAccount = async (req: Request, res: Response): Promise<any> => {
 
     if (!deleted) {
       res.setHeader('Content-Type', 'application/json');
-      return res.status(400).json({ error: 'Failed to delete account' });
+      return res.status(400).json({ error: 'Failed to delete account. You may have active waste posts or collections.' });
     }
 
     const displayName = user.type === 'business' ? userDetails.businessName : userDetails.companyName;
