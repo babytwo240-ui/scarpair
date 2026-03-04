@@ -12,7 +12,7 @@ const determineSocketUrl = () => {
     return window.location.origin;
   }
 
-  // Fallback for development
+  // Fallback for development (should use .env file instead)
   return 'http://localhost:5000';
 };
 

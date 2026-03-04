@@ -21,8 +21,16 @@ import adminRoutes from './routes/adminRoutes';
 const app: Express = express();
 const PORT = process.env.PORT || 5498;
 
+// Parse CORS origins from environment variable
+const corsOrigins = (process.env.CORS_ORIGIN || 'http://localhost:4000,http://127.0.0.1:4000').split(',').map(origin => origin.trim());
+
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: corsOrigins,
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(express.json());
 // HTTP request logging
 app.use(morganMiddleware);

@@ -34,7 +34,6 @@ const socketService_1 = require("./services/socketService");
 const aws_1 = require("./config/aws");
 const pickupDeadlineService_1 = require("./services/pickupDeadlineService");
 const models_1 = require("./models");
-// Dynamically load logger based on environment
 const logger = process.env.NODE_ENV === 'production'
     ? require('./config/logger.prod').default
     : require('./config/logger.dev').default;
@@ -56,15 +55,12 @@ const PORT = process.env.PORT || 5000;
 logger.info(`🚀 Starting Scrapair Backend Server...`);
 logger.info(`📋 Environment: ${process.env.NODE_ENV || 'development'}`);
 logger.info(`🔧 Port: ${PORT}`);
-// ✅ Trust proxy (needed for Render and other reverse proxies)
-// Use numeric value (1) instead of true to avoid express-rate-limit validation issues
 app.set('trust proxy', 1);
 const corsOrigins = (process.env.CORS_ORIGINS || 'http://localhost:3000,http://localhost:5173').split(',').map(origin => origin.trim());
 app.use((0, cors_1.default)({
     origin: corsOrigins,
     credentials: true
 }));
-// ✅ Security headers
 app.use((0, helmet_1.default)({
     frameguard: { action: 'deny' },
     noSniff: true,
@@ -79,11 +75,8 @@ app.use((0, helmet_1.default)({
         }
     }
 }));
-// ✅ HTTP request logging
 app.use(morganConfig_1.default);
 logger.info('📝 HTTP request logging enabled');
-// ✅ Global rate limiting (100 requests per 15 minutes)
-// When behind a proxy (Render), express-rate-limit will automatically use X-Forwarded-For
 const globalLimiter = (0, express_rate_limit_1.default)({
     windowMs: 15 * 60 * 1000,
     max: 100,
@@ -91,17 +84,12 @@ const globalLimiter = (0, express_rate_limit_1.default)({
     standardHeaders: true,
     legacyHeaders: false,
     skip: (req) => {
-        // Skip rate limiting for health checks and status endpoints
         return req.path === '/api/health' || req.path === '/health';
     }
-    // Note: express-rate-limit automatically respects app.set('trust proxy')
-    // and will use X-Forwarded-For header when Express is configured for proxy (trust proxy: 1)
 });
 app.use('/api/', globalLimiter);
-// ✅ Cache control headers for API responses
 app.use((req, res, next) => {
     if (req.path.startsWith('/api/')) {
-        // Never cache API responses
         res.set('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
         res.set('Pragma', 'no-cache');
         res.set('Expires', '0');
@@ -113,10 +101,8 @@ app.use(express_1.default.urlencoded({ limit: '50mb', extended: true }));
 const io = new socket_io_1.Server(server, {
     cors: {
         origin: function (origin, callback) {
-            // Allow requests with no origin (like mobile apps or curl requests)
             if (!origin)
                 return callback(null, true);
-            // Check if origin is in CORS_ORIGINS
             if (corsOrigins.includes(origin)) {
                 callback(null, true);
             }
@@ -132,7 +118,6 @@ const io = new socket_io_1.Server(server, {
     pingInterval: 25000,
     pingTimeout: 20000,
     allowRequest: (req, callback) => {
-        // Allow all requests - authentication is handled in socket.use() middleware
         callback(null, true);
     }
 });
@@ -142,7 +127,6 @@ app.use((req, res, next) => {
     next();
 });
 (0, socketService_1.initializeSocket)(io);
-// ✅ Swagger API Documentation
 app.use('/api-docs', swagger_ui_express_1.default.serve);
 app.get('/api-docs', swagger_ui_express_1.default.setup(swagger_1.swaggerSpec, {
     swaggerOptions: {
@@ -204,7 +188,6 @@ app.use((err, req, res, next) => {
 async function startServer() {
     let redisConnected = false;
     try {
-        // Check Redis connection
         try {
             logger.info('🔍 Checking Redis connection...');
             await (0, redisHealth_1.checkRedisConnection)();
@@ -214,16 +197,13 @@ async function startServer() {
         catch (redisError) {
             logger.warn(`⚠️  Redis connection failed: ${redisError.message}`);
         }
-        // Check database connection
         logger.info('🔍 Connecting to database...');
         await models_1.sequelize.authenticate();
         logger.info('✅ Database connected successfully');
-        // Start server
         server.listen(PORT, () => {
             const baseUrl = process.env.BACKEND_BASE_URL || `http://localhost:${PORT}`;
             logger.info(`✨ Server running at ${baseUrl}`);
             logger.info(`📚 API Docs available at ${baseUrl}/api-docs`);
-            // Initialize pickup deadline checker
             try {
                 (0, pickupDeadlineService_1.initializePickupDeadlineChecker)();
                 logger.info('⏰ Pickup deadline checker initialized');
