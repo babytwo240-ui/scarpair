@@ -190,11 +190,14 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   });
 });
 async function startServer() {
+  let redisConnected = false;
+  
   try {
     console.log('🔍 Checking Redis connection...');
     try {
       await checkRedisConnection();
       console.log('✅ Redis connected');
+      redisConnected = true;
     } catch (redisError) {
       console.warn('⚠️  Redis not available - WebSocket features will be limited');
       console.warn('   Run: docker run -d -p 6379:6379 redis:latest');
@@ -209,7 +212,7 @@ async function startServer() {
       console.log(`║  Scrapair Backend Server Started       ║`);
       console.log(`║  Port: ${PORT}${' '.repeat(45 - PORT.toString().length - 10)}║`);
       console.log(`║  Environment: ${(process.env.NODE_ENV || 'development').padEnd(29)}║`);
-      console.log(`║  WebSocket:  Limited (no Redis)        ║`);
+      console.log(`║  WebSocket:  ${(redisConnected ? 'Ready' : 'Limited (no Redis)').padEnd(28)}║`);
       console.log(`║  Database:  Ready                        ║`);
       console.log(`║                                            ║`);
       console.log(`║  Endpoints:                                ║`);
