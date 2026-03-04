@@ -197,7 +197,8 @@ export const getMarketplaceFeed = async (req: Request, res: Response): Promise<a
     const { count, rows } = await WastePost.findAndCountAll({
       where: {
         status: 'active',
-        visibility: 'public'
+        visibility: 'public',
+        collectionStatus: 'ACTIVE'
       },
       include: [
         {

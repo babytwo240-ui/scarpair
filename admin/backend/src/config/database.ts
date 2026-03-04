@@ -2,6 +2,9 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
+// Ensure NODE_ENV defaults to production if not explicitly set
+const NODE_ENV = process.env.NODE_ENV || 'production';
+
 interface DatabaseConfig {
   username: string;
   password: string;
@@ -28,7 +31,7 @@ const config: Config = {
     host: process.env.DB_HOST || 'localhost',
     port: parseInt(process.env.DB_PORT || '5432'),
     dialect: DATABASE_DIALECT,
-    logging: console.log
+    logging: NODE_ENV === 'development' ? console.log : false
   },
   production: {
     username: process.env.DB_USER || '',

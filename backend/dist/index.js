@@ -13,6 +13,7 @@ const helmet_1 = __importDefault(require("helmet"));
 const express_rate_limit_1 = __importDefault(require("express-rate-limit"));
 const swagger_ui_express_1 = __importDefault(require("swagger-ui-express"));
 const swagger_1 = require("./config/swagger");
+const morganConfig_1 = __importDefault(require("./config/morganConfig"));
 const authRoutes_1 = __importDefault(require("./routes/authRoutes"));
 const userRoutes_1 = __importDefault(require("./routes/userRoutes"));
 const adminRoutes_1 = __importDefault(require("./routes/adminRoutes"));
@@ -33,22 +34,31 @@ const socketService_1 = require("./services/socketService");
 const aws_1 = require("./config/aws");
 const pickupDeadlineService_1 = require("./services/pickupDeadlineService");
 const models_1 = require("./models");
+// Dynamically load logger based on environment
+const logger = process.env.NODE_ENV === 'production'
+    ? require('./config/logger.prod').default
+    : require('./config/logger.dev').default;
 const validateEnvironment = () => {
     const requiredVars = ['JWT_SECRET'];
     const missingVars = requiredVars.filter(v => !process.env[v]);
     if (missingVars.length > 0) {
+        logger.error(`Missing required environment variables: ${missingVars.join(', ')}`);
         process.exit(1);
     }
     const jwtSecret = process.env.JWT_SECRET || '';
     (0, aws_1.validateAwsConfig)();
+    logger.info('Environment validation passed');
 };
 validateEnvironment();
 const app = (0, express_1.default)();
 const server = (0, http_1.createServer)(app);
 const PORT = process.env.PORT || 5000;
+logger.info(`🚀 Starting Scrapair Backend Server...`);
+logger.info(`📋 Environment: ${process.env.NODE_ENV || 'development'}`);
+logger.info(`🔧 Port: ${PORT}`);
 // ✅ Trust proxy (needed for Render and other reverse proxies)
 app.set('trust proxy', true);
-const corsOrigins = (process.env.CORS_ORIGINS || 'http://localhost:3000,http://localhost:5173').split(',');
+const corsOrigins = (process.env.CORS_ORIGINS || 'http://localhost:3000,http://localhost:5173').split(',').map(origin => origin.trim());
 app.use((0, cors_1.default)({
     origin: corsOrigins,
     credentials: true
@@ -68,13 +78,21 @@ app.use((0, helmet_1.default)({
         }
     }
 }));
+// ✅ HTTP request logging
+app.use(morganConfig_1.default);
+logger.info('📝 HTTP request logging enabled');
 // ✅ Global rate limiting (100 requests per 15 minutes)
+// When behind a proxy (Render), configure to use X-Forwarded-For header
 const globalLimiter = (0, express_rate_limit_1.default)({
     windowMs: 15 * 60 * 1000,
     max: 100,
     message: 'Too many requests from this IP, please try again later.',
     standardHeaders: true,
     legacyHeaders: false,
+    skip: (req) => {
+        // Skip rate limiting for health checks and status endpoints
+        return req.path === '/api/health' || req.path === '/health';
+    }
 });
 app.use('/api/', globalLimiter);
 // ✅ Cache control headers for API responses
@@ -91,12 +109,31 @@ app.use(express_1.default.json({ limit: '50mb' }));
 app.use(express_1.default.urlencoded({ limit: '50mb', extended: true }));
 const io = new socket_io_1.Server(server, {
     cors: {
-        origin: corsOrigins,
+        origin: function (origin, callback) {
+            // Allow requests with no origin (like mobile apps or curl requests)
+            if (!origin)
+                return callback(null, true);
+            // Check if origin is in CORS_ORIGINS
+            if (corsOrigins.includes(origin)) {
+                callback(null, true);
+            }
+            else {
+                callback(new Error('Not allowed by CORS'));
+            }
+        },
         credentials: true,
         methods: ['GET', 'POST']
     },
-    transports: ['websocket', 'polling']
+    transports: ['websocket', 'polling'],
+    maxHttpBufferSize: 1e6,
+    pingInterval: 25000,
+    pingTimeout: 20000,
+    allowRequest: (req, callback) => {
+        // Allow all requests - authentication is handled in socket.use() middleware
+        callback(null, true);
+    }
 });
+logger.info('🔌 Socket.io server initialized');
 app.use((req, res, next) => {
     req.io = io;
     next();
@@ -155,6 +192,7 @@ app.use((req, res) => {
     res.status(404).json({ error: 'Route not found' });
 });
 app.use((err, req, res, next) => {
+    logger.error(`${req.method} ${req.path} - Error: ${err.message}`);
     res.status(err.status || 500).json({
         error: err.message || 'Internal server error',
         ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
@@ -163,19 +201,37 @@ app.use((err, req, res, next) => {
 async function startServer() {
     let redisConnected = false;
     try {
+        // Check Redis connection
         try {
+            logger.info('🔍 Checking Redis connection...');
             await (0, redisHealth_1.checkRedisConnection)();
             redisConnected = true;
+            logger.info('✅ Redis connected successfully');
         }
         catch (redisError) {
+            logger.warn(`⚠️  Redis connection failed: ${redisError.message}`);
         }
+        // Check database connection
+        logger.info('🔍 Connecting to database...');
         await models_1.sequelize.authenticate();
+        logger.info('✅ Database connected successfully');
+        // Start server
         server.listen(PORT, () => {
             const baseUrl = process.env.BACKEND_BASE_URL || `http://localhost:${PORT}`;
-            (0, pickupDeadlineService_1.initializePickupDeadlineChecker)();
+            logger.info(`✨ Server running at ${baseUrl}`);
+            logger.info(`📚 API Docs available at ${baseUrl}/api-docs`);
+            // Initialize pickup deadline checker
+            try {
+                (0, pickupDeadlineService_1.initializePickupDeadlineChecker)();
+                logger.info('⏰ Pickup deadline checker initialized');
+            }
+            catch (err) {
+                logger.error(`Failed to initialize pickup deadline checker: ${err.message}`);
+            }
         });
     }
     catch (error) {
+        logger.error(`❌ Failed to start server: ${error.message}`);
         process.exit(1);
     }
 }

@@ -8,6 +8,7 @@ import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import swaggerUi from 'swagger-ui-express';
 import { swaggerSpec } from './config/swagger';
+import morganMiddleware from './config/morganConfig';
 import authRoutes from './routes/authRoutes';
 import userRoutes from './routes/userRoutes';
 import adminRoutes from './routes/adminRoutes';
@@ -29,17 +30,24 @@ import { validateAwsConfig } from './config/aws';
 import { initializePickupDeadlineChecker } from './services/pickupDeadlineService';
 import { sequelize } from './models';
 
+// Dynamically load logger based on environment
+const logger = process.env.NODE_ENV === 'production'
+  ? require('./config/logger.prod').default
+  : require('./config/logger.dev').default;
+
 const validateEnvironment = (): void => {
   const requiredVars = ['JWT_SECRET'];
   const missingVars = requiredVars.filter(v => !process.env[v]);
   
   if (missingVars.length > 0) {
+    logger.error(`Missing required environment variables: ${missingVars.join(', ')}`);
     process.exit(1);
   }
 
   const jwtSecret = process.env.JWT_SECRET || '';
 
   validateAwsConfig();
+  logger.info('Environment validation passed');
 };
 
 validateEnvironment();
@@ -48,10 +56,14 @@ const app: Express = express();
 const server = createServer(app); 
 const PORT = process.env.PORT || 5000;
 
+logger.info(`🚀 Starting Scrapair Backend Server...`);
+logger.info(`📋 Environment: ${process.env.NODE_ENV || 'development'}`);
+logger.info(`🔧 Port: ${PORT}`);
+
 // ✅ Trust proxy (needed for Render and other reverse proxies)
 app.set('trust proxy', true);
 
-const corsOrigins = (process.env.CORS_ORIGINS || 'http://localhost:3000,http://localhost:5173').split(',');
+const corsOrigins = (process.env.CORS_ORIGINS || 'http://localhost:3000,http://localhost:5173').split(',').map(origin => origin.trim());
 app.use(cors({
   origin: corsOrigins,
   credentials: true
@@ -73,13 +85,22 @@ app.use(helmet({
   }
 }));
 
+// ✅ HTTP request logging
+app.use(morganMiddleware);
+logger.info('📝 HTTP request logging enabled');
+
 // ✅ Global rate limiting (100 requests per 15 minutes)
+// When behind a proxy (Render), configure to use X-Forwarded-For header
 const globalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100,
   message: 'Too many requests from this IP, please try again later.',
   standardHeaders: true,
   legacyHeaders: false,
+  skip: (req: Request) => {
+    // Skip rate limiting for health checks and status endpoints
+    return req.path === '/api/health' || req.path === '/health';
+  }
 });
 app.use('/api/', globalLimiter);
 
@@ -101,12 +122,31 @@ app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 const io: SocketIOServer = new SocketIOServer(server, {
   cors: {
-    origin: corsOrigins,
+    origin: function(origin, callback) {
+      // Allow requests with no origin (like mobile apps or curl requests)
+      if (!origin) return callback(null, true);
+      
+      // Check if origin is in CORS_ORIGINS
+      if (corsOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'))
+      }
+    },
     credentials: true,
     methods: ['GET', 'POST']
   },
-  transports: ['websocket', 'polling']
+  transports: ['websocket', 'polling'],
+  maxHttpBufferSize: 1e6,
+  pingInterval: 25000,
+  pingTimeout: 20000,
+  allowRequest: (req, callback) => {
+    // Allow all requests - authentication is handled in socket.use() middleware
+    callback(null, true);
+  }
 });
+
+logger.info('🔌 Socket.io server initialized');
 
 app.use((req: any, res, next) => {
   req.io = io;
@@ -174,28 +214,48 @@ app.use((req: Request, res: Response) => {
   res.status(404).json({ error: 'Route not found' });
 });
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
+  logger.error(`${req.method} ${req.path} - Error: ${err.message}`);
   res.status(err.status || 500).json({
     error: err.message || 'Internal server error',
     ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
   });
 });
+
 async function startServer() {
   let redisConnected = false;
   
   try {
+    // Check Redis connection
     try {
+      logger.info('🔍 Checking Redis connection...');
       await checkRedisConnection();
       redisConnected = true;
-    } catch (redisError) {
+      logger.info('✅ Redis connected successfully');
+    } catch (redisError: any) {
+      logger.warn(`⚠️  Redis connection failed: ${redisError.message}`);
     }
 
+    // Check database connection
+    logger.info('🔍 Connecting to database...');
     await sequelize.authenticate();
+    logger.info('✅ Database connected successfully');
 
+    // Start server
     server.listen(PORT, () => {
       const baseUrl = process.env.BACKEND_BASE_URL || `http://localhost:${PORT}`;
-      initializePickupDeadlineChecker();
+      logger.info(`✨ Server running at ${baseUrl}`);
+      logger.info(`📚 API Docs available at ${baseUrl}/api-docs`);
+      
+      // Initialize pickup deadline checker
+      try {
+        initializePickupDeadlineChecker();
+        logger.info('⏰ Pickup deadline checker initialized');
+      } catch (err: any) {
+        logger.error(`Failed to initialize pickup deadline checker: ${err.message}`);
+      }
     });
-  } catch (error) {
+  } catch (error: any) {
+    logger.error(`❌ Failed to start server: ${error.message}`);
     process.exit(1);
   }
 }

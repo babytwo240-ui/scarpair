@@ -2,6 +2,9 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
+// Ensure NODE_ENV defaults to production if not explicitly set
+const NODE_ENV = process.env.NODE_ENV || 'production';
+
 interface DatabaseConfig {
   username: string;
   password: string;
@@ -25,7 +28,7 @@ const DB_USER = process.env.DB_USER;
 const DB_PASSWORD = process.env.DB_PASSWORD;
 const DB_NAME = process.env.DB_NAME;
 
-if (process.env.NODE_ENV === 'production') {
+if (NODE_ENV === 'production') {
   const requiredVars = ['DB_HOST', 'DB_PORT', 'DB_USER', 'DB_PASSWORD', 'DB_NAME', 'JWT_SECRET'];
   const missing = requiredVars.filter(v => !process.env[v]);
   if (missing.length > 0) {
@@ -41,7 +44,7 @@ const config: Config = {
     host: DB_HOST || 'localhost',
     port: parseInt(DB_PORT || '5432'),
     dialect: DATABASE_DIALECT,
-    logging: console.log
+    logging: NODE_ENV === 'development' ? console.log : false
   },
   production: {
     username: DB_USER || '',

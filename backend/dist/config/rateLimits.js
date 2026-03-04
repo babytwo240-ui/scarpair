@@ -49,10 +49,6 @@ exports.rateLimitConfig = {
         })
     },
     passwordReset: {
-        // Per IP: 3 attempts in 15 minutes
-        // Per Email: 5 attempts in 1 hour
-        // Per IP+Email: 2 attempts in 24 hours
-        // Using Redis-based rate limiting (see passwordResetRateLimitUtil.ts)
         enabled: true
     }
 };

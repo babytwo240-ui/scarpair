@@ -192,7 +192,8 @@ const getMarketplaceFeed = async (req, res) => {
         const { count, rows } = await models_1.WastePost.findAndCountAll({
             where: {
                 status: 'active',
-                visibility: 'public'
+                visibility: 'public',
+                collectionStatus: 'ACTIVE'
             },
             include: [
                 {

@@ -1,6 +1,22 @@
 ﻿import io from 'socket.io-client';
 
-const SOCKET_URL = process.env.REACT_APP_SOCKET_URL || 'http://localhost:5000';
+// Determine socket URL based on environment
+const determineSocketUrl = () => {
+  // If explicit env var is set, use it
+  if (process.env.REACT_APP_SOCKET_URL) {
+    return process.env.REACT_APP_SOCKET_URL;
+  }
+
+  // If in browser, use the same domain as the frontend
+  if (typeof window !== 'undefined') {
+    return window.location.origin;
+  }
+
+  // Fallback for development
+  return 'http://localhost:5000';
+};
+
+const SOCKET_URL = determineSocketUrl();
 
 class SocketService {
   constructor() {
@@ -15,24 +31,36 @@ class SocketService {
     if (!token) {
       return null;
     }
-    this.socket = io(SOCKET_URL, {
-      auth: {
-        token,
-      },
-      reconnection: true,
-      reconnectionDelay: 1000,
-      reconnectionDelayMax: 5000,
-      reconnectionAttempts: 5,
-    });
 
-    this.socket.on('connect', () => {
-    });
+    try {
+      this.socket = io(SOCKET_URL, {
+        auth: {
+          token,
+        },
+        reconnection: true,
+        reconnectionDelay: 1000,
+        reconnectionDelayMax: 5000,
+        reconnectionAttempts: 5,
+        transports: ['websocket', 'polling'],
+        // Add path explicitly to ensure correct endpoint
+        path: '/socket.io',
+      });
 
-    this.socket.on('disconnect', (reason) => {
-    });
+      this.socket.on('connect', () => {
+      });
 
-    this.socket.on('error', (error) => {
-    });
+      this.socket.on('disconnect', (reason) => {
+      });
+
+      this.socket.on('error', (error) => {
+      });
+
+      this.socket.on('connect_error', (error) => {
+      });
+    } catch (error) {
+      this.socket = null;
+      return null;
+    }
 
     return this.socket;
   }
