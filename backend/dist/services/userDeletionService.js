@@ -38,9 +38,7 @@ const deleteUserWithCascade = async (userId, userType, sequelizeInstance) => {
         // Step 1: Delete all user ratings
         if (UserRating) {
             const ratingsDeleted = await UserRating.destroy({
-                where: {
-                    [sequelize_1.Op.or]: [{ userId: userId }, { ratedUserId: userId }]
-                },
+                where: { userId: userId },
                 transaction
             });
             deletedCount.ratings += ratingsDeleted;

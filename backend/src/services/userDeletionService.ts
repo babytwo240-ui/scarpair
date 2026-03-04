@@ -62,9 +62,7 @@ export const deleteUserWithCascade = async (
     // Step 1: Delete all user ratings
     if (UserRating) {
       const ratingsDeleted = await UserRating.destroy({
-        where: {
-          [Op.or]: [{ userId: userId }, { ratedUserId: userId }]
-        },
+        where: { userId: userId },
         transaction
       });
       deletedCount.ratings += ratingsDeleted;
