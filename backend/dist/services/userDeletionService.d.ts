@@ -8,6 +8,13 @@ export interface DeleteResult {
         collections: number;
         messages: number;
         conversations: number;
+        notifications: number;
+        reviews: number;
+        ratings: number;
+        feedback: number;
+        postMessages: number;
+        reports: number;
+        systemLogs: number;
     };
     message: string;
 }

@@ -9,6 +9,13 @@ export interface DeleteResult {
     collections: number;
     messages: number;
     conversations: number;
+    notifications: number;
+    reviews: number;
+    ratings: number;
+    feedback: number;
+    postMessages: number;
+    reports: number;
+    systemLogs: number;
   };
   message: string;
 }
@@ -25,7 +32,14 @@ export const deleteUserWithCascade = async (
       wastePosts: 0,
       collections: 0,
       messages: 0,
-      conversations: 0
+      conversations: 0,
+      notifications: 0,
+      reviews: 0,
+      ratings: 0,
+      feedback: 0,
+      postMessages: 0,
+      reports: 0,
+      systemLogs: 0
     };
 
     const models = (sequelizeInstance as any).models;
@@ -35,30 +49,107 @@ export const deleteUserWithCascade = async (
     const Message = models.Message;
     const Conversation = models.Conversation;
     const Notification = models.Notification;
+    const Review = models.Review;
+    const UserRating = models.UserRating;
+    const Feedback = models.Feedback;
+    const PostMessage = models.PostMessage;
+    const Report = models.Report;
+    const SystemLog = models.SystemLog;
+    const PasswordAudit = models.PasswordAudit;
 
-    // Step 1: Delete all notifications related to this user
-    if (Notification) {
-      const notificationsDeleted = await Notification.destroy({
+    // Step 1: Delete all user ratings
+    if (UserRating) {
+      const ratingsDeleted = await UserRating.destroy({
         where: {
-          [Op.or]: [
-            { userId: userId },
-            { senderId: userId }
-          ]
+          [Op.or]: [{ userId: userId }, { ratedUserId: userId }]
         },
+        transaction
+      });
+      deletedCount.ratings += ratingsDeleted;
+    }
+
+    // Step 2: Delete all reviews
+    if (Review) {
+      const reviewsDeleted = await Review.destroy({
+        where: {
+          [Op.or]: [{ reviewerId: userId }, { reviewedUserId: userId }]
+        },
+        transaction
+      });
+      deletedCount.reviews += reviewsDeleted;
+    }
+
+    // Step 3: Delete all feedback
+    if (Feedback) {
+      const feedbackDeleted = await Feedback.destroy({
+        where: {
+          [Op.or]: [{ fromUserId: userId }, { toUserId: userId }]
+        },
+        transaction
+      });
+      deletedCount.feedback += feedbackDeleted;
+    }
+
+    // Step 4: Delete all reports
+    if (Report) {
+      const reportsDeleted = await Report.destroy({
+        where: {
+          [Op.or]: [{ reportedByUserId: userId }, { reportedUserId: userId }]
+        },
+        transaction
+      });
+      deletedCount.reports += reportsDeleted;
+    }
+
+    // Step 5: Delete all post messages
+    if (PostMessage) {
+      const postMessagesDeleted = await PostMessage.destroy({
+        where: { userId: userId },
+        transaction
+      });
+      deletedCount.postMessages += postMessagesDeleted;
+    }
+
+    // Step 6: Delete all system logs
+    if (SystemLog) {
+      const systemLogsDeleted = await SystemLog.destroy({
+        where: { userId: userId },
+        transaction
+      });
+      deletedCount.systemLogs += systemLogsDeleted;
+    }
+
+    // Step 7: Delete password audit logs
+    if (PasswordAudit) {
+      await PasswordAudit.destroy({
+        where: { userId: userId },
         transaction
       });
     }
 
-    // Step 2: Delete messages
+    // Step 8: Delete all notifications
+    if (Notification) {
+      const notificationsDeleted = await Notification.destroy({
+        where: {
+          [Op.or]: [{ userId: userId }, { senderId: userId }]
+        },
+        transaction
+      });
+      deletedCount.notifications += notificationsDeleted;
+    }
+
+    // Step 9: Delete all messages
     if (Message) {
       const messagesDeleted = await Message.destroy({
-        where: { userId: userId },
+        where: {
+          [Op.or]: [{ userId: userId }, { senderId: userId }]
+        },
         transaction
       });
       deletedCount.messages += messagesDeleted;
     }
 
-    // Step 3: Delete conversations
+    // Step 10: Delete conversations
     if (Conversation) {
       const conversationsDeleted = await Conversation.destroy({
         where: {
@@ -72,7 +163,7 @@ export const deleteUserWithCascade = async (
       deletedCount.conversations += conversationsDeleted;
     }
 
-    // Step 4: Delete all collections involving this user (regardless of status)
+    // Step 11: Delete all collections involving this user (regardless of status)
     if (userType === 'business') {
       // First, get all waste post IDs for this business
       const wastePostIds = await WastePost.findAll({
@@ -108,7 +199,7 @@ export const deleteUserWithCascade = async (
       deletedCount.collections += collectionsDeleted;
     }
 
-    // Step 5: Delete all waste posts (business only)
+    // Step 12: Delete all waste posts (business only)
     if (userType === 'business') {
       const postsDeleted = await WastePost.destroy({
         where: { businessId: userId },
@@ -117,7 +208,7 @@ export const deleteUserWithCascade = async (
       deletedCount.wastePosts += postsDeleted;
     }
 
-    // Step 6: Delete the user
+    // Step 13: Delete the user
     const userDeleted = await User.destroy({
       where: { id: userId },
       transaction
@@ -130,7 +221,7 @@ export const deleteUserWithCascade = async (
       success: true,
       deletedUserId: userId,
       deletedCount,
-      message: `User and all related data deleted successfully. Deleted: ${deletedCount.user} user, ${deletedCount.wastePosts} posts, ${deletedCount.collections} collections, ${deletedCount.messages} messages, ${deletedCount.conversations} conversations.`
+      message: `User and all related data deleted successfully. Deleted: ${deletedCount.user} user, ${deletedCount.wastePosts} posts, ${deletedCount.collections} collections, ${deletedCount.messages} messages, ${deletedCount.conversations} conversations, ${deletedCount.notifications} notifications, ${deletedCount.reviews} reviews, ${deletedCount.ratings} ratings, ${deletedCount.feedback} feedback entries.`
     };
   } catch (error: any) {
     await transaction.rollback();
