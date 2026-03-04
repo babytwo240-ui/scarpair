@@ -230,9 +230,11 @@ const deleteUserAccount = async (req, res) => {
             return res.status(401).json({ error: 'Invalid password' });
         }
         const deleted = await userService.deleteUserAccount(user.email, user.type);
-        if (!deleted) {
+        if (!deleted || !deleted.success) {
             res.setHeader('Content-Type', 'application/json');
-            return res.status(400).json({ error: 'Failed to delete account. You may have active waste posts or collections.' });
+            return res.status(400).json({
+                error: deleted?.error || 'Failed to delete account. You may have active waste posts or collections.'
+            });
         }
         const displayName = user.type === 'business' ? userDetails.businessName : userDetails.companyName;
         await emailService.sendAccountDeletedEmail(user.email, displayName);

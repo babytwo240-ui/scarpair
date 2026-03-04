@@ -72,7 +72,10 @@ export const deleteUserWithCascade = async (
     if (Review) {
       const reviewsDeleted = await Review.destroy({
         where: {
-          [Op.or]: [{ reviewerId: userId }, { reviewedUserId: userId }]
+          [Op.or]: [
+            { reviewerId: userId },
+            { businessId: userId }
+          ]
         },
         transaction
       });
@@ -94,7 +97,11 @@ export const deleteUserWithCascade = async (
     if (Report) {
       const reportsDeleted = await Report.destroy({
         where: {
-          [Op.or]: [{ reportedByUserId: userId }, { reportedUserId: userId }]
+          [Op.or]: [
+            { reporterId: userId },
+            { reportedUserId: userId },
+            { approvedBy: userId }
+          ]
         },
         transaction
       });
@@ -104,7 +111,12 @@ export const deleteUserWithCascade = async (
     // Step 5: Delete all post messages
     if (PostMessage) {
       const postMessagesDeleted = await PostMessage.destroy({
-        where: { userId: userId },
+        where: {
+          [Op.or]: [
+            { senderId: userId },
+            { recipientId: userId }
+          ]
+        },
         transaction
       });
       deletedCount.postMessages += postMessagesDeleted;
@@ -130,9 +142,7 @@ export const deleteUserWithCascade = async (
     // Step 8: Delete all notifications
     if (Notification) {
       const notificationsDeleted = await Notification.destroy({
-        where: {
-          [Op.or]: [{ userId: userId }, { senderId: userId }]
-        },
+        where: { userId: userId },
         transaction
       });
       deletedCount.notifications += notificationsDeleted;
@@ -142,7 +152,10 @@ export const deleteUserWithCascade = async (
     if (Message) {
       const messagesDeleted = await Message.destroy({
         where: {
-          [Op.or]: [{ userId: userId }, { senderId: userId }]
+          [Op.or]: [
+            { senderId: userId },
+            { recipientId: userId }
+          ]
         },
         transaction
       });

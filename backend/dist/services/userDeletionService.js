@@ -47,7 +47,10 @@ const deleteUserWithCascade = async (userId, userType, sequelizeInstance) => {
         if (Review) {
             const reviewsDeleted = await Review.destroy({
                 where: {
-                    [sequelize_1.Op.or]: [{ reviewerId: userId }, { reviewedUserId: userId }]
+                    [sequelize_1.Op.or]: [
+                        { reviewerId: userId },
+                        { businessId: userId }
+                    ]
                 },
                 transaction
             });
@@ -67,7 +70,11 @@ const deleteUserWithCascade = async (userId, userType, sequelizeInstance) => {
         if (Report) {
             const reportsDeleted = await Report.destroy({
                 where: {
-                    [sequelize_1.Op.or]: [{ reportedByUserId: userId }, { reportedUserId: userId }]
+                    [sequelize_1.Op.or]: [
+                        { reporterId: userId },
+                        { reportedUserId: userId },
+                        { approvedBy: userId }
+                    ]
                 },
                 transaction
             });
@@ -76,7 +83,12 @@ const deleteUserWithCascade = async (userId, userType, sequelizeInstance) => {
         // Step 5: Delete all post messages
         if (PostMessage) {
             const postMessagesDeleted = await PostMessage.destroy({
-                where: { userId: userId },
+                where: {
+                    [sequelize_1.Op.or]: [
+                        { senderId: userId },
+                        { recipientId: userId }
+                    ]
+                },
                 transaction
             });
             deletedCount.postMessages += postMessagesDeleted;
@@ -99,9 +111,7 @@ const deleteUserWithCascade = async (userId, userType, sequelizeInstance) => {
         // Step 8: Delete all notifications
         if (Notification) {
             const notificationsDeleted = await Notification.destroy({
-                where: {
-                    [sequelize_1.Op.or]: [{ userId: userId }, { senderId: userId }]
-                },
+                where: { userId: userId },
                 transaction
             });
             deletedCount.notifications += notificationsDeleted;
@@ -110,7 +120,10 @@ const deleteUserWithCascade = async (userId, userType, sequelizeInstance) => {
         if (Message) {
             const messagesDeleted = await Message.destroy({
                 where: {
-                    [sequelize_1.Op.or]: [{ userId: userId }, { senderId: userId }]
+                    [sequelize_1.Op.or]: [
+                        { senderId: userId },
+                        { recipientId: userId }
+                    ]
                 },
                 transaction
             });

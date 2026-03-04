@@ -50,7 +50,7 @@ declare const updateUserProfile: (email: string, type: "business" | "recycler", 
     companyName?: string;
     specialization?: string;
 }) => Promise<UserResult | ErrorResult>;
-declare const deleteUserAccount: (email: string, type: "business" | "recycler") => Promise<boolean>;
+declare const deleteUserAccount: (email: string, type: "business" | "recycler") => Promise<any>;
 declare const validateNewPassword: (email: string, type: "business" | "recycler", currentPassword: string, newPassword: string) => Promise<{
     valid: boolean;
     error?: string;

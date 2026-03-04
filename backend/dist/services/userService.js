@@ -283,19 +283,27 @@ const deleteUserAccount = async (email, type) => {
     try {
         const user = await models_1.User.findOne({ where: { email, type } });
         if (!user) {
-            return false;
+            return { success: false, error: 'User not found' };
         }
         const { deleteUserWithCascade } = require('./userDeletionService');
-        const result = await deleteUserWithCascade(user.id, type, models_1.sequelize);
-        if (result.success) {
-            return true;
+        try {
+            const result = await deleteUserWithCascade(user.id, type, models_1.sequelize);
+            if (result.success) {
+                return { success: true };
+            }
+            else {
+                return { success: false, error: result.message || 'Failed to delete account' };
+            }
         }
-        else {
-            return false;
+        catch (cascadeError) {
+            const errorMessage = cascadeError?.message || cascadeError?.error?.message || JSON.stringify(cascadeError);
+            console.error('Cascade delete error:', errorMessage);
+            return { success: false, error: errorMessage };
         }
     }
     catch (error) {
-        return false;
+        console.error('Delete account error:', error.message);
+        return { success: false, error: error.message };
     }
 };
 exports.deleteUserAccount = deleteUserAccount;

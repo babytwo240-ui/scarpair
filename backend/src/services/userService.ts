@@ -314,25 +314,32 @@ const updateUserProfile = async (
   }
 };
 
-const deleteUserAccount = async (email: string, type: 'business' | 'recycler'): Promise<boolean> => {
+const deleteUserAccount = async (email: string, type: 'business' | 'recycler'): Promise<any> => {
   try {
     const user = await User.findOne({ where: { email, type } });
     
     if (!user) {
-      return false;
+      return { success: false, error: 'User not found' };
     }
 
     const { deleteUserWithCascade } = require('./userDeletionService');
     
-    const result = await deleteUserWithCascade(user.id, type, sequelize);
-    
-    if (result.success) {
-      return true;
-    } else {
-      return false;
+    try {
+      const result = await deleteUserWithCascade(user.id, type, sequelize);
+      
+      if (result.success) {
+        return { success: true };
+      } else {
+        return { success: false, error: result.message || 'Failed to delete account' };
+      }
+    } catch (cascadeError: any) {
+      const errorMessage = cascadeError?.message || cascadeError?.error?.message || JSON.stringify(cascadeError);
+      console.error('Cascade delete error:', errorMessage);
+      return { success: false, error: errorMessage };
     }
-  } catch (error) {
-    return false;
+  } catch (error: any) {
+    console.error('Delete account error:', error.message);
+    return { success: false, error: error.message };
   }
 };
 
