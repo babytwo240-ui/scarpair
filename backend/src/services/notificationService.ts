@@ -1,4 +1,4 @@
-import { Notification } from '../models';
+﻿import { Notification } from '../models';
 import type { NotificationInstance } from '../models';
 
 export interface NotificationData {
@@ -20,11 +20,8 @@ export class NotificationService {
         relatedId: data.relatedId,
         read: false
       });
-
-      console.log(`✓ Notification created for user ${data.userId}: ${data.title}`);
       return notification;
     } catch (error) {
-      console.error('Error creating notification:', error);
       throw error;
     }
   }
@@ -46,12 +43,9 @@ export class NotificationService {
         )
       );
 
-      console.log(
-        `✓ Bulk notifications created for ${userIds.length} users: ${data.title}`
-      );
+
       return notifications;
     } catch (error) {
-      console.error('Error creating bulk notifications:', error);
       throw error;
     }
   }
@@ -144,7 +138,6 @@ export class NotificationService {
 
       return { notifications, total };
     } catch (error) {
-      console.error('Error getting user notifications:', error);
       throw error;
     }
   }
@@ -158,10 +151,10 @@ export class NotificationService {
       });
       return count;
     } catch (error) {
-      console.error('Error getting unread count:', error);
       throw error;
     }
   }
 }
 
 export default NotificationService;
+

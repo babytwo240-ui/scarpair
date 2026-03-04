@@ -360,9 +360,6 @@ table td {
   font-size: 13px;
 }
 
-.rating-guide li:last-child {
-}
-
 /* Success/Error Boxes */
 .success-box {
   padding: 12px;

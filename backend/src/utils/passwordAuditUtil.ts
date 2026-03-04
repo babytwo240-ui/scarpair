@@ -1,4 +1,4 @@
-import { PasswordAudit } from '../models';
+﻿import { PasswordAudit } from '../models';
 import { Request } from 'express';
 
 /**
@@ -41,10 +41,7 @@ export const logPasswordAudit = async (
       status,
       reason
     });
-
-    console.log(`✓ Password audit logged for ${email} - ${changeType} (${status})`);
   } catch (error) {
-    console.error('Error logging password audit:', error);
     // Don't throw error - audit logging shouldn't break the flow
   }
 };
@@ -60,7 +57,6 @@ export const getPasswordChangeHistory = async (userId: number, limit: number = 1
     
     return audits;
   } catch (error) {
-    console.error('Error fetching password change history:', error);
     return [];
   }
 };
@@ -83,7 +79,6 @@ export const getRecentPasswordResetAttempts = async (email: string, minutesBack:
     
     return attempts;
   } catch (error) {
-    console.error('Error fetching reset attempts:', error);
     return [];
   }
 };
@@ -105,7 +100,7 @@ export const countFailedPasswordAttempts = async (email: string, minutesBack: nu
     
     return count;
   } catch (error) {
-    console.error('Error counting failed attempts:', error);
     return 0;
   }
 };
+

@@ -193,7 +193,6 @@ const incrementLoginAttempts = async (email, type, attempts) => {
         await models_1.User.update({ loginAttempts: attempts, lastLoginAttempt: new Date() }, { where: { email, type } });
     }
     catch (error) {
-        console.error('Error incrementing login attempts:', error);
     }
 };
 exports.incrementLoginAttempts = incrementLoginAttempts;
@@ -202,7 +201,6 @@ const resetLoginAttempts = async (email, type) => {
         await models_1.User.update({ loginAttempts: 0, isLocked: false, lockedUntil: null }, { where: { email, type } });
     }
     catch (error) {
-        console.error('Error resetting login attempts:', error);
     }
 };
 exports.resetLoginAttempts = resetLoginAttempts;
@@ -211,7 +209,6 @@ const lockUserAccount = async (email, type) => {
         await models_1.User.update({ isLocked: true, lockedUntil: (0, securityUtil_1.calculateUnlockTime)() }, { where: { email, type } });
     }
     catch (error) {
-        console.error('Error locking account:', error);
     }
 };
 exports.lockUserAccount = lockUserAccount;
@@ -220,7 +217,6 @@ const setPasswordResetToken = async (email, type, resetCode, resetTokenExpiry) =
         await models_1.User.update({ verificationCode: resetCode, resetTokenExpiry }, { where: { email, type } });
     }
     catch (error) {
-        console.error('Error setting reset token:', error);
     }
 };
 exports.setPasswordResetToken = setPasswordResetToken;
@@ -245,11 +241,9 @@ const updateUserPassword = async (email, type, newPassword) => {
             await redis_1.redisClient.del(`pwd_reset:${email}`);
         }
         catch (error) {
-            console.error('Error clearing Redis token:', error);
         }
     }
     catch (error) {
-        console.error('Error updating password:', error);
     }
 };
 exports.updateUserPassword = updateUserPassword;
@@ -289,22 +283,18 @@ const deleteUserAccount = async (email, type) => {
     try {
         const user = await models_1.User.findOne({ where: { email, type } });
         if (!user) {
-            console.error('User not found for deletion:', email);
             return false;
         }
         const { deleteUserWithCascade } = require('./userDeletionService');
         const result = await deleteUserWithCascade(user.id, type, models_1.sequelize);
         if (result.success) {
-            console.log('User deleted successfully with cascade:', result.message);
             return true;
         }
         else {
-            console.error('User deletion failed:', result.message);
             return false;
         }
     }
     catch (error) {
-        console.error('Error deleting user:', error);
         return false;
     }
 };
@@ -333,7 +323,6 @@ const validateNewPassword = async (email, type, currentPassword, newPassword) =>
         return { valid: true };
     }
     catch (error) {
-        console.error('Error validating password:', error);
         return { valid: false, error: 'Password validation failed' };
     }
 };
@@ -360,7 +349,6 @@ const validateResetPassword = async (email, newPassword) => {
         return { valid: true };
     }
     catch (error) {
-        console.error('Error validating reset password:', error);
         return { valid: false, error: 'Password validation failed' };
     }
 };

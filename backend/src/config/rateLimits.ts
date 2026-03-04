@@ -30,6 +30,16 @@ export const rateLimitConfig = {
     })
   },
 
+  getConversations: {
+    windowMs: 60 * 1000,
+    maxPerUser: 30,
+    maxPerIP: 100,
+    keyGenerator: (userId: string, ip: string) => ({
+      user: `ratelimit:get_conv:${userId}`,
+      ip: `ratelimit:get_conv:ip:${ip}`
+    })
+  },
+
   getMessages: {
     windowMs: 60 * 1000, 
     maxPerUser: 50, 

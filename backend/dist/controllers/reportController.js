@@ -58,7 +58,6 @@ const submitReport = async (req, res) => {
         });
     }
     catch (error) {
-        console.error('Error submitting report:', error);
         res.status(500).json({ message: 'Error submitting report', error: error.message });
     }
 };
@@ -77,7 +76,6 @@ const processReportApproval = async (reportedUserId, reportId) => {
         }
     }
     catch (error) {
-        console.error('Error processing report approval:', error);
     }
 };
 const getPendingReports = async (req, res) => {
@@ -119,7 +117,6 @@ const getPendingReports = async (req, res) => {
         });
     }
     catch (error) {
-        console.error('Error fetching pending reports:', error);
         res.status(500).json({ message: 'Error fetching pending reports', error: error.message });
     }
 };
@@ -160,7 +157,6 @@ const approveReport = async (req, res) => {
         });
     }
     catch (error) {
-        console.error('Error approving report:', error);
         res.status(500).json({ message: 'Error approving report', error: error.message });
     }
 };
@@ -196,7 +192,6 @@ const rejectReport = async (req, res) => {
         });
     }
     catch (error) {
-        console.error('Error rejecting report:', error);
         res.status(500).json({ message: 'Error rejecting report', error: error.message });
     }
 };
@@ -250,7 +245,6 @@ const getAllReports = async (req, res) => {
         });
     }
     catch (error) {
-        console.error('Error fetching reports:', error);
         res.status(500).json({ message: 'Error fetching reports', error: error.message });
     }
 };
@@ -291,7 +285,6 @@ const getUserReports = async (req, res) => {
         });
     }
     catch (error) {
-        console.error('Error fetching user reports:', error);
         res.status(500).json({ message: 'Error fetching user reports', error: error.message });
     }
 };

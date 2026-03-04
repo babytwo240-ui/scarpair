@@ -10,25 +10,14 @@ const MANILA_OFFSET_MS = 8 * 60 * 60 * 1000;
  * @returns
  */
 export const parseUserInputAsManillaTime = (dateTimeLocalString: string): Date => {
-  console.log('🔍 parseUserInputAsManillaTime DEBUG:');
-  console.log('   Input string:', dateTimeLocalString);
-    
   const [dateStr, timeStr] = dateTimeLocalString.split('T');
   const [year, month, day] = dateStr.split('-').map(Number);
   const [hours, minutes] = timeStr.split(':').map(Number);
   
-  console.log('   Parsed components:');
-  console.log('     Year:', year, 'Month:', month, 'Day:', day);
-  console.log('     Hours:', hours, 'Minutes:', minutes);
-  
   const dateAsUTC = new Date(Date.UTC(year, month - 1, day, hours, minutes, 0));
-  console.log('   Date as if UTC:', dateAsUTC.toISOString());
   
   const MANILA_OFFSET_MS = 8 * 60 * 60 * 1000;
   const utcDate = new Date(dateAsUTC.getTime() - MANILA_OFFSET_MS);
-  
-  console.log('   After subtracting 8 hours (Manila→UTC):');
-  console.log('   UTC Date:', utcDate.toISOString());
   
   return utcDate;
 };

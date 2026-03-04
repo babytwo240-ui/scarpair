@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import userService from '../services/userService';
@@ -49,7 +49,6 @@ const EditProfilePage = () => {
         specialization: profileData.specialization || '',
       });
     } catch (err) {
-      console.error('Failed to load profile:', err);
       setError(err.message || 'Failed to load profile');
     } finally {
       setLoading(false);
@@ -91,7 +90,6 @@ const EditProfilePage = () => {
         }
       }, 1500);
     } catch (err) {
-      console.error('Failed to update profile:', err);
       setError(err.message || 'Failed to update profile. Please try again.');
     } finally {
       setSaving(false);
@@ -182,7 +180,7 @@ const EditProfilePage = () => {
           marginBottom: '20px',
         }}
       >
-        ← Back
+        â† Back
       </button>
 
       <h2>Edit Profile</h2>
@@ -391,7 +389,7 @@ const EditProfilePage = () => {
               fontSize: '16px',
             }}
           >
-            🔐 Change Password
+            ðŸ” Change Password
           </button>
         ) : (
           <form onSubmit={handleChangePassword} style={{ display: 'grid', gap: '15px', marginTop: '15px' }}>
@@ -548,7 +546,7 @@ const EditProfilePage = () => {
             fontSize: '16px'
           }}
         >
-          🗑️ Delete Account
+          ðŸ—‘ï¸ Delete Account
         </button>
       </div>
 
@@ -562,3 +560,4 @@ const EditProfilePage = () => {
 };
 
 export default EditProfilePage;
+

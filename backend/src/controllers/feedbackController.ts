@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+﻿import { Request, Response } from 'express';
 import { sequelize } from '../models';
 import { logFeedbackSubmitted } from '../utils/systemLogger';
 
@@ -79,7 +79,6 @@ const submitFeedback = async (req: Request, res: Response): Promise<any> => {
       }
     });
   } catch (error: any) {
-    console.error('Error submitting feedback:', error);
     res.status(500).json({ message: 'Error submitting feedback', error: error.message });
   }
 };
@@ -125,7 +124,6 @@ const getUserFeedback = async (req: Request, res: Response): Promise<any> => {
       }
     });
   } catch (error: any) {
-    console.error('Error fetching user feedback:', error);
     res.status(500).json({ message: 'Error fetching user feedback', error: error.message });
   }
 };
@@ -180,7 +178,6 @@ const getPostFeedback = async (req: Request, res: Response): Promise<any> => {
       }
     });
   } catch (error: any) {
-    console.error('Error fetching post feedback:', error);
     res.status(500).json({ message: 'Error fetching post feedback', error: error.message });
   }
 };
@@ -190,3 +187,4 @@ export {
   getUserFeedback,
   getPostFeedback
 };
+

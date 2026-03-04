@@ -1,4 +1,4 @@
-"use strict";
+﻿"use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     var desc = Object.getOwnPropertyDescriptor(m, k);
@@ -47,21 +47,15 @@ router.post('/login', adminController.login);
 // DEBUG: Test database connection (remove in production)
 router.get('/debug/db-status', async (req, res) => {
     try {
-        console.log('🔍 Debug endpoint called');
-        console.log('Available models:', Object.keys(models_1.sequelize.models || {}));
         const User = models_1.sequelize.models.User;
-        console.log('User model:', User ? 'Found' : 'NOT FOUND');
         if (!User) {
             return res.status(500).json({
                 error: 'User model not initialized',
                 availableModels: Object.keys(models_1.sequelize.models || {})
             });
         }
-        console.log('Counting users...');
         const count = await User.count();
-        console.log(`✓ Found ${count} users`);
         const sample = await User.findAll({ limit: 3, raw: true });
-        console.log(`✓ Retrieved ${sample.length} sample users`);
         res.status(200).json({
             status: 'Database connected',
             userCount: count,
@@ -69,8 +63,6 @@ router.get('/debug/db-status', async (req, res) => {
         });
     }
     catch (error) {
-        console.error('❌ Debug endpoint error:', error);
-        console.error('Full error:', JSON.stringify(error, null, 2));
         res.status(500).json({
             error: 'Database error',
             details: error.message,

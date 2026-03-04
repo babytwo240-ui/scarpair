@@ -27,6 +27,15 @@ export declare const rateLimitConfig: {
             ip: string;
         };
     };
+    getConversations: {
+        windowMs: number;
+        maxPerUser: number;
+        maxPerIP: number;
+        keyGenerator: (userId: string, ip: string) => {
+            user: string;
+            ip: string;
+        };
+    };
     getMessages: {
         windowMs: number;
         maxPerUser: number;

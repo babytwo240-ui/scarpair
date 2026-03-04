@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Box,
@@ -70,7 +70,6 @@ const AdminDashboard = () => {
       setStats(statsData.data || {});
       setError('');
     } catch (err) {
-      console.error('Fetch error:', err);
       setError(err.message || 'Failed to load data');
     } finally {
       setLoading(false);
@@ -342,3 +341,4 @@ const AdminDashboard = () => {
 };
 
 export default AdminDashboard;
+

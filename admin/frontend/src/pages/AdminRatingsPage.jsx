@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Box,
@@ -65,7 +65,6 @@ const AdminRatingsPage = () => {
       }
     } catch (err) {
       setError(err.message || 'Failed to fetch ratings');
-      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -288,3 +287,4 @@ const AdminRatingsPage = () => {
 };
 
 export default AdminRatingsPage;
+

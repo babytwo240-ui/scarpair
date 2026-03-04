@@ -18,14 +18,12 @@ class NotificationController {
                 relatedId,
                 read: false
             });
-            console.log(`✓ Notification created by admin for user ${userId}: ${title}`);
             res.status(201).json({
                 message: 'Notification created successfully',
                 data: notification
             });
         }
         catch (error) {
-            console.error('Create notification error:', error);
             res.status(500).json({ error: 'Failed to create notification' });
         }
     }
@@ -62,7 +60,6 @@ class NotificationController {
             });
         }
         catch (error) {
-            console.error('Get notifications error:', error);
             res.status(500).json({ error: 'Failed to retrieve notifications' });
         }
     }
@@ -81,7 +78,6 @@ class NotificationController {
             });
         }
         catch (error) {
-            console.error('Get unread count error:', error);
             res.status(500).json({ error: 'Failed to get unread count' });
         }
     }
@@ -105,7 +101,6 @@ class NotificationController {
             });
         }
         catch (error) {
-            console.error('Mark as read error:', error);
             res.status(500).json({ error: 'Failed to mark notification as read' });
         }
     }
@@ -126,7 +121,6 @@ class NotificationController {
             });
         }
         catch (error) {
-            console.error('Mark all as read error:', error);
             res.status(500).json({ error: 'Failed to mark all notifications as read' });
         }
     }
@@ -149,7 +143,6 @@ class NotificationController {
             });
         }
         catch (error) {
-            console.error('Delete notification error:', error);
             res.status(500).json({ error: 'Failed to delete notification' });
         }
     }
@@ -167,7 +160,6 @@ class NotificationController {
             });
         }
         catch (error) {
-            console.error('Delete all notifications error:', error);
             res.status(500).json({ error: 'Failed to delete all notifications' });
         }
     }

@@ -1,4 +1,4 @@
-import redis from '../config/redis';
+﻿import redis from '../config/redis';
 
 /**
  * Blacklist a token (invalidate it on logout)
@@ -15,9 +15,7 @@ export const blacklistToken = async (
   try {
     // Store token in Redis with expiry to match JWT expiry
     await redis.setex(key, expiryTime, 'true');
-    console.log(`✅ Token blacklisted (expires in ${expiryTime}s)`);
   } catch (error) {
-    console.error('❌ Error blacklisting token:', error);
     // Don't crash - fallback to normal operation
     throw error;
   }
@@ -35,7 +33,6 @@ export const isTokenBlacklisted = async (token: string): Promise<boolean> => {
     const exists = await redis.exists(key);
     return exists === 1;
   } catch (error) {
-    console.error('❌ Error checking token blacklist:', error);
     // If Redis fails, don't block user - fallback to accepting token
     return false;
   }
@@ -50,8 +47,7 @@ export const removeTokenFromBlacklist = async (token: string): Promise<void> => 
 
   try {
     await redis.del(key);
-    console.log(`✅ Token removed from blacklist`);
   } catch (error) {
-    console.error('❌ Error removing token from blacklist:', error);
   }
 };
+

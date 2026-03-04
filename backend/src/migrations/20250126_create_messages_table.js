@@ -4,7 +4,7 @@ module.exports = {
   up: async (queryInterface, Sequelize) => {
     const tableExists = await queryInterface.tableExists('messages');
     if (tableExists) {
-      console.log('⏭️  Table "messages" already exists, skipping...');
+
       return;
     }
 

@@ -1,4 +1,4 @@
-import bcryptjs from 'bcryptjs';
+﻿import bcryptjs from 'bcryptjs';
 
 /**
  * SECURITY UTILITY FOR PASSWORD HISTORY
@@ -23,7 +23,6 @@ export const addPasswordToHistory = (currentPasswordHash: string, passwordHistor
     
     return JSON.stringify(history);
   } catch (error) {
-    console.error('Error adding to password history:', error);
     return JSON.stringify([currentPasswordHash]);
   }
 };
@@ -46,7 +45,6 @@ export const isPasswordInHistory = async (newPassword: string, passwordHistory: 
     
     return false;
   } catch (error) {
-    console.error('Error checking password history:', error);
     return false;
   }
 };
@@ -60,7 +58,6 @@ export const getPasswordHistoryInfo = (passwordHistory: string | null): number =
     const history: string[] = JSON.parse(passwordHistory);
     return history.length;
   } catch (error) {
-    console.error('Error reading password history:', error);
     return 0;
   }
 };
@@ -68,3 +65,4 @@ export const getPasswordHistoryInfo = (passwordHistory: string | null): number =
 export const clearPasswordHistory = (): string => {
   return JSON.stringify([]);
 };
+

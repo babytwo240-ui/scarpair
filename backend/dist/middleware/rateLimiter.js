@@ -28,7 +28,6 @@ class RateLimiter {
             return true;
         }
         catch (error) {
-            console.error('Rate limiter error:', error);
             return true;
         }
     }
@@ -59,7 +58,6 @@ class RateLimiter {
             await redis_1.default.del(keys.user);
         }
         catch (error) {
-            console.error('Error resetting rate limit:', error);
         }
     }
     static async getStatus(userId, ip, limitType) {
@@ -77,7 +75,6 @@ class RateLimiter {
             };
         }
         catch (error) {
-            console.error('Error getting rate limit status:', error);
             return {
                 userCount: 0,
                 ipCount: 0,

@@ -20,12 +20,11 @@ router.post('/admin/clear-all', async (req, res) => {
         });
     }
     catch (error) {
-        console.error('Clear conversations error:', error);
         res.status(500).json({ error: 'Failed to clear conversations' });
     }
 });
 router.use(userAuthMiddleware_1.authenticateUser);
-router.get('/', conversationController_1.ConversationController.getConversations);
+router.get('/', rateLimiter_1.RateLimiter.middleware('getConversations'), conversationController_1.ConversationController.getConversations);
 router.post('/', rateLimiter_1.RateLimiter.middleware('createConversation'), conversationController_1.ConversationController.startConversation);
 router.get('/:id', conversationController_1.ConversationController.getConversation);
 router.delete('/:id', conversationController_1.ConversationController.deleteConversation);

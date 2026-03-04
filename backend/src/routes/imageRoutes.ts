@@ -1,4 +1,4 @@
-import { Router, Request, Response } from 'express';
+﻿import { Router, Request, Response } from 'express';
 import { uploadMiddleware, imageRateLimiter } from '../middleware/imageUpload';
 import { authenticateUser } from '../middleware/userAuthMiddleware';
 import ImageService from '../services/imageService';
@@ -39,7 +39,6 @@ router.post(
         }
       });
     } catch (error) {
-      console.error('Image upload error:', error);
       res.status(500).json({ error: 'Failed to upload image' });
     }
   }
@@ -59,10 +58,10 @@ router.delete(
         message: 'Image deleted successfully'
       });
     } catch (error) {
-      console.error('Image deletion error:', error);
       res.status(500).json({ error: 'Failed to delete image' });
     }
   }
 );
 
 export default router;
+

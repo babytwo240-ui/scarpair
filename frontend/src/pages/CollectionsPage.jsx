@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import collectionService from '../services/collectionService';
@@ -99,18 +99,13 @@ const CollectionsPage = () => {
     }
 
     try {
-      console.log('🔴 Cancelling collection:', collectionId);
       const result = await collectionService.cancelCollection(collectionId);
-      console.log('✅ Cancel response:', result);
       setSuccess('Collection cancelled successfully!');
       setError('');
       
       // Force immediate reload without delay
-      console.log('🔄 Reloading collections immediately...');
       await loadCollections();
-      console.log('✅ Collections reloaded');
     } catch (err) {
-      console.error('❌ Error cancelling collection:', err);
       setError(err.message || 'Failed to cancel collection.');
       setSuccess('');
     }
@@ -343,7 +338,7 @@ const CollectionsPage = () => {
 
                     {user.type === 'recycler' && collection.cancellationCount && collection.cancellationCount > 0 && (
                       <p style={{ margin: '3px 0', color: '#dc3545' }}>
-                        <strong>⚠️ Cancellations Used:</strong> {collection.cancellationCount}/3
+                        <strong>âš ï¸ Cancellations Used:</strong> {collection.cancellationCount}/3
                       </p>
                     )}
 
@@ -369,7 +364,7 @@ const CollectionsPage = () => {
                       fontSize: '12px',
                     }}
                   >
-                    📋 View Details
+                    ðŸ“‹ View Details
                   </button>
 
                   {user.type === 'business' && collection.status === 'pending' && (
@@ -483,3 +478,4 @@ const CollectionsPage = () => {
 };
 
 export default CollectionsPage;
+

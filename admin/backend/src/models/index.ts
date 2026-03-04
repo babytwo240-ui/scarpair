@@ -1,4 +1,4 @@
-import { Sequelize } from 'sequelize';
+﻿import { Sequelize } from 'sequelize';
 import dotenv from 'dotenv';
 import path from 'path';
 import config from '../config/database';
@@ -84,20 +84,15 @@ Object.keys(models).forEach((key) => {
 if (process.env.NODE_ENV === 'development') {
   // Don't sync - table already exists from main backend migrations
   // Just verify connection is working
-  console.log('🔍 Testing database connection...');
   sequelize.authenticate()
     .then(() => {
-      console.log('✓ Database connection authenticated successfully');
-      console.log(`✓ Models registered: ${Object.keys((sequelize as any).models).join(', ')}`);
     })
     .catch((err: any) => {
-      console.error('❌ Database authentication failed:', err.message);
-      console.error('Details:', err);
     });
 } else {
   // In production, skip auto-sync to avoid startup delays
-  console.log('✓ Database sync skipped in production mode');
 }
 
 export { sequelize, User, Material, AdminUser, WasteCategory, Report, UserRating, PostRating, SystemLog };
 export default models;
+

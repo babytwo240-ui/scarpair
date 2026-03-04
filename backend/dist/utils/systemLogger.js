@@ -30,7 +30,6 @@ const logSystemAction = async (userId, action, target, targetId, status, details
         });
     }
     catch (error) {
-        console.error('Error logging system action:', error);
     }
 };
 exports.logSystemAction = logSystemAction;

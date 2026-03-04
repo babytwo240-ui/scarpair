@@ -7,10 +7,8 @@ exports.redisClient = void 0;
 const ioredis_1 = __importDefault(require("ioredis"));
 const redisOptions = {
     retryStrategy: (times) => {
-        // Don't retry forever if Redis is optional
         if (times > 10) {
-            console.warn('⚠️  Redis unavailable after 10 attempts - features will be limited');
-            return -1; // Stop retrying
+            return -1;
         }
         const delay = Math.min(times * 50, 2000);
         return delay;
@@ -29,13 +27,10 @@ exports.redisClient = process.env.REDIS_URL
         ...redisOptions
     });
 exports.redisClient.on('error', (err) => {
-    console.error('❌ Redis error:', err.message);
 });
 exports.redisClient.on('connect', () => {
-    console.log('✅ Redis connected');
 });
 exports.redisClient.on('reconnecting', () => {
-    console.warn('⚠️  Redis reconnecting...');
 });
 exports.default = exports.redisClient;
 //# sourceMappingURL=redis.js.map

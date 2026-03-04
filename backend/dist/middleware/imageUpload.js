@@ -29,11 +29,11 @@ const storage = multer_1.default.memoryStorage();
 const fileFilter = (req, file, cb) => {
     // Validate MIME type
     if (!exports.IMAGE_CONFIG.allowedMimes.includes(file.mimetype)) {
-        return cb(new Error(`❌ Invalid file type. Allowed: ${exports.IMAGE_CONFIG.allowedMimes.join(', ')}`));
+        return cb(new Error(`âŒ Invalid file type. Allowed: ${exports.IMAGE_CONFIG.allowedMimes.join(', ')}`));
     }
     const ext = (file.originalname.match(/\.[^.]*$/) || [''])[0].toLowerCase();
     if (!exports.IMAGE_CONFIG.allowedExtensions.includes(ext)) {
-        return cb(new Error(`❌ Invalid file extension. Allowed: ${exports.IMAGE_CONFIG.allowedExtensions.join(', ')}`));
+        return cb(new Error(`âŒ Invalid file extension. Allowed: ${exports.IMAGE_CONFIG.allowedExtensions.join(', ')}`));
     }
     cb(null, true);
 };
@@ -84,13 +84,11 @@ async function imageRateLimiter(req, res, next) {
         next();
     }
     catch (error) {
-        console.error('Image rate limiter error:', error);
         next();
     }
 }
 async function compressImage(originalName, buffer) {
     try {
-        console.log(`📦 Compressing image: ${originalName}`);
         const imageBuffer = buffer;
         if (!imageBuffer) {
             throw new Error('No image buffer provided for compression');
@@ -106,11 +104,9 @@ async function compressImage(originalName, buffer) {
         const originalSize = (imageBuffer.length / 1024 / 1024).toFixed(2);
         const compressedSize = (compressed.length / 1024 / 1024).toFixed(2);
         const ratio = ((1 - compressed.length / imageBuffer.length) * 100).toFixed(1);
-        console.log(`✅ Compression complete: ${originalSize}MB → ${compressedSize}MB (${ratio}% reduction)`);
         return compressed;
     }
     catch (error) {
-        console.error('❌ Image compression error:', error);
         throw error;
     }
 }

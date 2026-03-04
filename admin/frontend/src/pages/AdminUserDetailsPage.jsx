@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 const AdminUserDetailsPage = () => {
@@ -36,7 +36,6 @@ const AdminUserDetailsPage = () => {
       const data = await response.json();
       setUser(data.user);
     } catch (err) {
-      console.error('Fetch user details error:', err);
       setError(err.message || 'Failed to load user details');
     } finally {
       setLoading(false);
@@ -64,7 +63,6 @@ const AdminUserDetailsPage = () => {
       alert('User deleted successfully');
       navigate('/admin/users');
     } catch (err) {
-      console.error('Delete user error:', err);
       alert('Failed to delete user: ' + err.message);
     }
   };
@@ -88,7 +86,6 @@ const AdminUserDetailsPage = () => {
       alert('User verification status updated');
       fetchUserDetails();
     } catch (err) {
-      console.error('Verify user error:', err);
       alert('Failed to update verification status: ' + err.message);
     }
   };
@@ -103,7 +100,7 @@ const AdminUserDetailsPage = () => {
 
   return (
     <div style={{ padding: '20px', maxWidth: '800px', margin: '0 auto' }}>
-      <button onClick={() => navigate('/admin/users')} style={{ padding: '8px 12px', marginBottom: '20px' }}>← Back to Users</button>
+      <button onClick={() => navigate('/admin/users')} style={{ padding: '8px 12px', marginBottom: '20px' }}>â† Back to Users</button>
 
       <h1>User Details</h1>
 
@@ -153,7 +150,7 @@ const AdminUserDetailsPage = () => {
 
         <div style={{ marginBottom: '15px' }}>
           <label style={{ fontWeight: 'bold' }}>Verified:</label>
-          <p>{user.isVerified ? '✓ Yes' : '✗ No'}</p>
+          <p>{user.isVerified ? 'âœ“ Yes' : 'âœ— No'}</p>
         </div>
 
         <div style={{ marginBottom: '15px' }}>
@@ -168,7 +165,7 @@ const AdminUserDetailsPage = () => {
 
         <div style={{ marginBottom: '15px' }}>
           <label style={{ fontWeight: 'bold' }}>Active:</label>
-          <p>{user.isActive ? '✓ Yes' : '✗ No'}</p>
+          <p>{user.isActive ? 'âœ“ Yes' : 'âœ— No'}</p>
         </div>
       </div>
 
@@ -192,3 +189,4 @@ const AdminUserDetailsPage = () => {
 };
 
 export default AdminUserDetailsPage;
+

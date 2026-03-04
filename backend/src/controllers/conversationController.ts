@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+﻿import { Request, Response } from 'express';
 import { Conversation, User, Message, WastePost } from '../models';
 import { Op } from 'sequelize';
 import redisClient from '../config/redis';
@@ -61,7 +61,6 @@ export class ConversationController {
         }
       });
     } catch (error) {
-      console.error('Get conversations error:', error);
       res.status(500).json({ error: 'Failed to retrieve conversations' });
     }
   }
@@ -159,7 +158,6 @@ export class ConversationController {
         data: conversationWithParticipants
       });
     } catch (error) {
-      console.error('Start conversation error:', error);
       res.status(500).json({ error: 'Failed to start conversation' });
     }
   }
@@ -206,7 +204,6 @@ export class ConversationController {
         data: conversation
       });
     } catch (error) {
-      console.error('Get conversation error:', error);
       res.status(500).json({ error: 'Failed to retrieve conversation' });
     }
   }
@@ -239,10 +236,10 @@ export class ConversationController {
         message: 'Conversation deleted'
       });
     } catch (error) {
-      console.error('Delete conversation error:', error);
       res.status(500).json({ error: 'Failed to delete conversation' });
     }
   }
 }
 
 export default ConversationController;
+

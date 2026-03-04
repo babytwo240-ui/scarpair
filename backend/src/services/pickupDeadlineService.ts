@@ -3,8 +3,6 @@ import { Op } from 'sequelize';
 
 export async function checkPickupDeadlines(): Promise<void> {
   try {
-    console.log('🕐 Checking collection deadlines...');
-
     const now = new Date();
 
     // Find all approved/scheduled collections that have passed their deadline
@@ -44,11 +42,8 @@ export async function checkPickupDeadlines(): Promise<void> {
     });
 
     if (expiredCollections.length === 0) {
-      console.log('✅ No expired collections found');
       return;
     }
-
-    console.log(`⏰ Found ${expiredCollections.length} expired collection(s)`);
 
     for (const collection of expiredCollections) {
       try {
@@ -67,8 +62,6 @@ export async function checkPickupDeadlines(): Promise<void> {
           post.pickupDeadline = null;
           await post.save();
         }
-
-        console.log(`✅ Collection ${collection.id} expired and post ${post?.id} reverted to ACTIVE`);
 
         // Notify recycler
         if (recycler) {
@@ -92,24 +85,17 @@ export async function checkPickupDeadlines(): Promise<void> {
           });
         }
       } catch (error) {
-        console.error(`❌ Error processing collection ${collection.id}:`, error);
       }
     }
 
-    console.log(`✅ Processed ${expiredCollections.length} expired collection(s)`);
   } catch (error) {
-    console.error('❌ Error checking pickup deadlines:', error);
   }
 }
 
 export function initializePickupDeadlineChecker(): void {
-  console.log('🚀 Initializing collection deadline checker (runs every 5 minutes)...');
-
   checkPickupDeadlines();
 
   setInterval(checkPickupDeadlines, 5 * 60 * 1000);
-
-  console.log('✅ Collection deadline checker initialized');
 }
 
 export default {

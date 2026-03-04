@@ -1,4 +1,4 @@
-"use strict";
+﻿"use strict";
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -86,20 +86,14 @@ Object.keys(models).forEach((key) => {
 if (process.env.NODE_ENV === 'development') {
     // Don't sync - table already exists from main backend migrations
     // Just verify connection is working
-    console.log('🔍 Testing database connection...');
     sequelize.authenticate()
         .then(() => {
-        console.log('✓ Database connection authenticated successfully');
-        console.log(`✓ Models registered: ${Object.keys(sequelize.models).join(', ')}`);
     })
         .catch((err) => {
-        console.error('❌ Database authentication failed:', err.message);
-        console.error('Details:', err);
     });
 }
 else {
     // In production, skip auto-sync to avoid startup delays
-    console.log('✓ Database sync skipped in production mode');
 }
 exports.default = models;
 //# sourceMappingURL=index.js.map

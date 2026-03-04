@@ -65,7 +65,6 @@ const checkPasswordResetRateLimit = async (email, ipAddress) => {
         };
     }
     catch (error) {
-        console.error('Error checking password reset rate limit:', error);
         // On error, allow the request (fail open)
         return {
             allowed: true,
@@ -86,10 +85,8 @@ const clearPasswordResetRateLimit = async (email, ipAddress) => {
             await redis_1.redisClient.del(`pwd_reset_ip:${ipAddress}`);
             await redis_1.redisClient.del(`pwd_reset_combo:${email}:${ipAddress}`);
         }
-        console.log(`✓ Rate limits cleared for ${email}`);
     }
     catch (error) {
-        console.error('Error clearing password reset rate limit:', error);
     }
 };
 exports.clearPasswordResetRateLimit = clearPasswordResetRateLimit;
@@ -114,7 +111,6 @@ const getPasswordResetRateLimitStatus = async (email, ipAddress) => {
         };
     }
     catch (error) {
-        console.error('Error getting rate limit status:', error);
         return {
             ipAttempts: 0,
             ipTtl: 0,

@@ -1,4 +1,4 @@
-import apiClient from './api';
+﻿import apiClient from './api';
 
 const collectionService = {
   // Request collection - recycler initiates collection request
@@ -118,7 +118,6 @@ const collectionService = {
       return response.data?.data || response.data || response;
     } catch (error) {
       const msg = error.message || error.data?.message || 'Failed to fetch collections';
-      console.error('getAllCollections error:', { error, msg, status: error.status });
       throw new Error(msg);
     }
   },
@@ -140,3 +139,4 @@ const collectionService = {
 };
 
 export default collectionService;
+

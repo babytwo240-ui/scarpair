@@ -633,7 +633,6 @@ export const getUserWastePosts = async (req: Request, res: Response): Promise<an
       }
     });
   } catch (error: any) {
-    console.error('❌ Error in getUserWastePosts:', error);
     res.status(500).json({ message: 'Error retrieving user posts', error: error.message });
   }
 };
@@ -666,7 +665,6 @@ export const getWastePostDetails = async (req: Request, res: Response): Promise<
         }
       }
     } catch (imgError) {
-      console.warn('⚠️ Warning parsing images:', imgError);
       images = [];
     }
 
@@ -707,7 +705,6 @@ export const getWastePostDetails = async (req: Request, res: Response): Promise<
       data: responseData
     });
   } catch (error: any) {
-    console.error('❌ Error retrieving waste post details:', error);
     res.status(500).json({ message: 'Error retrieving waste post details', error: error.message });
   }
 };
@@ -784,11 +781,6 @@ export const approveRecycler = async (req: Request, res: Response): Promise<any>
       }
     });
   } catch (error: any) {
-    console.error('Error in approveRecycler:', {
-      message: error.message,
-      stack: error.stack,
-      name: error.name
-    });
     res.status(500).json({ 
       message: 'Error approving recycler', 
       error: error.message,
@@ -969,7 +961,6 @@ export const getMyApprovedCollections = async (req: Request, res: Response): Pro
       }
     });
   } catch (error: any) {
-    console.error('❌ Error in getMyApprovedCollections:', error);
     res.status(500).json({ message: 'Error retrieving approved collections', error: error.message });
   }
 };
@@ -990,7 +981,6 @@ export const getWasteCategories = async (req: Request, res: Response): Promise<a
       data: categories
     });
   } catch (error: any) {
-    console.error('Error fetching waste categories:', error);
     res.status(500).json({ message: 'Error fetching waste categories', error: error.message });
   }
 };

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import collectionService from '../services/collectionService';
@@ -73,15 +73,9 @@ const ScheduleCollectionPage = () => {
     try {
       // Convert datetime-local (browser's local time) to Manila time before sending to backend
       const manilaScheduledDate = convertBrowserLocalToManilaTime(formData.scheduledDate);
-      console.log('📋 Frontend conversion (ScheduleCollectionPage):');
-      console.log('   Original scheduledDate:', formData.scheduledDate);
-      console.log('   Converted to Manila time:', manilaScheduledDate);
-
       const response = await collectionService.scheduleCollection(collectionId, {
         scheduledDate: manilaScheduledDate,
       });
-      console.log('Collection scheduled:', response);
-
       setSuccess('Collection scheduled successfully!');
 
       setTimeout(() => {
@@ -89,7 +83,6 @@ const ScheduleCollectionPage = () => {
       }, 1500);
     } catch (err) {
       setError(err.message || 'Failed to schedule collection.');
-      console.error('Schedule error:', err);
     } finally {
       setSaving(false);
     }
@@ -205,3 +198,4 @@ const ScheduleCollectionPage = () => {
 };
 
 export default ScheduleCollectionPage;
+

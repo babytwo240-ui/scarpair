@@ -1,4 +1,4 @@
-"use strict";
+﻿"use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteUser = exports.toggleUserVerification = exports.getUserById = exports.getAllUsers = void 0;
 const models_1 = require("../models");
@@ -12,11 +12,8 @@ const getAllUsers = async (req, res) => {
         // Query users directly from database
         const User = models_1.sequelize.models.User;
         if (!User) {
-            console.error('❌ ERROR: User model not found on sequelize.models');
-            console.log('Available models:', Object.keys(models_1.sequelize.models || {}));
             return res.status(500).json({ error: 'User model not initialized', debug: 'User model missing' });
         }
-        console.log('✓ User model found, querying database...');
         const whereClause = {};
         // Build filters
         if (type) {
@@ -38,7 +35,6 @@ const getAllUsers = async (req, res) => {
         }
         // Fetch total count
         const totalCount = await User.count({ where: whereClause });
-        console.log(`✓ Total users found: ${totalCount}`);
         // Fetch paginated users
         const pageNum = parseInt(page) || 1;
         const limitNum = parseInt(limit) || 10;
@@ -63,7 +59,6 @@ const getAllUsers = async (req, res) => {
             raw: true,
             order: [['createdAt', 'DESC']]
         });
-        console.log(`✓ Retrieved ${users.length} users for page ${pageNum}`);
         const mappedUsers = users.map((user) => ({
             id: user.id,
             email: user.email,
@@ -86,8 +81,6 @@ const getAllUsers = async (req, res) => {
         });
     }
     catch (error) {
-        console.error('❌ Get all users error:', error.message);
-        console.error('Stack:', error.stack);
         res.status(500).json({ error: 'Failed to fetch users', details: error.message });
     }
 };
@@ -137,7 +130,6 @@ const getUserById = async (req, res) => {
         });
     }
     catch (error) {
-        console.error('Get user by ID error:', error.message);
         res.status(500).json({ error: 'Failed to fetch user details', details: error.message });
     }
 };
@@ -159,7 +151,6 @@ const toggleUserVerification = async (req, res) => {
         }
         // Update isVerified field in database
         await user.update({ isVerified });
-        console.log(`✓ User ${id} verification status updated to: ${isVerified}`);
         // Send notification to user (async, don't block response)
         const notificationMessage = isVerified
             ? 'Your account has been verified by the admin. You can now post materials and waste.'
@@ -171,7 +162,6 @@ const toggleUserVerification = async (req, res) => {
         try {
             const mainBackendUrl = process.env.MAIN_BACKEND_URL;
             if (!mainBackendUrl) {
-                console.warn('⚠️ MAIN_BACKEND_URL not configured - notifications will not be created');
                 return;
             }
             await fetch(`${mainBackendUrl}/api/admin/notifications`, {
@@ -186,10 +176,9 @@ const toggleUserVerification = async (req, res) => {
                     title: notificationTitle,
                     message: notificationMessage
                 })
-            }).catch(err => console.log('ℹ️  Notification creation attempt:', err.message));
+            }).catch(err => console.log('â„¹ï¸  Notification creation attempt:', err.message));
         }
         catch (notificationError) {
-            console.log('ℹ️  Could not notify user (non-blocking)', notificationError);
         }
         res.status(200).json({
             message: 'User verification status updated successfully',
@@ -203,7 +192,6 @@ const toggleUserVerification = async (req, res) => {
         });
     }
     catch (error) {
-        console.error('❌ Toggle verification error:', error.message);
         res.status(500).json({ error: 'Failed to update user verification status', details: error.message });
     }
 };
@@ -233,7 +221,6 @@ const deleteUser = async (req, res) => {
         });
     }
     catch (error) {
-        console.error('Delete user error:', error.message);
         res.status(500).json({ error: 'Failed to delete user', details: error.message });
     }
 };

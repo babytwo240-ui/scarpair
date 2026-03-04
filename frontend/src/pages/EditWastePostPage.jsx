@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import wastePostService from '../services/wastePostService';
@@ -45,7 +45,6 @@ const EditWastePostPage = () => {
       const data = await response.json();
       setCategories(Array.isArray(data.data) ? data.data : []);
     } catch (err) {
-      console.error('Failed to fetch categories:', err);
     }
   };
 
@@ -105,7 +104,6 @@ const EditWastePostPage = () => {
         try {
           await imageService.deleteImage(currentImageUrl);
         } catch (err) {
-          console.warn('Failed to delete old image');
         }
       }
 
@@ -452,3 +450,4 @@ const EditWastePostPage = () => {
 };
 
 export default EditWastePostPage;
+

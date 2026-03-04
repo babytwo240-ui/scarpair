@@ -1,4 +1,4 @@
-import { redisClient } from '../config/redis';
+﻿import { redisClient } from '../config/redis';
 
 /**
  * RATE LIMITING UTILITY FOR PASSWORD RESETS
@@ -88,7 +88,6 @@ export const checkPasswordResetRateLimit = async (
       resetTime: 0
     };
   } catch (error) {
-    console.error('Error checking password reset rate limit:', error);
     // On error, allow the request (fail open)
     return {
       allowed: true,
@@ -110,10 +109,7 @@ export const clearPasswordResetRateLimit = async (email: string, ipAddress?: str
       await redisClient.del(`pwd_reset_ip:${ipAddress}`);
       await redisClient.del(`pwd_reset_combo:${email}:${ipAddress}`);
     }
-    
-    console.log(`✓ Rate limits cleared for ${email}`);
   } catch (error) {
-    console.error('Error clearing password reset rate limit:', error);
   }
 };
 
@@ -139,7 +135,6 @@ export const getPasswordResetRateLimitStatus = async (email: string, ipAddress: 
       comboTtl: comboTtl > 0 ? comboTtl : 0
     };
   } catch (error) {
-    console.error('Error getting rate limit status:', error);
     return {
       ipAttempts: 0,
       ipTtl: 0,
@@ -150,3 +145,4 @@ export const getPasswordResetRateLimitStatus = async (email: string, ipAddress: 
     };
   }
 };
+

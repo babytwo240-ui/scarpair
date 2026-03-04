@@ -72,7 +72,6 @@ const submitFeedback = async (req, res) => {
         });
     }
     catch (error) {
-        console.error('Error submitting feedback:', error);
         res.status(500).json({ message: 'Error submitting feedback', error: error.message });
     }
 };
@@ -116,7 +115,6 @@ const getUserFeedback = async (req, res) => {
         });
     }
     catch (error) {
-        console.error('Error fetching user feedback:', error);
         res.status(500).json({ message: 'Error fetching user feedback', error: error.message });
     }
 };
@@ -166,7 +164,6 @@ const getPostFeedback = async (req, res) => {
         });
     }
     catch (error) {
-        console.error('Error fetching post feedback:', error);
         res.status(500).json({ message: 'Error fetching post feedback', error: error.message });
     }
 };

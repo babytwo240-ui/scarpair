@@ -55,6 +55,15 @@ class MessageController {
                 imageUrl: imageUrl || null,
                 createdAt: message.createdAt
             });
+            // Notify both participants that conversation list should be updated
+            io.to(`user:${senderId}`).emit('conversation:updated', {
+                conversationId,
+                lastMessageAt: new Date()
+            });
+            io.to(`user:${recipientId}`).emit('conversation:updated', {
+                conversationId,
+                lastMessageAt: new Date()
+            });
             io.to(`user:${recipientId}`).emit('notification:new', {
                 id: message.id,
                 type: 'MESSAGE',
@@ -77,7 +86,6 @@ class MessageController {
             });
         }
         catch (error) {
-            console.error('Send message error:', error);
             res.status(500).json({ error: 'Failed to send message' });
         }
     }
@@ -103,7 +111,6 @@ class MessageController {
                 }
             }
             catch (error) {
-                console.warn('Cache miss, querying database');
             }
             if (!fromCache) {
                 messages = await models_1.Message.findAll({
@@ -128,7 +135,6 @@ class MessageController {
                     await redis_1.default.expire(cacheKey, 24 * 60 * 60);
                 }
                 catch (error) {
-                    console.warn('Cache write failed');
                 }
             }
             // Get total count
@@ -146,7 +152,6 @@ class MessageController {
             });
         }
         catch (error) {
-            console.error('Get messages error:', error);
             res.status(500).json({ error: 'Failed to retrieve messages' });
         }
     }
@@ -176,7 +181,6 @@ class MessageController {
             });
         }
         catch (error) {
-            console.error('Edit message error:', error);
             res.status(500).json({ error: 'Failed to update message' });
         }
     }
@@ -201,7 +205,6 @@ class MessageController {
             });
         }
         catch (error) {
-            console.error('Delete message error:', error);
             res.status(500).json({ error: 'Failed to delete message' });
         }
     }

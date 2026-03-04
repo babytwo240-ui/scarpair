@@ -1,4 +1,4 @@
-import { Sequelize } from 'sequelize';
+﻿import { Sequelize } from 'sequelize';
 
 export interface DeleteResult {
   success: boolean;
@@ -111,9 +111,6 @@ export const deleteUserWithCascade = async (
     };
   } catch (error: any) {
     await transaction.rollback();
-
-    console.error('User deletion service error:', error);
-
     throw {
       success: false,
       message: `Failed to delete user: ${error.message}`,
@@ -121,3 +118,4 @@ export const deleteUserWithCascade = async (
     };
   }
 };
+

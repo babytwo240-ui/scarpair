@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import collectionService from '../services/collectionService';
@@ -56,35 +56,28 @@ const RequestCollectionPage = () => {
       let manilaScheduledDate = scheduledDate;
       if (scheduledDate) {
         manilaScheduledDate = convertBrowserLocalToManilaTime(scheduledDate);
-        console.log('📋 Frontend conversion:');
-        console.log('   Original scheduledDate:', scheduledDate);
-        console.log('   Converted to Manila time:', manilaScheduledDate);
       }
 
       const response = await collectionService.requestCollection(parseInt(postId), manilaScheduledDate);
       
       // Check if this is a forced approval or if cancel is locked
       if (response.data?.forceApproved) {
-        setSuccess('✅ Collection request submitted and auto-approved! The business has already rejected similar requests.');
+        setSuccess('âœ… Collection request submitted and auto-approved! The business has already rejected similar requests.');
       } else if (response.data?.cancelLocked) {
-        setSuccess('⚠️ Collection request submitted. Note: You have used 3 cancellations before. This request cannot be cancelled.');
+        setSuccess('âš ï¸ Collection request submitted. Note: You have used 3 cancellations before. This request cannot be cancelled.');
       } else {
         setSuccess('Collection request submitted successfully! Redirecting...');
       }
-      
-      console.log('Collection created:', response);
-
       setTimeout(() => {
         navigate('/collections');
       }, 2000);
     } catch (err) {
       // Check for specific error codes
       if (err.cause?.code === 'MAX_REQUESTS_EXCEEDED') {
-        setError('❌ You have already requested this post 4 times. You cannot request it again.');
+        setError('âŒ You have already requested this post 4 times. You cannot request it again.');
       } else {
         setError(err.message || 'Failed to submit collection request.');
       }
-      console.error('Collection request error:', err);
     } finally {
       setSubmitting(false);
     }
@@ -174,7 +167,7 @@ const RequestCollectionPage = () => {
             }}
           />
           <p style={{ fontSize: '12px', color: '#666', marginTop: '5px' }}>
-            💡 Suggest when you'd like to pick up these materials. The business owner can approve or adjust this.
+            ðŸ’¡ Suggest when you'd like to pick up these materials. The business owner can approve or adjust this.
           </p>
         </div>
 
@@ -200,3 +193,4 @@ const RequestCollectionPage = () => {
 };
 
 export default RequestCollectionPage;
+

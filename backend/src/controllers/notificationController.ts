@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+﻿import { Request, Response } from 'express';
 import { Notification } from '../models';
 
 export class NotificationController {
@@ -19,15 +19,11 @@ export class NotificationController {
         relatedId,
         read: false
       });
-
-      console.log(`✓ Notification created by admin for user ${userId}: ${title}`);
-
       res.status(201).json({
         message: 'Notification created successfully',
         data: notification
       });
     } catch (error) {
-      console.error('Create notification error:', error);
       res.status(500).json({ error: 'Failed to create notification' });
     }
   }
@@ -67,7 +63,6 @@ export class NotificationController {
         }
       });
     } catch (error) {
-      console.error('Get notifications error:', error);
       res.status(500).json({ error: 'Failed to retrieve notifications' });
     }
   }
@@ -88,7 +83,6 @@ export class NotificationController {
         data: { unreadCount }
       });
     } catch (error) {
-      console.error('Get unread count error:', error);
       res.status(500).json({ error: 'Failed to get unread count' });
     }
   }
@@ -116,7 +110,6 @@ export class NotificationController {
         data: notification
       });
     } catch (error) {
-      console.error('Mark as read error:', error);
       res.status(500).json({ error: 'Failed to mark notification as read' });
     }
   }
@@ -142,7 +135,6 @@ export class NotificationController {
         }
       });
     } catch (error) {
-      console.error('Mark all as read error:', error);
       res.status(500).json({ error: 'Failed to mark all notifications as read' });
     }
   }
@@ -169,7 +161,6 @@ export class NotificationController {
         message: 'Notification deleted'
       });
     } catch (error) {
-      console.error('Delete notification error:', error);
       res.status(500).json({ error: 'Failed to delete notification' });
     }
   }
@@ -189,10 +180,10 @@ export class NotificationController {
         }
       });
     } catch (error) {
-      console.error('Delete all notifications error:', error);
       res.status(500).json({ error: 'Failed to delete all notifications' });
     }
   }
 }
 
 export default NotificationController;
+

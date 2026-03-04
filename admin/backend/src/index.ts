@@ -1,4 +1,4 @@
-import express, { Express, Request, Response, NextFunction } from 'express';
+﻿import express, { Express, Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
@@ -31,7 +31,6 @@ app.use((req: Request, res: Response) => {
 
 // Error handling middleware
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
-  console.error(err.stack);
   res.status(err.status || 500).json({
     error: err.message || 'Internal server error'
   });
@@ -40,16 +39,11 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
 // Start server
 const server = app.listen(PORT, () => {
   const baseUrl = process.env.ADMIN_BACKEND_BASE_URL || `http://localhost:${PORT}`;
-  console.log(`\n✓ Scrapair Admin Backend running on port ${PORT}`);
-  console.log(`\nDefault Admin Credentials:`);
-  console.log(`Username: admin11`);
-  console.log(`Password: asdqwe123`);
-  console.log(`\nAPI Available at: ${baseUrl}/api/admin`);
 });
 
 // Handle server errors
 server.on('error', (err: any) => {
-  console.error('Server error:', err);
 });
 
 export default app;
+

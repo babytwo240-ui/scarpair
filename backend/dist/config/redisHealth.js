@@ -28,7 +28,6 @@ async function checkRedisConnection() {
     try {
         const response = await testRedis.ping();
         if (response === 'PONG') {
-            console.log('✅ Redis connected successfully');
             await testRedis.quit();
             return;
         }

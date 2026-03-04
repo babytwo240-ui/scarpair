@@ -40,13 +40,11 @@ class ImageService {
     static async uploadToS3(buffer, originalName, userId, mimeType) {
         try {
             if (!aws_1.supabaseConfig.url || !aws_1.supabaseConfig.serviceRoleKey) {
-                console.warn('⚠️  Supabase not configured. Returning placeholder URL.');
                 return `data:${mimeType};base64,${buffer.toString('base64').substring(0, 50)}...`;
             }
             const compressed = await (0, imageUpload_1.compressImage)(originalName, buffer);
             const fileName = (0, imageUpload_1.generateS3Key)(userId, originalName);
             const filePath = `${aws_1.supabaseConfig.bucket}/${fileName}`;
-            console.log(`🔼 Uploading to Supabase: ${filePath}`);
             const { data, error } = await aws_1.default.storage
                 .from(aws_1.supabaseConfig.bucket)
                 .upload(fileName, compressed, {
@@ -55,55 +53,44 @@ class ImageService {
                 contentType: 'image/jpeg'
             });
             if (error) {
-                console.error('❌ Supabase upload error:', error);
                 throw error;
             }
             const { data: publicData } = aws_1.default.storage
                 .from(aws_1.supabaseConfig.bucket)
                 .getPublicUrl(fileName);
             const imageUrl = publicData.publicUrl;
-            console.log(`✅ Uploaded to Supabase: ${imageUrl}`);
             return imageUrl;
         }
         catch (error) {
-            console.error('❌ Image upload service error:', error);
             throw error;
         }
     }
     static async deleteFromS3(imageUrl) {
         try {
             if (!aws_1.supabaseConfig.url || !aws_1.supabaseConfig.serviceRoleKey) {
-                console.warn(`⚠️  Supabase not configured. Skipping deletion for: ${imageUrl}`);
                 return;
             }
             const urlParts = imageUrl.split('/');
             const fileName = urlParts[urlParts.length - 1];
             if (!fileName) {
-                console.warn(`⚠️  Could not extract file name from URL: ${imageUrl}`);
                 return;
             }
-            console.log(`🗑️  Deleting from Supabase: ${fileName}`);
             const { error } = await aws_1.default.storage
                 .from(aws_1.supabaseConfig.bucket)
                 .remove([fileName]);
             if (error) {
-                console.error('❌ Supabase delete error:', error);
                 throw error;
             }
-            console.log(`✅ Deleted from Supabase: ${fileName}`);
         }
         catch (error) {
-            console.error('❌ Image deletion service error:', error);
             throw error;
         }
     }
     static async getPresignedUrl(imageUrl, expiresIn = 3600) {
         try {
-            console.log(`🔐 Using public URL (valid indefinitely)`);
             return imageUrl;
         }
         catch (error) {
-            console.error('❌ Get presigned URL error:', error);
             throw error;
         }
     }

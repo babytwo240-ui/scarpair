@@ -30,6 +30,15 @@ exports.rateLimitConfig = {
             ip: `ratelimit:msg:ip:${ip}`
         })
     },
+    getConversations: {
+        windowMs: 60 * 1000,
+        maxPerUser: 30,
+        maxPerIP: 100,
+        keyGenerator: (userId, ip) => ({
+            user: `ratelimit:get_conv:${userId}`,
+            ip: `ratelimit:get_conv:ip:${ip}`
+        })
+    },
     getMessages: {
         windowMs: 60 * 1000,
         maxPerUser: 50,

@@ -24,7 +24,6 @@ const addPasswordToHistory = (currentPasswordHash, passwordHistory) => {
         return JSON.stringify(history);
     }
     catch (error) {
-        console.error('Error adding to password history:', error);
         return JSON.stringify([currentPasswordHash]);
     }
 };
@@ -45,7 +44,6 @@ const isPasswordInHistory = async (newPassword, passwordHistory) => {
         return false;
     }
     catch (error) {
-        console.error('Error checking password history:', error);
         return false;
     }
 };
@@ -59,7 +57,6 @@ const getPasswordHistoryInfo = (passwordHistory) => {
         return history.length;
     }
     catch (error) {
-        console.error('Error reading password history:', error);
         return 0;
     }
 };

@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+﻿import { Request, Response } from 'express';
 import * as userService from '../services/userService';
 import * as emailService from '../services/emailService';
 import { deleteUserWithCascade } from '../services/userDeletionService';
@@ -42,7 +42,6 @@ const getAllUsers = async (req: Request, res: Response): Promise<any> => {
       users: mappedUsers
     });
   } catch (error: any) {
-    console.error('Get all users error:', error);
     res.status(500).json({ error: 'Failed to fetch users' });
   }
 };
@@ -90,7 +89,6 @@ const getUserById = async (req: Request, res: Response): Promise<any> => {
       }
     });
   } catch (error: any) {
-    console.error('Get user by ID error:', error);
     res.status(500).json({ error: 'Failed to fetch user details' });
   }
 };
@@ -133,7 +131,6 @@ const verifyUser = async (req: Request, res: Response): Promise<any> => {
       }
     });
   } catch (error: any) {
-    console.error('Verify user error:', error);
     res.status(500).json({ error: 'Failed to update user verification status' });
   }
 };
@@ -171,7 +168,6 @@ const deleteUserAdmin = async (req: Request, res: Response): Promise<any> => {
       res.status(500).json({ error: result.message });
     }
   } catch (error: any) {
-    console.error('Delete user error:', error);
     res.status(500).json({ error: 'Failed to delete user' });
   }
 };
@@ -220,7 +216,6 @@ const verifyUserAccount = async (req: Request, res: Response): Promise<any> => {
       }
     });
   } catch (error: any) {
-    console.error('Verify user error:', error);
     res.status(500).json({ error: 'Failed to verify user' });
   }
 };
@@ -239,7 +234,6 @@ const getUserStatistics = (req: Request, res: Response): any => {
       timestamp: new Date().toISOString()
     });
   } catch (error: any) {
-    console.error('Get statistics error:', error);
     res.status(500).json({ error: 'Failed to get statistics' });
   }
 };
@@ -294,7 +288,6 @@ const deactivateUser = async (req: Request, res: Response): Promise<any> => {
       data: { userId, collectionsAffected: collections.length }
     });
   } catch (error: any) {
-    console.error('Error deactivating user:', error);
     res.status(500).json({ message: 'Error deactivating user', error: error.message });
   }
 };
@@ -334,7 +327,6 @@ const reactivateUser = async (req: Request, res: Response): Promise<any> => {
       data: { userId, status: 'active' }
     });
   } catch (error: any) {
-    console.error('Error reactivating user:', error);
     res.status(500).json({ message: 'Error reactivating user', error: error.message });
   }
 };
@@ -378,7 +370,6 @@ const createWasteCategory = async (req: Request, res: Response): Promise<any> =>
       data: category
     });
   } catch (error: any) {
-    console.error('Error creating waste category:', error);
     res.status(500).json({ message: 'Error creating waste category', error: error.message });
   }
 };
@@ -396,7 +387,6 @@ const getWasteCategories = async (req: Request, res: Response): Promise<any> => 
       data: categories
     });
   } catch (error: any) {
-    console.error('Error fetching categories:', error);
     res.status(500).json({ message: 'Error fetching categories', error: error.message });
   }
 };
@@ -444,7 +434,6 @@ const updateWasteCategory = async (req: Request, res: Response): Promise<any> =>
       data: category
     });
   } catch (error: any) {
-    console.error('Error updating waste category:', error);
     res.status(500).json({ message: 'Error updating waste category', error: error.message });
   }
 };
@@ -479,7 +468,6 @@ const deleteWasteCategory = async (req: Request, res: Response): Promise<any> =>
       data: { categoryId, isActive: false }
     });
   } catch (error: any) {
-    console.error('Error deleting waste category:', error);
     res.status(500).json({ message: 'Error deleting waste category', error: error.message });
   }
 };
@@ -524,7 +512,6 @@ const getSystemLogs = async (req: Request, res: Response): Promise<any> => {
       }
     });
   } catch (error: any) {
-    console.error('Error fetching system logs:', error);
     res.status(500).json({ message: 'Error fetching system logs', error: error.message });
   }
 };
@@ -564,7 +551,6 @@ const getLogsByAction = async (req: Request, res: Response): Promise<any> => {
       }
     });
   } catch (error: any) {
-    console.error('Error fetching action logs:', error);
     res.status(500).json({ message: 'Error fetching action logs', error: error.message });
   }
 };
@@ -601,7 +587,6 @@ const getAllUserRatingsAdmin = async (req: Request, res: Response): Promise<any>
       }
     });
   } catch (error: any) {
-    console.error('Error fetching user ratings:', error);
     res.status(500).json({ message: 'Error fetching user ratings', error: error.message });
   }
 };
@@ -638,7 +623,6 @@ const getAllPostRatingsAdmin = async (req: Request, res: Response): Promise<any>
       }
     });
   } catch (error: any) {
-    console.error('Error fetching post ratings:', error);
     res.status(500).json({ message: 'Error fetching post ratings', error: error.message });
   }
 };
@@ -680,7 +664,6 @@ const getAllReportsAdmin = async (req: Request, res: Response): Promise<any> => 
       }
     });
   } catch (error: any) {
-    console.error('Error fetching reports:', error);
     res.status(500).json({ message: 'Error fetching reports', error: error.message });
   }
 };
@@ -764,7 +747,6 @@ const seedTestData = async (req: Request, res: Response): Promise<any> => {
       }
     });
   } catch (error: any) {
-    console.error('Error seeding test data:', error);
     res.status(500).json({ error: 'Failed to seed test data', message: error.message });
   }
 };
@@ -789,3 +771,4 @@ export {
   getAllReportsAdmin,
   seedTestData
 };
+

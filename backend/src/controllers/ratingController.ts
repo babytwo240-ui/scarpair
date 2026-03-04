@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+﻿import { Request, Response } from 'express';
 import { sequelize } from '../models';
 
 const getPostRating = async (req: Request, res: Response): Promise<any> => {
@@ -51,7 +51,6 @@ const getPostRating = async (req: Request, res: Response): Promise<any> => {
       }
     });
   } catch (error: any) {
-    console.error('Error fetching post rating:', error);
     res.status(500).json({ message: 'Error fetching post rating', error: error.message });
   }
 };
@@ -109,7 +108,6 @@ const getUserRating = async (req: Request, res: Response): Promise<any> => {
       }
     });
   } catch (error: any) {
-    console.error('Error fetching user rating:', error);
     res.status(500).json({ message: 'Error fetching user rating', error: error.message });
   }
 };
@@ -146,7 +144,6 @@ const getAllUserRatings = async (req: Request, res: Response): Promise<any> => {
       }
     });
   } catch (error: any) {
-    console.error('Error fetching user ratings:', error);
     res.status(500).json({ message: 'Error fetching user ratings', error: error.message });
   }
 };
@@ -183,7 +180,6 @@ const getAllPostRatings = async (req: Request, res: Response): Promise<any> => {
       }
     });
   } catch (error: any) {
-    console.error('Error fetching post ratings:', error);
     res.status(500).json({ message: 'Error fetching post ratings', error: error.message });
   }
 };
@@ -194,3 +190,4 @@ export {
   getAllUserRatings,
   getAllPostRatings
 };
+

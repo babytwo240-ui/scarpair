@@ -1,18 +1,49 @@
-import apiClient from './api';
+﻿import apiClient from './api';
 
 const messageService = {
+  // Cache management
+  _cache: {
+    conversations: null,
+    conversationTimestamp: 0,
+  },
+  
+  CACHE_DURATION: 5 * 60 * 1000, // 5 minutes
+
+  clearConversationsCache() {
+    this._cache.conversations = null;
+    this._cache.conversationTimestamp = 0;
+  },
+
+  isCacheValid() {
+    return (
+      this._cache.conversations &&
+      Date.now() - this._cache.conversationTimestamp < this.CACHE_DURATION
+    );
+  },
+
   // Start conversation
   startConversation: async (participantUserId, wastePostId) => {
     const response = await apiClient.post('/conversations', {
       participantUserId,
       wastePostId,
     });
+    // Clear cache after creating conversation
+    messageService.clearConversationsCache();
     return response.data;
   },
 
-  // Get all conversations
-  getConversations: async () => {
+  // Get all conversations (with caching)
+  getConversations: async (ignoreCache = false) => {
+    // Return cached data if valid and not ignoring cache
+    if (!ignoreCache && messageService.isCacheValid()) {
+      return messageService._cache.conversations;
+    }
     const response = await apiClient.get('/conversations');
+    
+    // Update cache
+    messageService._cache.conversations = response.data;
+    messageService._cache.conversationTimestamp = Date.now();
+    
     return response.data;
   },
 
@@ -93,3 +124,4 @@ const messageService = {
 };
 
 export default messageService;
+

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import wastePostService from '../services/wastePostService';
@@ -38,12 +38,10 @@ const WastePostDetailsPage = () => {
             setCollection(collData.data || collData);
           }
         } catch (collErr) {
-          console.warn('Could not load collection details:', collErr);
           // This is non-critical, continue without collection
         }
       }
     } catch (err) {
-      console.error('Failed to load post:', err);
       setError(err.message || 'Failed to load waste post details');
     } finally {
       setLoading(false);
@@ -71,7 +69,6 @@ const WastePostDetailsPage = () => {
         navigate(`/messages/${conversationId}`);
       }
     } catch (err) {
-      console.error('Failed to start conversation:', err);
       setError(err.message || 'Failed to open conversation with business');
     } finally {
       setMessageLoading(false);
@@ -126,7 +123,7 @@ const WastePostDetailsPage = () => {
           marginBottom: '20px',
         }}
       >
-        ← Back
+        â† Back
       </button>
 
       {error && (
@@ -192,10 +189,10 @@ const WastePostDetailsPage = () => {
                 marginLeft: '8px'
               }}>
                 {post.status === 'in-collection' 
-                  ? '🔄 IN COLLECTION' 
+                  ? 'ðŸ”„ IN COLLECTION' 
                   : post.status === 'collected'
-                  ? '✅ COLLECTED'
-                  : '✨ AVAILABLE'}
+                  ? 'âœ… COLLECTED'
+                  : 'âœ¨ AVAILABLE'}
               </span>
             </p>
             {post.business && post.business.id && (
@@ -240,7 +237,7 @@ const WastePostDetailsPage = () => {
                 opacity: messageLoading ? 0.7 : 1,
               }}
             >
-              {messageLoading ? 'Opening...' : '💬 Message Business'}
+              {messageLoading ? 'Opening...' : 'ðŸ’¬ Message Business'}
             </button>
             <button
               onClick={handleRequestCollection}
@@ -258,10 +255,10 @@ const WastePostDetailsPage = () => {
               }}
             >
               {post.status === 'in-collection' 
-                ? '🔄 In Collection' 
+                ? 'ðŸ”„ In Collection' 
                 : post.status === 'collected'
-                ? '✅ Already Collected'
-                : '🚚 Request Collection'}
+                ? 'âœ… Already Collected'
+                : 'ðŸšš Request Collection'}
             </button>
           </div>
         </div>
@@ -296,7 +293,7 @@ const WastePostDetailsPage = () => {
       
       {post && !collection && post.collectionId && (
         <div style={{ marginTop: '30px', backgroundColor: '#fff3cd', padding: '15px', borderRadius: '8px' }}>
-          <p style={{ color: '#856404', margin: 0 }}>ℹ️ Feedback form available after collection details are loaded.</p>
+          <p style={{ color: '#856404', margin: 0 }}>â„¹ï¸ Feedback form available after collection details are loaded.</p>
         </div>
       )}
     </div>
@@ -304,3 +301,4 @@ const WastePostDetailsPage = () => {
 };
 
 export default WastePostDetailsPage;
+

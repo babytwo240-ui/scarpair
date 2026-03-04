@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import userService from '../services/userService';
 
 const DeleteAccountModal = ({ isOpen, onClose, onSuccess }) => {
@@ -21,7 +21,6 @@ const DeleteAccountModal = ({ isOpen, onClose, onSuccess }) => {
       alert('Account deleted successfully. You will be logged out.');
       onSuccess();
     } catch (err) {
-      console.error('Delete account error:', err);
       setError(err.message || 'Failed to delete account');
     } finally {
       setLoading(false);
@@ -77,3 +76,4 @@ const DeleteAccountModal = ({ isOpen, onClose, onSuccess }) => {
 };
 
 export default DeleteAccountModal;
+

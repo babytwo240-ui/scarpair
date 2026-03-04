@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+﻿import { Request, Response } from 'express';
 import { Message, Conversation, User, Notification } from '../models';
 import redisClient from '../config/redis';
 import { Op } from 'sequelize';
@@ -63,6 +63,17 @@ export class MessageController {
         createdAt: message.createdAt
       });
 
+      // Notify both participants that conversation list should be updated
+      io.to(`user:${senderId}`).emit('conversation:updated', {
+        conversationId,
+        lastMessageAt: new Date()
+      });
+
+      io.to(`user:${recipientId}`).emit('conversation:updated', {
+        conversationId,
+        lastMessageAt: new Date()
+      });
+
       io.to(`user:${recipientId}`).emit('notification:new', {
         id: message.id,
         type: 'MESSAGE',
@@ -85,7 +96,6 @@ export class MessageController {
         }
       });
     } catch (error) {
-      console.error('Send message error:', error);
       res.status(500).json({ error: 'Failed to send message' });
     }
   }
@@ -114,7 +124,6 @@ export class MessageController {
           fromCache = true;
         }
       } catch (error) {
-        console.warn('Cache miss, querying database');
       }
 
       if (!fromCache) {
@@ -140,7 +149,6 @@ export class MessageController {
           }
           await redisClient.expire(cacheKey, 24 * 60 * 60);
         } catch (error) {
-          console.warn('Cache write failed');
         }
       }
 
@@ -159,7 +167,6 @@ export class MessageController {
         fromCache
       });
     } catch (error) {
-      console.error('Get messages error:', error);
       res.status(500).json({ error: 'Failed to retrieve messages' });
     }
   }
@@ -195,7 +202,6 @@ export class MessageController {
         data: message
       });
     } catch (error) {
-      console.error('Edit message error:', error);
       res.status(500).json({ error: 'Failed to update message' });
     }
   }
@@ -225,10 +231,10 @@ export class MessageController {
         message: 'Message deleted'
       });
     } catch (error) {
-      console.error('Delete message error:', error);
       res.status(500).json({ error: 'Failed to delete message' });
     }
   }
 }
 
 export default MessageController;
+

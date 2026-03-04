@@ -83,7 +83,6 @@ const deleteUserWithCascade = async (userId, userType, sequelizeInstance) => {
     }
     catch (error) {
         await transaction.rollback();
-        console.error('User deletion service error:', error);
         throw {
             success: false,
             message: `Failed to delete user: ${error.message}`,

@@ -118,7 +118,6 @@ const requestCollection = async (req, res) => {
                 recyclerId
             }
         });
-        console.log(`[UNIQUE_TX] Request count for recycler ${recyclerId} on post ${postId}: ${totalRequests}`);
         if (totalRequests >= 4) {
             return res.status(409).json({
                 message: 'You have reached the maximum number of requests for this post (4 requests)',
@@ -133,11 +132,9 @@ const requestCollection = async (req, res) => {
                 status: 'cancelled'
             }
         });
-        console.log(`[UNIQUE_TX] Cancellation count for recycler ${recyclerId} on post ${postId}: ${cancellationCount}`);
         let cancelLocked = false;
         if (cancellationCount >= 3) {
             cancelLocked = true;
-            console.log(`[UNIQUE_TX] Recycler ${recyclerId} has hit cancellation limit (3). Cancel button will be locked.`);
         }
         // 4. Check rejection count for this business on this recycler-post combo
         const rejectionCount = await models_1.Collection.count({
@@ -148,11 +145,9 @@ const requestCollection = async (req, res) => {
                 status: 'rejected'
             }
         });
-        console.log(`[UNIQUE_TX] Rejection count for recycler ${recyclerId} from business ${post.businessId} on post ${postId}: ${rejectionCount}`);
         let forceApproval = false;
         if (rejectionCount >= 4) {
             forceApproval = true;
-            console.log(`[UNIQUE_TX] Business ${post.businessId} has rejected recycler ${recyclerId} 4 times. Next request will force approval.`);
         }
         // 5. Generate transaction code: COLL-YYYYMMDD-NNN
         const nowUtc = (0, philippineTimeUtil_1.getNowUtc)();
@@ -172,21 +167,14 @@ const requestCollection = async (req, res) => {
         });
         const sequenceNum = String(countToday + 1).padStart(3, '0');
         const transactionCode = `COLL-${dateStr}-${sequenceNum}`;
-        console.log(`[UNIQUE_TX] Generated transaction code: ${transactionCode}`);
         // 6. Parse scheduled date if provided
         let collectionScheduledDate = null;
         let collectionScheduledDateISO = null;
         if (scheduledDate) {
             collectionScheduledDate = (0, philippineTimeUtil_1.parseUserInputAsManillaTime)(scheduledDate);
             collectionScheduledDateISO = collectionScheduledDate.toISOString();
-            console.log('🔍 DEBUG scheduledDate:');
-            console.log('   User input:', scheduledDate);
-            console.log('   Parsed as UTC:', collectionScheduledDate.toISOString());
-            console.log('   Storing as ISO string:', collectionScheduledDateISO);
         }
         const nowUtcISO = nowUtc.toISOString();
-        console.log('🔍 DEBUG requestDate (NOW):');
-        console.log('   UTC time:', nowUtcISO);
         // 7. Determine if this is a retry
         const isRetry = totalRequests > 0;
         const previousCollectionId = null; // Will be set if explicitly needed
@@ -204,13 +192,6 @@ const requestCollection = async (req, res) => {
             isRetry,
             previousCollectionId
         });
-        console.log('🔍 DEBUG After collection.create():');
-        console.log('   requestDate stored:', collection.requestDate);
-        console.log('   scheduledDate stored:', collection.scheduledDate);
-        console.log('   transactionCode stored:', collection.transactionCode);
-        console.log('   cancellationCount:', collection.cancellationCount);
-        console.log('   status:', collection.status);
-        console.log(`[UNIQUE_TX] Collection ${collection.id} created with transaction code ${transactionCode}, cancel_locked=${cancelLocked}, force_approved=${forceApproval}`);
         try {
             const recyclerInfo = await models_1.User.findByPk(recyclerId);
             const messageText = forceApproval
@@ -225,7 +206,7 @@ const requestCollection = async (req, res) => {
             });
         }
         catch (notifError) {
-            console.error('⚠️ Failed to create notification:', notifError);
+            // Notification creation failed, but don't fail the whole request
         }
         const collectionResponse = {
             id: collection.id,
@@ -250,7 +231,6 @@ const requestCollection = async (req, res) => {
         res.status(201).send(responseBody);
     }
     catch (error) {
-        console.error('❌ Error in requestCollection:', error);
         res.status(500).json({ message: 'Error requesting collection', error: error.message });
     }
 };
@@ -519,8 +499,6 @@ const getUserCollections = async (req, res) => {
         if (status) {
             whereClause.status = status;
         }
-        console.log('📥 getUserCollections called for user:', userId);
-        console.log('   Query params:', { status, page: pageNum, limit: limitNum });
         const { count, rows } = await models_1.Collection.findAndCountAll({
             where: whereClause,
             include: [
@@ -544,7 +522,6 @@ const getUserCollections = async (req, res) => {
             offset: offset,
             order: [['createdAt', 'DESC']]
         });
-        console.log('✅ Query successful. Found', count, 'total collections');
         const serializedRows = rows.map((collection) => ({
             id: collection.id,
             postId: collection.postId,
@@ -596,11 +573,8 @@ const getUserCollections = async (req, res) => {
             data: serializedRows
         });
         res.status(200).send(responseBody);
-        console.log('✅ Response sent successfully');
     }
     catch (error) {
-        console.error('❌ Error in getUserCollections:', error.message);
-        console.error('   Stack:', error.stack);
         res.status(500).json({ message: 'Error fetching user collections', error: error.message });
     }
 };
@@ -663,7 +637,6 @@ const approveCollectionRequest = async (req, res) => {
         res.status(200).send(responseBody);
     }
     catch (error) {
-        console.error('❌ Error in approveCollectionRequest:', error);
         res.status(500).json({ message: 'Error approving collection request', error: error.message });
     }
 };
@@ -687,12 +660,10 @@ const rejectCollectionRequest = async (req, res) => {
         }
         // ===== UNIQUE TRANSACTION SYSTEM: Update rejection count =====
         const newRejectionCount = (collection.rejectionCount || 0) + 1;
-        console.log(`[UNIQUE_TX] Incrementing rejectionCount from ${collection.rejectionCount} to ${newRejectionCount} for recycler ${collection.recyclerId}`);
         // Update collection status to rejected and increment rejection count
         collection.status = 'rejected';
         collection.rejectionCount = newRejectionCount;
         await collection.save();
-        console.log(`[UNIQUE_TX] Collection ${collection.id} rejected. Rejection count is now ${collection.rejectionCount}`);
         // Don't modify the post - a rejected pending request doesn't affect post availability
         // The post should remain available for other recyclers to request
         const collectionResponse = {
@@ -715,7 +686,6 @@ const rejectCollectionRequest = async (req, res) => {
         res.status(200).send(responseBody);
     }
     catch (error) {
-        console.error('❌ Error in rejectCollectionRequest:', error);
         res.status(500).json({ message: 'Error rejecting collection request', error: error.message });
     }
 };
@@ -726,39 +696,28 @@ const cancelApprovedCollection = async (req, res) => {
         const { cancellationReason } = req.body;
         const userId = req.user?.id;
         const userType = req.user?.type;
-        console.log('🔴 [CANCEL] Request received:');
-        console.log('   Collection ID:', id);
-        console.log('   User ID:', userId, 'Type:', userType);
-        console.log('   Cancellation reason:', cancellationReason);
         const collection = await models_1.Collection.findByPk(id);
         if (!collection) {
             return res.status(404).json({ message: 'Collection not found' });
         }
-        console.log('   Current status:', collection.status);
-        console.log('   Business ID:', collection.businessId, '| Recycler ID:', collection.recyclerId);
         // Allow both business owner and recycler to cancel
         const isBusinessOwner = collection.businessId === userId;
         const isRecycler = collection.recyclerId === userId;
-        console.log('   isBusinessOwner:', isBusinessOwner, '| isRecycler:', isRecycler);
         if (!isBusinessOwner && !isRecycler) {
-            console.log('❌ [CANCEL] Unauthorized: User is neither business owner nor recycler');
             return res.status(403).json({ message: 'Only the business owner or recycler can cancel this collection' });
         }
         if (collection.status !== 'pending' && collection.status !== 'approved' && collection.status !== 'scheduled') {
-            console.log(`❌ [CANCEL] Invalid status: Cannot cancel collection with status '${collection.status}'`);
             return res.status(400).json({ message: `Cannot cancel collection with status '${collection.status}'` });
         }
         // ===== UNIQUE TRANSACTION SYSTEM: Handle cancellation logic =====
         if (isRecycler) {
             // Check if recycler has already used 3 cancellations
             if ((collection.cancellationCount || 0) >= 3) {
-                console.log(`❌ [CANCEL] Recycler has reached max cancellations (${collection.cancellationCount}/3)`);
                 return res.status(400).json({ message: 'You have used all 3 allowed cancellations for this post. You must proceed with this collection.' });
             }
             // Recycler cancelling: increment cancellation count
             const newCancellationCount = (collection.cancellationCount || 0) + 1;
             collection.cancellationCount = newCancellationCount;
-            console.log(`[UNIQUE_TX] Recycler ${userId} cancelling. Cancellation count: ${collection.cancellationCount}`);
         }
         else if (isBusinessOwner) {
             // Business cancelling: store the cancellation reason
@@ -766,12 +725,10 @@ const cancelApprovedCollection = async (req, res) => {
                 return res.status(400).json({ message: 'Valid cancellation reason is required for business cancellation' });
             }
             collection.cancellationReason = cancellationReason;
-            console.log(`[UNIQUE_TX] Business cancelling with reason: ${cancellationReason}`);
         }
         // Update collection status to cancelled
         collection.status = 'cancelled';
         await collection.save();
-        console.log('✅ [CANCEL] Collection status updated to CANCELLED');
         // Also reset the WastePost collectionStatus to ACTIVE
         const wastePost = await models_1.WastePost.findByPk(collection.postId);
         if (wastePost) {
@@ -779,7 +736,6 @@ const cancelApprovedCollection = async (req, res) => {
             wastePost.approvedRecyclerId = null;
             wastePost.pickupDeadline = null;
             await wastePost.save();
-            console.log('✅ [CANCEL] WastePost reset to ACTIVE');
         }
         // Notify the OTHER party
         let notificationUserId;
@@ -795,13 +751,11 @@ const cancelApprovedCollection = async (req, res) => {
             };
             const reasonText = cancellationReason ? reasonMap[cancellationReason] || cancellationReason : 'a reason';
             notificationMessage = `The business owner has cancelled the approved collection for "${wastePost?.title}". Reason: ${reasonText}. The waste post has been returned to the marketplace.`;
-            console.log('📧 [CANCEL] Sending notification to RECYCLER:', notificationUserId);
         }
         else {
             // Send notification to business
             notificationUserId = collection.businessId;
             notificationMessage = `The recycler has cancelled the approved collection for "${wastePost?.title}". The waste post has been returned to the marketplace.`;
-            console.log('📧 [CANCEL] Sending notification to BUSINESS:', notificationUserId);
         }
         if (notificationUserId && wastePost) {
             await models_1.Notification.create({
@@ -811,9 +765,7 @@ const cancelApprovedCollection = async (req, res) => {
                 message: notificationMessage,
                 relatedId: collection.id
             });
-            console.log('✅ [CANCEL] Notification created');
         }
-        console.log('✅ [CANCEL] Cancel request completed successfully');
         res.status(200).json({
             message: 'Collection cancelled successfully',
             data: {
@@ -825,7 +777,6 @@ const cancelApprovedCollection = async (req, res) => {
         });
     }
     catch (error) {
-        console.error('❌ [CANCEL] Error in cancelApprovedCollection:', error);
         res.status(500).json({ message: 'Error cancelling collection', error: error.message });
     }
 };

@@ -81,11 +81,9 @@ const getUserProfile = async (req, res) => {
             message: 'Profile retrieved successfully',
             user: profileData
         });
-        console.log('Get profile response:', responseBody.substring(0, 100));
         res.status(200).send(responseBody);
     }
     catch (error) {
-        console.error('Get profile error:', error.message || error);
         res.setHeader('Content-Type', 'application/json');
         res.status(500).json({ error: 'Failed to get profile' });
     }
@@ -140,11 +138,9 @@ const updateUserProfile = async (req, res) => {
             message: 'Profile updated successfully',
             user: userResponse
         });
-        console.log('Update profile response:', responseBody.substring(0, 100));
         res.status(200).send(responseBody);
     }
     catch (error) {
-        console.error('Update profile error:', error.message || error);
         res.setHeader('Content-Type', 'application/json');
         res.status(500).json({ error: 'Failed to update profile' });
     }
@@ -196,11 +192,9 @@ const changePassword = async (req, res) => {
         const responseBody = JSON.stringify({
             message: 'Password changed successfully'
         });
-        console.log('Change password response:', responseBody.substring(0, 100));
         res.status(200).send(responseBody);
     }
     catch (error) {
-        console.error('Change password error:', error.message || error);
         res.setHeader('Content-Type', 'application/json');
         res.status(500).json({ error: 'Failed to change password' });
     }
@@ -246,11 +240,9 @@ const deleteUserAccount = async (req, res) => {
         const responseBody = JSON.stringify({
             message: 'Account deleted successfully'
         });
-        console.log('Delete account response:', responseBody.substring(0, 100));
         res.status(200).send(responseBody);
     }
     catch (error) {
-        console.error('Delete account error:', error.message || error);
         res.setHeader('Content-Type', 'application/json');
         res.status(500).json({ error: 'Failed to delete account' });
     }

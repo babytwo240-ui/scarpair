@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+﻿import { Request, Response } from 'express';
 import { sequelize } from '../models';
 import { validateReportReason, shouldAutoApprove, getPointDeduction } from '../utils/reportValidator';
 import { logReportSubmitted, logReportApproved, logReportRejected } from '../utils/systemLogger';
@@ -64,7 +64,6 @@ const submitReport = async (req: Request, res: Response): Promise<any> => {
       }
     });
   } catch (error: any) {
-    console.error('Error submitting report:', error);
     res.status(500).json({ message: 'Error submitting report', error: error.message });
   }
 };
@@ -84,7 +83,6 @@ const processReportApproval = async (reportedUserId: number, reportId: number) =
       await userRating.save();
     }
   } catch (error) {
-    console.error('Error processing report approval:', error);
   }
 };
 
@@ -129,7 +127,6 @@ const getPendingReports = async (req: Request, res: Response): Promise<any> => {
       }
     });
   } catch (error: any) {
-    console.error('Error fetching pending reports:', error);
     res.status(500).json({ message: 'Error fetching pending reports', error: error.message });
   }
 };
@@ -177,7 +174,6 @@ const approveReport = async (req: Request, res: Response): Promise<any> => {
       }
     });
   } catch (error: any) {
-    console.error('Error approving report:', error);
     res.status(500).json({ message: 'Error approving report', error: error.message });
   }
 };
@@ -218,7 +214,6 @@ const rejectReport = async (req: Request, res: Response): Promise<any> => {
       }
     });
   } catch (error: any) {
-    console.error('Error rejecting report:', error);
     res.status(500).json({ message: 'Error rejecting report', error: error.message });
   }
 };
@@ -272,7 +267,6 @@ const getAllReports = async (req: Request, res: Response): Promise<any> => {
       }
     });
   } catch (error: any) {
-    console.error('Error fetching reports:', error);
     res.status(500).json({ message: 'Error fetching reports', error: error.message });
   }
 };
@@ -315,7 +309,6 @@ const getUserReports = async (req: Request, res: Response): Promise<any> => {
       }
     });
   } catch (error: any) {
-    console.error('Error fetching user reports:', error);
     res.status(500).json({ message: 'Error fetching user reports', error: error.message });
   }
 };
@@ -328,3 +321,4 @@ export {
   getAllReports,
   getUserReports
 };
+

@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
+﻿import React, { createContext, useState, useContext, useEffect } from 'react';
 import authService from '../services/authService';
 import apiClient from '../services/api';
 
@@ -97,7 +97,7 @@ export const AuthProvider = ({ children }) => {
     try {
       const token = localStorage.getItem('token');
       
-      // ✅ Call backend logout endpoint to blacklist token
+      // âœ… Call backend logout endpoint to blacklist token
       if (token) {
         try {
           await apiClient.post('/auth/logout', {}, {
@@ -107,11 +107,10 @@ export const AuthProvider = ({ children }) => {
           });
         } catch (error) {
           // If logout endpoint fails, still clear client state
-          console.error('Backend logout failed:', error);
         }
       }
 
-      // ✅ Clear all local state
+      // âœ… Clear all local state
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       localStorage.removeItem('refreshToken');
@@ -120,7 +119,6 @@ export const AuthProvider = ({ children }) => {
       setToken(null);
       setError(null);
     } catch (error) {
-      console.error('Logout error:', error);
       // Still clear state even if error
       localStorage.removeItem('token');
       localStorage.removeItem('user');
@@ -173,3 +171,4 @@ export const useAuth = () => {
   }
   return context;
 };
+

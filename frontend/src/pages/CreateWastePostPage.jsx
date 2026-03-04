@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import wastePostService from '../services/wastePostService';
@@ -42,7 +42,6 @@ const CreateWastePostPage = () => {
         setFormData((prev) => ({ ...prev, wasteType: data.data[0].name.toLowerCase() }));
       }
     } catch (err) {
-      console.error('Failed to fetch categories:', err);
     }
   };
 
@@ -444,3 +443,4 @@ const CreateWastePostPage = () => {
 };
 
 export default CreateWastePostPage;
+

@@ -16,10 +16,8 @@ const blacklistToken = async (token, expiryTime = 7 * 24 * 60 * 60) => {
     try {
         // Store token in Redis with expiry to match JWT expiry
         await redis_1.default.setex(key, expiryTime, 'true');
-        console.log(`✅ Token blacklisted (expires in ${expiryTime}s)`);
     }
     catch (error) {
-        console.error('❌ Error blacklisting token:', error);
         // Don't crash - fallback to normal operation
         throw error;
     }
@@ -37,7 +35,6 @@ const isTokenBlacklisted = async (token) => {
         return exists === 1;
     }
     catch (error) {
-        console.error('❌ Error checking token blacklist:', error);
         // If Redis fails, don't block user - fallback to accepting token
         return false;
     }
@@ -51,10 +48,8 @@ const removeTokenFromBlacklist = async (token) => {
     const key = `blacklist:${token}`;
     try {
         await redis_1.default.del(key);
-        console.log(`✅ Token removed from blacklist`);
     }
     catch (error) {
-        console.error('❌ Error removing token from blacklist:', error);
     }
 };
 exports.removeTokenFromBlacklist = removeTokenFromBlacklist;

@@ -1,4 +1,4 @@
-import apiClient from './api';
+﻿import apiClient from './api';
 
 const imageService = {
   // Upload image
@@ -74,7 +74,6 @@ const imageService = {
       const compressedFile = new File([compressedBlob], file.name, { type: 'image/jpeg' });
       return await imageService.uploadImage(compressedFile);
     } catch (error) {
-      console.error('Error compressing image:', error);
       // Fallback to original file
       return await imageService.uploadImage(file);
     }
@@ -82,3 +81,4 @@ const imageService = {
 };
 
 export default imageService;
+

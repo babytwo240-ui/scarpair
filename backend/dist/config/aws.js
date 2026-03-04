@@ -14,14 +14,8 @@ function validateAwsConfig() {
     const requiredVars = ['SUPABASE_URL', 'SUPABASE_ANON_KEY', 'SUPABASE_SERVICE_ROLE_KEY'];
     const missingVars = requiredVars.filter(v => !process.env[v]);
     if (missingVars.length > 0) {
-        console.warn(`⚠️  Missing Supabase environment variables: ${missingVars.join(', ')}`);
-        console.warn('Image uploads will be disabled. Configure these variables:');
-        console.warn('   SUPABASE_URL');
-        console.warn('   SUPABASE_ANON_KEY');
-        console.warn('   SUPABASE_SERVICE_ROLE_KEY');
     }
     else {
-        console.log('✅ Supabase Storage configured and ready for image uploads');
     }
 }
 exports.default = exports.supabaseClient;

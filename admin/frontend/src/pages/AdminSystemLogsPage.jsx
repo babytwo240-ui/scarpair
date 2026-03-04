@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Box,
@@ -50,7 +50,6 @@ const AdminSystemLogsPage = () => {
       setLogs(Array.isArray(data.data) ? data.data : []);
     } catch (err) {
       setError(err.message || 'Failed to fetch logs');
-      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -159,3 +158,4 @@ const AdminSystemLogsPage = () => {
 };
 
 export default AdminSystemLogsPage;
+

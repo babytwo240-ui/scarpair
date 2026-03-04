@@ -1,4 +1,4 @@
-import { calculateUnlockTime } from '../utils/securityUtil';
+﻿import { calculateUnlockTime } from '../utils/securityUtil';
 import { User, sequelize } from '../models';
 import bcryptjs from 'bcryptjs';
 import { addPasswordToHistory, isPasswordInHistory } from '../utils/passwordSecurityUtil';
@@ -215,7 +215,6 @@ const incrementLoginAttempts = async (email: string, type: 'business' | 'recycle
       { where: { email, type } }
     );
   } catch (error) {
-    console.error('Error incrementing login attempts:', error);
   }
 };
 const resetLoginAttempts = async (email: string, type: 'business' | 'recycler'): Promise<void> => {
@@ -225,7 +224,6 @@ const resetLoginAttempts = async (email: string, type: 'business' | 'recycler'):
       { where: { email, type } }
     );
   } catch (error) {
-    console.error('Error resetting login attempts:', error);
   }
 };
 const lockUserAccount = async (email: string, type: 'business' | 'recycler'): Promise<void> => {
@@ -235,7 +233,6 @@ const lockUserAccount = async (email: string, type: 'business' | 'recycler'): Pr
       { where: { email, type } }
     );
   } catch (error) {
-    console.error('Error locking account:', error);
   }
 };
 const setPasswordResetToken = async (
@@ -250,7 +247,6 @@ const setPasswordResetToken = async (
       { where: { email, type } }
     );
   } catch (error) {
-    console.error('Error setting reset token:', error);
   }
 };
 
@@ -281,10 +277,8 @@ const updateUserPassword = async (email: string, type: 'business' | 'recycler', 
     try {
       await redisClient.del(`pwd_reset:${email}`);
     } catch (error) {
-      console.error('Error clearing Redis token:', error);
     }
   } catch (error) {
-    console.error('Error updating password:', error);
   }
 };
 
@@ -325,7 +319,6 @@ const deleteUserAccount = async (email: string, type: 'business' | 'recycler'): 
     const user = await User.findOne({ where: { email, type } });
     
     if (!user) {
-      console.error('User not found for deletion:', email);
       return false;
     }
 
@@ -334,14 +327,11 @@ const deleteUserAccount = async (email: string, type: 'business' | 'recycler'): 
     const result = await deleteUserWithCascade(user.id, type, sequelize);
     
     if (result.success) {
-      console.log('User deleted successfully with cascade:', result.message);
       return true;
     } else {
-      console.error('User deletion failed:', result.message);
       return false;
     }
   } catch (error) {
-    console.error('Error deleting user:', error);
     return false;
   }
 };
@@ -379,7 +369,6 @@ const validateNewPassword = async (
 
     return { valid: true };
   } catch (error: any) {
-    console.error('Error validating password:', error);
     return { valid: false, error: 'Password validation failed' };
   }
 };
@@ -412,7 +401,6 @@ const validateResetPassword = async (
 
     return { valid: true };
   } catch (error: any) {
-    console.error('Error validating reset password:', error);
     return { valid: false, error: 'Password validation failed' };
   }
 };
@@ -438,3 +426,4 @@ export {
   validateResetPassword
 };
 export type { BusinessData, RecyclerData, UserResult };
+

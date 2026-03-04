@@ -3,7 +3,7 @@ module.exports = {
     try {
       const tableExists = await queryInterface.tableExists('password_audits');
       if (tableExists) {
-        console.log('⏭️  Table "password_audits" already exists, skipping...');
+
         return;
       }
 
@@ -82,9 +82,7 @@ module.exports = {
   down: async (queryInterface, Sequelize) => {
     try {
       await queryInterface.dropTable('password_audits');
-      console.log('✓ Dropped password_audits table');
     } catch (error) {
-      console.error('Migration rollback error:', error);
       throw error;
     }
   }

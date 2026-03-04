@@ -63,7 +63,6 @@ class ConversationController {
             });
         }
         catch (error) {
-            console.error('Get conversations error:', error);
             res.status(500).json({ error: 'Failed to retrieve conversations' });
         }
     }
@@ -152,7 +151,6 @@ class ConversationController {
             });
         }
         catch (error) {
-            console.error('Start conversation error:', error);
             res.status(500).json({ error: 'Failed to start conversation' });
         }
     }
@@ -194,7 +192,6 @@ class ConversationController {
             });
         }
         catch (error) {
-            console.error('Get conversation error:', error);
             res.status(500).json({ error: 'Failed to retrieve conversation' });
         }
     }
@@ -221,7 +218,6 @@ class ConversationController {
             });
         }
         catch (error) {
-            console.error('Delete conversation error:', error);
             res.status(500).json({ error: 'Failed to delete conversation' });
         }
     }

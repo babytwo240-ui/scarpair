@@ -18,10 +18,8 @@ module.exports = {
       `, { transaction });
 
       await transaction.commit();
-      console.log('✅ Foreign key constraint updated to RESTRICT cascade delete');
     } catch (error) {
       await transaction.rollback();
-      console.error('❌ Error updating foreign key constraint:', error);
       throw error;
     }
   },

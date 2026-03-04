@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import feedbackService from '../services/feedbackService';
 import '../styles/FeedbackForm.css';
@@ -72,7 +72,6 @@ const FeedbackForm = ({ collectionId, business, recycler, onSubmitSuccess }) => 
         onSubmitSuccess();
       }
     } catch (err) {
-      console.error('Feedback submission error:', err);
       setError(err.message || 'Error submitting feedback. Please try again.');
     } finally {
       setIsSubmitting(false);
@@ -98,7 +97,7 @@ const FeedbackForm = ({ collectionId, business, recycler, onSubmitSuccess }) => 
                 onClick={() => setRating(star)}
                 title={`${star} star${star !== 1 ? 's' : ''}`}
               >
-                ★
+                â˜…
               </button>
             ))}
           </div>
@@ -131,3 +130,4 @@ const FeedbackForm = ({ collectionId, business, recycler, onSubmitSuccess }) => 
 };
 
 export default FeedbackForm;
+

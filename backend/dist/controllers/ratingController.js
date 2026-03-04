@@ -47,7 +47,6 @@ const getPostRating = async (req, res) => {
         });
     }
     catch (error) {
-        console.error('Error fetching post rating:', error);
         res.status(500).json({ message: 'Error fetching post rating', error: error.message });
     }
 };
@@ -99,7 +98,6 @@ const getUserRating = async (req, res) => {
         });
     }
     catch (error) {
-        console.error('Error fetching user rating:', error);
         res.status(500).json({ message: 'Error fetching user rating', error: error.message });
     }
 };
@@ -134,7 +132,6 @@ const getAllUserRatings = async (req, res) => {
         });
     }
     catch (error) {
-        console.error('Error fetching user ratings:', error);
         res.status(500).json({ message: 'Error fetching user ratings', error: error.message });
     }
 };
@@ -169,7 +166,6 @@ const getAllPostRatings = async (req, res) => {
         });
     }
     catch (error) {
-        console.error('Error fetching post ratings:', error);
         res.status(500).json({ message: 'Error fetching post ratings', error: error.message });
     }
 };

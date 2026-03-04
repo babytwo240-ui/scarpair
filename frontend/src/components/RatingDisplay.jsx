@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import ratingService from '../services/ratingService';
 import '../styles/RatingDisplay.css';
@@ -25,7 +25,6 @@ const RatingDisplay = ({ userId = null, postId = null, variant = 'compact' }) =>
 
         setRating(data);
       } catch (err) {
-        console.error('Rating fetch error:', err);
         setError('Could not load rating');
       } finally {
         setLoading(false);
@@ -55,16 +54,16 @@ const RatingDisplay = ({ userId = null, postId = null, variant = 'compact' }) =>
     const stars = [];
 
     for (let i = 0; i < fullStars; i++) {
-      stars.push(<span key={`star-${i}`} className="star full">★</span>);
+      stars.push(<span key={`star-${i}`} className="star full">â˜…</span>);
     }
 
     if (hasHalf) {
-      stars.push(<span key="star-half" className="star half">★</span>);
+      stars.push(<span key="star-half" className="star half">â˜…</span>);
     }
 
     const emptyStars = 5 - Math.ceil(avg);
     for (let i = 0; i < emptyStars; i++) {
-      stars.push(<span key={`empty-${i}`} className="star empty">★</span>);
+      stars.push(<span key={`empty-${i}`} className="star empty">â˜…</span>);
     }
 
     return stars;
@@ -102,7 +101,7 @@ const RatingDisplay = ({ userId = null, postId = null, variant = 'compact' }) =>
                   <ul>
                     {rating.recentFeedback.slice(0, 3).map((fb, idx) => (
                       <li key={idx}>
-                        <span className="rating-value">{fb.rating} ★</span>
+                        <span className="rating-value">{fb.rating} â˜…</span>
                         {fb.fromUser && (
                           <span className="reviewer">
                             {fb.fromUser.businessName || fb.fromUser.companyName || fb.fromUser.email}
@@ -123,3 +122,4 @@ const RatingDisplay = ({ userId = null, postId = null, variant = 'compact' }) =>
 };
 
 export default RatingDisplay;
+

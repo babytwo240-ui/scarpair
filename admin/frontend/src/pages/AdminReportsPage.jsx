@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Box,
@@ -46,7 +46,6 @@ const AdminReportsPage = () => {
       setReports(Array.isArray(data.data) ? data.data : []);
     } catch (err) {
       setError(err.message || 'Failed to fetch reports');
-      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -124,3 +123,4 @@ const AdminReportsPage = () => {
 };
 
 export default AdminReportsPage;
+

@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import messageService from '../services/messageService';
+import socketService from '../services/socketService';
 
 const MessagesPage = () => {
   const navigate = useNavigate();
@@ -10,33 +11,65 @@ const MessagesPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [unreadCounts, setUnreadCounts] = useState({});
+  const [isPageVisible, setIsPageVisible] = useState(!document.hidden);
+  const intervalRef = useRef(null);
 
+  // Handle Page Visibility API - pause polling when tab is inactive
   useEffect(() => {
-    loadConversations();
-    const interval = setInterval(loadConversations, 5000); // Refresh every 5 seconds
-    return () => clearInterval(interval);
+    const handleVisibilityChange = () => {
+      const hidden = document.hidden;
+      setIsPageVisible(!hidden);
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, []);
 
-  const loadConversations = async () => {
-    setLoading(true);
+  // Polling effect - only polls when page is visible
+  useEffect(() => {
+    if (!isPageVisible) {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+      return;
+    }
+    loadConversations();
+    intervalRef.current = setInterval(loadConversations, 30000); // Refresh every 30 seconds
+    
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, [isPageVisible]);
+
+  // WebSocket listener for real-time conversation updates
+  useEffect(() => {
+    const socket = socketService.getSocket();
+    if (!socket) return;
+
+    const handleConversationUpdate = (data) => {
+      // Clear cache and reload when notified of updates
+      messageService.clearConversationsCache();
+      loadConversations();
+    };
+
+    // Listen for conversation updates via WebSocket
+    socketService.onConversationUpdate(handleConversationUpdate);
+
+    return () => {
+      socketService.off('conversation:updated');
+    };
+  }, []);
+
+  const loadConversations = async (ignoreCache = false) => {
+    // Don't show loading if we have cached data
+    if (messageService.isCacheValid() && !ignoreCache) {
+      setLoading(false);
+    } else {
+      setLoading(true);
+    }
+    
     setError('');
     try {
-      // Debug authentication state
       const token = localStorage.getItem('token');
-      console.log('=== AUTH DEBUG ===');
-      console.log('Current user:', user);
-      console.log('Token exists:', !!token);
-      console.log('Token preview:', token ? token.substring(0, 30) + '...' : 'NO TOKEN');
-
-      const response = await messageService.getConversations();
-      // Debug: Log the response structure
-      console.log('=== MESSAGES API DEBUG ===');
-      console.log('Full Response:', response);
-      console.log('response.data type:', typeof response.data);
-      console.log('response.data is array:', Array.isArray(response.data));
-      console.log('Conversations to display:', response.data);
-      
-      // Extract the conversations array from nested data structure
+      const response = await messageService.getConversations(ignoreCache);
       const conversationsArray = Array.isArray(response.data) ? response.data : [];
       setConversations(conversationsArray);
 
@@ -47,12 +80,10 @@ const MessagesPage = () => {
           const countResponse = await messageService.getUnreadCount();
           counts[conv.id] = countResponse.data?.unreadCount || 0;
         } catch (err) {
-          console.warn('Failed to get unread count');
         }
       }
       setUnreadCounts(counts);
     } catch (err) {
-      console.error('Full error object:', err);
       setError(err.message || 'Failed to load conversations.');
     } finally {
       setLoading(false);
@@ -63,7 +94,12 @@ const MessagesPage = () => {
     navigate(`/messages/${conversationId}`);
   };
 
-  if (loading) {
+  // Manual refresh button handler
+  const handleManualRefresh = () => {
+    loadConversations(true); // Ignore cache and force refresh
+  };
+
+  if (loading && conversations.length === 0) {
     return <div style={{ padding: '40px 20px', textAlign: 'center' }}>Loading conversations...</div>;
   }
 
@@ -77,7 +113,29 @@ const MessagesPage = () => {
 
   return (
     <div style={{ padding: '40px 20px', maxWidth: '600px', margin: '0 auto' }}>
-      <h2>Messages</h2>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+        <h2 style={{ margin: 0 }}>Messages</h2>
+        <button
+          onClick={handleManualRefresh}
+          style={{
+            padding: '8px 16px',
+            backgroundColor: '#2196f3',
+            color: 'white',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: 'pointer',
+            fontSize: '14px',
+          }}
+        >
+          Refresh
+        </button>
+      </div>
+
+      {!isPageVisible && (
+        <div style={{ backgroundColor: '#fff3cd', padding: '10px', borderRadius: '4px', color: '#856404', marginBottom: '20px', fontSize: '14px' }}>
+          ðŸ’¤ Polling paused (tab inactive) - click Refresh to update
+        </div>
+      )}
 
       {error && (
         <div style={{ backgroundColor: '#fee', padding: '10px', borderRadius: '4px', color: '#c33', marginBottom: '20px' }}>
@@ -162,3 +220,4 @@ const MessagesPage = () => {
 };
 
 export default MessagesPage;
+

@@ -91,7 +91,6 @@ const businessSignup = async (req, res) => {
         });
     }
     catch (error) {
-        console.error('Signup error:', error);
         res.status(500).json({ error: 'Signup failed' });
     }
 };
@@ -145,7 +144,6 @@ const recyclerSignup = async (req, res) => {
         });
     }
     catch (error) {
-        console.error('Signup error:', error);
         res.status(500).json({ error: 'Signup failed' });
     }
 };
@@ -201,7 +199,6 @@ const verifyEmail = async (req, res) => {
         });
     }
     catch (error) {
-        console.error('Email verification error:', error);
         res.status(500).json({ error: 'Email verification failed' });
     }
 };
@@ -214,18 +211,14 @@ const businessLogin = async (req, res) => {
         }
         const business = await userService.findBusinessByEmail(email);
         if (!business) {
-            console.log(`Business login attempt - user not found: ${email}`);
             return res.status(401).json({ error: 'Invalid email or password' });
         }
-        console.log(`Business login attempt for: ${email}, isVerified: ${business.isVerified}, isLocked: ${business.isLocked}`);
         if ((0, securityUtil_1.isAccountLocked)(business.isLocked || false, business.lockedUntil || null)) {
-            console.log(`Account locked for: ${email}`);
             return res.status(403).json({
                 error: (0, securityUtil_1.getLockedAccountMessage)(business.lockedUntil)
             });
         }
         const isValid = await userService.verifyBusinessCredentials(email, password);
-        console.log(`Password verification for ${email}: ${isValid}`);
         if (!isValid) {
             const maxAttempts = parseInt(process.env.MAX_LOGIN_ATTEMPTS || '5');
             const newAttempts = (business.loginAttempts || 0) + 1;
@@ -244,7 +237,6 @@ const businessLogin = async (req, res) => {
             }
         }
         if (!business.isVerified) {
-            console.log(`Email not verified for: ${email}`);
             return res.status(403).json({
                 error: 'Please verify your email before logging in'
             });
@@ -278,11 +270,9 @@ const businessLogin = async (req, res) => {
             refreshToken: refreshToken,
             user: userResponse
         });
-        console.log('Business login response:', responseBody.substring(0, 100));
         res.status(200).send(responseBody);
     }
     catch (error) {
-        console.error('Login error:', error);
         res.status(500).json({ error: 'Login failed' });
     }
 };
@@ -295,18 +285,14 @@ const recyclerLogin = async (req, res) => {
         }
         const recycler = await userService.findRecyclerByEmail(email);
         if (!recycler) {
-            console.log(`Recycler login attempt - user not found: ${email}`);
             return res.status(401).json({ error: 'Invalid email or password' });
         }
-        console.log(`Recycler login attempt for: ${email}, isVerified: ${recycler.isVerified}, isLocked: ${recycler.isLocked}`);
         if ((0, securityUtil_1.isAccountLocked)(recycler.isLocked || false, recycler.lockedUntil || null)) {
-            console.log(`Account locked for: ${email}`);
             return res.status(403).json({
                 error: (0, securityUtil_1.getLockedAccountMessage)(recycler.lockedUntil)
             });
         }
         const isValid = await userService.verifyRecyclerCredentials(email, password);
-        console.log(`Password verification for ${email}: ${isValid}`);
         if (!isValid) {
             const maxAttempts = parseInt(process.env.MAX_LOGIN_ATTEMPTS || '5');
             const newAttempts = (recycler.loginAttempts || 0) + 1;
@@ -325,7 +311,6 @@ const recyclerLogin = async (req, res) => {
             }
         }
         if (!recycler.isVerified) {
-            console.log(`Email not verified for: ${email}`);
             return res.status(403).json({
                 error: 'Please verify your email before logging in'
             });
@@ -359,11 +344,9 @@ const recyclerLogin = async (req, res) => {
             refreshToken: refreshToken,
             user: userResponse
         });
-        console.log('Recycler login response:', responseBody.substring(0, 100));
         res.status(200).send(responseBody);
     }
     catch (error) {
-        console.error('Login error:', error);
         res.status(500).json({ error: 'Login failed' });
     }
 };
@@ -372,7 +355,7 @@ const logout = async (req, res) => {
     try {
         const token = req.headers['authorization']?.split(' ')[1];
         if (token) {
-            // ✅ Blacklist the token so it can't be used again
+            // âœ… Blacklist the token so it can't be used again
             await (0, tokenBlacklistService_1.blacklistToken)(token);
         }
         return res.status(200).json({
@@ -381,7 +364,6 @@ const logout = async (req, res) => {
         });
     }
     catch (error) {
-        console.error('Logout error:', error);
         return res.status(500).json({
             error: 'Logout failed',
             status: 'error'
@@ -430,7 +412,6 @@ const forgotPassword = async (req, res) => {
         });
     }
     catch (error) {
-        console.error('Forgot password error:', error);
         res.status(500).json({ error: 'Failed to process password reset request' });
     }
 };
@@ -482,7 +463,6 @@ const resetPassword = async (req, res) => {
         });
     }
     catch (error) {
-        console.error('Reset password error:', error);
         res.status(500).json({ error: 'Failed to reset password' });
     }
 };

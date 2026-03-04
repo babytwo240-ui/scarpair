@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import messageService from '../services/messageService';
 
@@ -19,10 +19,6 @@ const NotificationsPage = () => {
     setError('');
     try {
       const response = await messageService.getNotifications(page, 20);
-      console.log('📬 Notification Response:', response);
-      console.log('📬 Response Data:', response.data);
-      console.log('📬 Response Data.data:', response.data?.data);
-      
       // Extract notifications array
       let notificationsArray = [];
       if (Array.isArray(response.data)) {
@@ -35,9 +31,6 @@ const NotificationsPage = () => {
         // Try response.data.notifications
         notificationsArray = response.data.notifications;
       }
-      
-      console.log('📬 Final notifications array:', notificationsArray);
-      
       if (page === 1) {
         setNotifications(notificationsArray);
       } else {
@@ -45,7 +38,6 @@ const NotificationsPage = () => {
       }
       setHasMore(notificationsArray.length === 20);
     } catch (err) {
-      console.error('❌ Error loading notifications:', err);
       setError(err.message || 'Failed to load notifications.');
     } finally {
       setLoading(false);
@@ -59,7 +51,6 @@ const NotificationsPage = () => {
         prev.map((n) => (n.id === notificationId ? { ...n, read: true } : n))
       );
     } catch (err) {
-      console.error('Failed to mark notification as read:', err);
     }
   };
 
@@ -68,7 +59,6 @@ const NotificationsPage = () => {
       await messageService.markAllNotificationsRead();
       setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
     } catch (err) {
-      console.error('Failed to mark all as read:', err);
       setError('Failed to mark all as read.');
     }
   };
@@ -78,7 +68,6 @@ const NotificationsPage = () => {
       await messageService.deleteNotification(notificationId);
       setNotifications((prev) => prev.filter((n) => n.id !== notificationId));
     } catch (err) {
-      console.error('Failed to delete notification:', err);
       setError('Failed to delete notification.');
     }
   };
@@ -217,3 +206,4 @@ const NotificationsPage = () => {
 };
 
 export default NotificationsPage;
+

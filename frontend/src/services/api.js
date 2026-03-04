@@ -1,4 +1,4 @@
-import axios from 'axios';
+﻿import axios from 'axios';
 import DOMPurify from 'dompurify';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
@@ -22,7 +22,7 @@ apiClient.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// ✅ Sanitize responses and handle errors
+// âœ… Sanitize responses and handle errors
 apiClient.interceptors.response.use(
   (response) => {
     // Sanitize string responses to prevent XSS
@@ -37,7 +37,7 @@ apiClient.interceptors.response.use(
       const { status, data } = error.response;
 
       if (status === 401) {
-        // ✅ Token is invalid or expired - clear everything
+        // âœ… Token is invalid or expired - clear everything
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         localStorage.removeItem('refreshToken');
@@ -46,15 +46,10 @@ apiClient.interceptors.response.use(
         if (window.location.pathname !== '/') {
           window.location.href = '/';
         }
-        console.error('Session expired. Please login again.');
       } else if (status === 403) {
-        console.error('Permission denied:', data.message);
       } else if (status === 404) {
-        console.error('Resource not found:', data.message);
       } else if (status === 400) {
-        console.error('Bad request:', data.message);
       } else if (status >= 500) {
-        console.error('Server error:', data.message);
       }
 
       // Return error data for handling in components
@@ -65,14 +60,12 @@ apiClient.interceptors.response.use(
       });
     } else if (error.request) {
       // Request made but no response
-      console.error('No response from server');
       return Promise.reject({
         status: 0,
         message: 'No response from server. Check your connection.',
       });
     } else {
       // Error in request setup
-      console.error('Error:', error.message);
       return Promise.reject({
         status: 0,
         message: error.message,
@@ -82,4 +75,5 @@ apiClient.interceptors.response.use(
 );
 
 export default apiClient;
+
 

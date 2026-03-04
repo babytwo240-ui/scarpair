@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+﻿import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext.jsx';
 import { NotificationProvider, useNotifications } from './context/NotificationContext.jsx';
@@ -46,18 +46,11 @@ const AppContent = () => {
 
   useEffect(() => {
     if (user && token) {
-      console.log('🔌 [APP] Socket connection triggered');
-      console.log('🔌 [APP] User:', user.email || user.businessName);
-      console.log('🔌 [APP] Token preview:', token.substring(0, 30) + '...');
-      
       // Connect socket when user logs in
       const socket = socketService.connect(token);
-      console.log('🔌 [APP] Socket returned:', !!socket);
-
       // Listen for new notifications (only register listener once)
       if (!notificationListenerRef.current) {
         socketService.onNotification((notification) => {
-          console.log('📬 New notification received:', notification);
           handleNewNotification(notification);
         });
         notificationListenerRef.current = true;
@@ -67,7 +60,7 @@ const AppContent = () => {
         // Don't disconnect on unmount, as we need socket throughout the app
       };
     }
-  }, [user, token]);
+  }, [user && token && user.id]); // Only reconnect if user/token actually changes
 
   return (
     <Routes>
@@ -274,3 +267,4 @@ function App() {
 }
 
 export default App;
+

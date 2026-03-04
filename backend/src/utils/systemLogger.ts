@@ -1,4 +1,4 @@
-import { Request } from 'express';
+﻿import { Request } from 'express';
 import { sequelize } from '../models';
 
 export const getClientIP = (req: Request): string => {
@@ -37,7 +37,6 @@ export const logSystemAction = async (
       timestamp: new Date()
     });
   } catch (error) {
-    console.error('Error logging system action:', error);
   }
 };
 
@@ -77,3 +76,4 @@ export const logReportRejected = async (adminId: number, reportId: number, req?:
 export const logFeedbackSubmitted = async (userId: number, feedbackId: number, req?: Request) => {
   await logSystemAction(userId, 'FEEDBACK_SUBMITTED', 'feedback', feedbackId, 'success', undefined, req);
 };
+

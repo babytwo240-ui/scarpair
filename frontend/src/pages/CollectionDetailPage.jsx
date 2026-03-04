@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import collectionService from '../services/collectionService';
@@ -38,10 +38,8 @@ const CollectionDetailPage = () => {
       setError('');
       const response = await collectionService.getCollectionDetails(collectionId);
       const collectionData = response.data || response;
-      console.log('📋 Collection Details:', collectionData);
       setCollection(collectionData);
     } catch (err) {
-      console.error('❌ Failed to load collection:', err);
       setError(err.message || 'Failed to load collection details.');
     } finally {
       setLoading(false);
@@ -56,7 +54,7 @@ const CollectionDetailPage = () => {
     try {
       setActionLoading(true);
       await collectionService.approveCollection(collectionId);
-      setSuccess('✅ Collection approved!');
+      setSuccess('âœ… Collection approved!');
       setTimeout(() => {
         loadCollectionDetails();
       }, 1000);
@@ -79,7 +77,7 @@ const CollectionDetailPage = () => {
     try {
       setActionLoading(true);
       await collectionService.confirmCollection(collectionId);
-      setSuccess('✅ Collection confirmed!');
+      setSuccess('âœ… Collection confirmed!');
       setTimeout(() => {
         loadCollectionDetails();
       }, 1000);
@@ -98,7 +96,7 @@ const CollectionDetailPage = () => {
     try {
       setActionLoading(true);
       await collectionService.acceptMaterials(collectionId);
-      setSuccess('✅ Materials accepted! Collection completed.');
+      setSuccess('âœ… Materials accepted! Collection completed.');
       setTimeout(() => {
         loadCollectionDetails();
       }, 1000);
@@ -137,12 +135,11 @@ const CollectionDetailPage = () => {
       setActionLoading(true);
       setError('');
       await collectionService.cancelCollection(collectionId);
-      setSuccess('✅ Collection cancelled successfully.');
+      setSuccess('âœ… Collection cancelled successfully.');
       setTimeout(() => {
         loadCollectionDetails();
       }, 1000);
     } catch (err) {
-      console.error('Cancel error:', err);
       setError(err.message || 'Failed to cancel collection.');
     } finally {
       setActionLoading(false);
@@ -224,7 +221,7 @@ const CollectionDetailPage = () => {
             cursor: 'pointer',
           }}
         >
-          ← Back
+          â† Back
         </button>
         <h1 style={{ margin: 0 }}>Collection #{collection.id}</h1>
         <div></div>
@@ -265,7 +262,7 @@ const CollectionDetailPage = () => {
           {/* Material Details */}
           {collection.post && (
             <div style={{ backgroundColor: '#f5f5f5', padding: '15px', borderRadius: '4px', marginBottom: '20px' }}>
-              <h3 style={{ margin: '0 0 15px 0' }}>📦 Material Details</h3>
+              <h3 style={{ margin: '0 0 15px 0' }}>ðŸ“¦ Material Details</h3>
               <p style={{ margin: '8px 0' }}>
                 <strong>Title:</strong> {collection.post.title}
               </p>
@@ -283,13 +280,13 @@ const CollectionDetailPage = () => {
 
           {/* Timeline */}
           <div style={{ backgroundColor: '#f5f5f5', padding: '15px', borderRadius: '4px', marginBottom: '20px' }}>
-            <h3 style={{ margin: '0 0 15px 0' }}>📅 Timeline</h3>
+            <h3 style={{ margin: '0 0 15px 0' }}>ðŸ“… Timeline</h3>
             <p style={{ margin: '8px 0', fontSize: '14px' }}>
               <strong>Requested:</strong> {formatLocalDateTime(collection.requestDate)}
             </p>
             {collection.scheduledDate && (
               <p style={{ margin: '8px 0', fontSize: '14px', color: '#28a745', fontWeight: 'bold' }}>
-                ⏰ <strong>Proposed Pickup:</strong> {formatScheduledDateTime(collection.scheduledDate)}
+                â° <strong>Proposed Pickup:</strong> {formatScheduledDateTime(collection.scheduledDate)}
               </p>
             )}
             {collection.completeDate && (
@@ -310,7 +307,7 @@ const CollectionDetailPage = () => {
           {/* Recycler Info */}
           {collection.recycler && (
             <div style={{ backgroundColor: '#e3f2fd', padding: '15px', borderRadius: '4px', marginBottom: '20px', border: '1px solid #90caf9' }}>
-              <h3 style={{ margin: '0 0 15px 0' }}>♻️ Recycler Information</h3>
+              <h3 style={{ margin: '0 0 15px 0' }}>â™»ï¸ Recycler Information</h3>
               <p style={{ margin: '8px 0' }}>
                 <strong>Name:</strong> {collection.recycler.companyName || collection.recycler.businessName}
               </p>
@@ -328,7 +325,7 @@ const CollectionDetailPage = () => {
           {/* Business Info */}
           {collection.business && (
             <div style={{ backgroundColor: '#f0f8ff', padding: '15px', borderRadius: '4px', marginBottom: '20px', border: '1px solid #add8e6' }}>
-              <h3 style={{ margin: '0 0 15px 0' }}>🏢 Business Information</h3>
+              <h3 style={{ margin: '0 0 15px 0' }}>ðŸ¢ Business Information</h3>
               <p style={{ margin: '8px 0' }}>
                 <strong>Name:</strong> {collection.business.businessName || collection.business.companyName}
               </p>
@@ -346,7 +343,7 @@ const CollectionDetailPage = () => {
           {/* Collection Deadline */}
           {collection.pickupDeadline && (
             <div style={{ backgroundColor: '#fff3cd', padding: '15px', borderRadius: '4px', marginBottom: '20px', border: '1px solid #ffc107' }}>
-              <h3 style={{ margin: '0 0 10px 0', color: '#856404' }}>⏱️ Pickup Deadline</h3>
+              <h3 style={{ margin: '0 0 10px 0', color: '#856404' }}>â±ï¸ Pickup Deadline</h3>
               <p style={{ margin: 0, fontSize: '16px', fontWeight: 'bold', color: '#856404' }}>
                 {formatLocalDateTime(collection.pickupDeadline)}
               </p>
@@ -358,7 +355,7 @@ const CollectionDetailPage = () => {
       {/* Notes Section */}
       {collection.notes && (
         <div style={{ backgroundColor: '#f9f9f9', padding: '15px', borderRadius: '4px', marginBottom: '30px' }}>
-          <h3>📝 Notes</h3>
+          <h3>ðŸ“ Notes</h3>
           <p style={{ color: '#333' }}>{collection.notes}</p>
         </div>
       )}
@@ -380,7 +377,7 @@ const CollectionDetailPage = () => {
             opacity: actionLoading ? 0.7 : 1,
           }}
         >
-          💬 Message
+          ðŸ’¬ Message
         </button>
 
         {/* Business Actions */}
@@ -400,7 +397,7 @@ const CollectionDetailPage = () => {
                 opacity: actionLoading ? 0.7 : 1,
               }}
             >
-              ✅ Approve
+              âœ… Approve
             </button>
             <button
               onClick={handleSchedule}
@@ -416,7 +413,7 @@ const CollectionDetailPage = () => {
                 opacity: actionLoading ? 0.7 : 1,
               }}
             >
-              📅 Schedule
+              ðŸ“… Schedule
             </button>
           </>
         )}
@@ -437,7 +434,7 @@ const CollectionDetailPage = () => {
               opacity: actionLoading ? 0.7 : 1,
             }}
           >
-            ✓ Confirm Completion
+            âœ“ Confirm Completion
           </button>
         )}
 
@@ -457,7 +454,7 @@ const CollectionDetailPage = () => {
               opacity: actionLoading ? 0.7 : 1,
             }}
           >
-            🎯 Accept Materials
+            ðŸŽ¯ Accept Materials
           </button>
         )}
 
@@ -478,7 +475,7 @@ const CollectionDetailPage = () => {
               opacity: actionLoading ? 0.7 : 1,
             }}
           >
-            {collection.cancellationCount >= 3 ? '🔒 Cancel Locked' : '❌ Cancel Collection'}
+            {collection.cancellationCount >= 3 ? 'ðŸ”’ Cancel Locked' : 'âŒ Cancel Collection'}
           </button>
         )}
       </div>
@@ -486,7 +483,7 @@ const CollectionDetailPage = () => {
       {/* Info Box */}
       <div style={{ backgroundColor: '#e7f3ff', padding: '15px', borderRadius: '4px', border: '1px solid #b3d9ff' }}>
         <p style={{ margin: 0, fontSize: '14px', color: '#004085' }}>
-          💡 <strong>Tip:</strong> Use the Message button to communicate with the other party about pickup details, questions, or issues.
+          ðŸ’¡ <strong>Tip:</strong> Use the Message button to communicate with the other party about pickup details, questions, or issues.
         </p>
       </div>
 
@@ -526,3 +523,4 @@ const CollectionDetailPage = () => {
 };
 
 export default CollectionDetailPage;
+

@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+﻿import { Request, Response } from 'express';
 import { verifyCredentials, generateToken } from '../config/jwt';
 import { sequelize } from '../models';
 
@@ -63,7 +63,6 @@ const getAllMaterials = async (req: Request, res: Response): Promise<any> => {
       data: materials
     });
   } catch (error: any) {
-    console.error('Get materials error:', error.message);
     res.status(500).json({ error: 'Failed to fetch materials' });
   }
 };
@@ -93,7 +92,6 @@ const getMaterialById = async (req: Request, res: Response): Promise<any> => {
       data: material
     });
   } catch (error: any) {
-    console.error('Get material by ID error:', error.message);
     res.status(500).json({ error: 'Failed to fetch material' });
   }
 };
@@ -132,7 +130,6 @@ const createMaterial = async (req: Request, res: Response): Promise<any> => {
       data: material
     });
   } catch (error: any) {
-    console.error('Create material error:', error.message);
     res.status(500).json({ error: 'Failed to create material' });
   }
 };
@@ -171,7 +168,6 @@ const updateMaterial = async (req: Request, res: Response): Promise<any> => {
       data: material
     });
   } catch (error: any) {
-    console.error('Update material error:', error.message);
     res.status(500).json({ error: 'Failed to update material' });
   }
 };
@@ -199,7 +195,6 @@ const deleteMaterial = async (req: Request, res: Response): Promise<any> => {
       message: 'Material deleted successfully'
     });
   } catch (error: any) {
-    console.error('Delete material error:', error.message);
     res.status(500).json({ error: 'Failed to delete material' });
   }
 };
@@ -224,7 +219,6 @@ const getStatistics = async (req: Request, res: Response): Promise<any> => {
       timestamp: new Date().toISOString()
     });
   } catch (error: any) {
-    console.error('Get statistics error:', error.message);
     res.status(500).json({ error: 'Failed to get statistics' });
   }
 };
@@ -244,7 +238,6 @@ const getWasteCategories = async (req: Request, res: Response): Promise<any> => 
       data: categories
     });
   } catch (error: any) {
-    console.error('Error fetching categories:', error);
     res.status(500).json({ message: 'Error fetching categories', error: error.message });
   }
 };
@@ -270,7 +263,6 @@ const createWasteCategory = async (req: Request, res: Response): Promise<any> =>
       data: category
     });
   } catch (error: any) {
-    console.error('Error creating category:', error);
     res.status(500).json({ message: 'Error creating category', error: error.message });
   }
 };
@@ -299,7 +291,6 @@ const updateWasteCategory = async (req: Request, res: Response): Promise<any> =>
       data: category
     });
   } catch (error: any) {
-    console.error('Error updating category:', error);
     res.status(500).json({ message: 'Error updating category', error: error.message });
   }
 };
@@ -322,7 +313,6 @@ const deleteWasteCategory = async (req: Request, res: Response): Promise<any> =>
       data: { id: categoryId }
     });
   } catch (error: any) {
-    console.error('Error deleting category:', error);
     res.status(500).json({ message: 'Error deleting category', error: error.message });
   }
 };
@@ -359,7 +349,6 @@ const getAllUserRatings = async (req: Request, res: Response): Promise<any> => {
       }
     });
   } catch (error: any) {
-    console.error('Error fetching user ratings:', error);
     res.status(500).json({ message: 'Error fetching user ratings', error: error.message });
   }
 };
@@ -389,7 +378,6 @@ const getAllPostRatings = async (req: Request, res: Response): Promise<any> => {
       }
     });
   } catch (error: any) {
-    console.error('Error fetching post ratings:', error);
     res.status(500).json({ message: 'Error fetching post ratings', error: error.message });
   }
 };
@@ -431,7 +419,6 @@ const getAllReports = async (req: Request, res: Response): Promise<any> => {
       }
     });
   } catch (error: any) {
-    console.error('Error fetching reports:', error);
     res.status(500).json({ message: 'Error fetching reports', error: error.message });
   }
 };
@@ -460,7 +447,6 @@ const getSystemLogs = async (req: Request, res: Response): Promise<any> => {
       }
     });
   } catch (error: any) {
-    console.error('Error fetching system logs:', error);
     res.status(500).json({ message: 'Error fetching system logs', error: error.message });
   }
 };
@@ -482,3 +468,4 @@ export {
   getAllReports,
   getSystemLogs
 };
+

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import wastePostService from '../services/wastePostService';
@@ -35,7 +35,6 @@ const MarketplacePage = () => {
       const data = await response.json();
       setCategories(Array.isArray(data.data) ? data.data : []);
     } catch (err) {
-      console.error('Failed to fetch categories:', err);
       setCategories([]);
     }
   };
@@ -208,7 +207,7 @@ const MarketplacePage = () => {
           {/* AVAILABLE POSTS SECTION */}
           {activePosts.length > 0 && (
             <>
-              <h3 style={{ marginBottom: '15px', color: '#28a745' }}>✅ Available for Collection ({activePosts.length})</h3>
+              <h3 style={{ marginBottom: '15px', color: '#28a745' }}>âœ… Available for Collection ({activePosts.length})</h3>
               <div style={{ display: 'grid', gap: '20px', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', marginBottom: '40px' }}>
                 {activePosts.map((post) => (
                   <div
@@ -263,7 +262,7 @@ const MarketplacePage = () => {
                           fontSize: '12px',
                         }}
                       >
-                        📋 Details
+                        ðŸ“‹ Details
                       </button>
                       <button
                         onClick={() => handleMessageBusiness(post.businessId, post.id)}
@@ -277,7 +276,7 @@ const MarketplacePage = () => {
                           fontSize: '12px',
                         }}
                       >
-                        💬 Message
+                        ðŸ’¬ Message
                       </button>
                       <button
                         onClick={() => handleRequestCollection(post.id)}
@@ -291,7 +290,7 @@ const MarketplacePage = () => {
                           fontSize: '12px',
                         }}
                       >
-                        🚚 Collect
+                        ðŸšš Collect
                       </button>
                     </div>
                   </div>
@@ -303,7 +302,7 @@ const MarketplacePage = () => {
           {/* IN-COLLECTION POSTS SECTION */}
           {inCollectionPosts.length > 0 && (
             <>
-              <h3 style={{ marginBottom: '15px', color: '#ffc107' }}>🔄 In Collection ({inCollectionPosts.length})</h3>
+              <h3 style={{ marginBottom: '15px', color: '#ffc107' }}>ðŸ”„ In Collection ({inCollectionPosts.length})</h3>
               <div style={{ display: 'grid', gap: '20px', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))' }}>
                 {inCollectionPosts.map((post) => (
                   <div
@@ -344,7 +343,7 @@ const MarketplacePage = () => {
                           fontWeight: 'bold',
                         }}
                       >
-                        🔄 In Collection
+                        ðŸ”„ In Collection
                       </div>
                     </div>
 
@@ -377,7 +376,7 @@ const MarketplacePage = () => {
                           fontSize: '12px',
                         }}
                       >
-                        📋 Details
+                        ðŸ“‹ Details
                       </button>
                       <button
                         onClick={() => handleMessageBusiness(post.businessId, post.id)}
@@ -391,7 +390,7 @@ const MarketplacePage = () => {
                           fontSize: '12px',
                         }}
                       >
-                        💬 Message
+                        ðŸ’¬ Message
                       </button>
                       <button
                         disabled
@@ -406,7 +405,7 @@ const MarketplacePage = () => {
                         }}
                         title="This material is already being collected by another recycler"
                       >
-                        🚚 Collect
+                        ðŸšš Collect
                       </button>
                     </div>
                   </div>
@@ -421,3 +420,4 @@ const MarketplacePage = () => {
 };
 
 export default MarketplacePage;
+

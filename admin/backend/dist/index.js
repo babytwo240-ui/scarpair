@@ -1,4 +1,4 @@
-"use strict";
+﻿"use strict";
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -28,7 +28,6 @@ app.use((req, res) => {
 });
 // Error handling middleware
 app.use((err, req, res, next) => {
-    console.error(err.stack);
     res.status(err.status || 500).json({
         error: err.message || 'Internal server error'
     });
@@ -36,15 +35,9 @@ app.use((err, req, res, next) => {
 // Start server
 const server = app.listen(PORT, () => {
     const baseUrl = process.env.ADMIN_BACKEND_BASE_URL || `http://localhost:${PORT}`;
-    console.log(`\n✓ Scrapair Admin Backend running on port ${PORT}`);
-    console.log(`\nDefault Admin Credentials:`);
-    console.log(`Username: admin11`);
-    console.log(`Password: asdqwe123`);
-    console.log(`\nAPI Available at: ${baseUrl}/api/admin`);
 });
 // Handle server errors
 server.on('error', (err) => {
-    console.error('Server error:', err);
 });
 exports.default = app;
 //# sourceMappingURL=index.js.map

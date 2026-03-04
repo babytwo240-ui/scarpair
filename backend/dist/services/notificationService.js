@@ -13,11 +13,9 @@ class NotificationService {
                 relatedId: data.relatedId,
                 read: false
             });
-            console.log(`✓ Notification created for user ${data.userId}: ${data.title}`);
             return notification;
         }
         catch (error) {
-            console.error('Error creating notification:', error);
             throw error;
         }
     }
@@ -31,11 +29,9 @@ class NotificationService {
                 relatedId: data.relatedId,
                 read: false
             })));
-            console.log(`✓ Bulk notifications created for ${userIds.length} users: ${data.title}`);
             return notifications;
         }
         catch (error) {
-            console.error('Error creating bulk notifications:', error);
             throw error;
         }
     }
@@ -107,7 +103,6 @@ class NotificationService {
             return { notifications, total };
         }
         catch (error) {
-            console.error('Error getting user notifications:', error);
             throw error;
         }
     }
@@ -122,7 +117,6 @@ class NotificationService {
             return count;
         }
         catch (error) {
-            console.error('Error getting unread count:', error);
             throw error;
         }
     }

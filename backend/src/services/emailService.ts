@@ -19,9 +19,7 @@ const initializeEmailService = async () => {
     try {
       // Initialize Resend client
       resend = new Resend(process.env.RESEND_API_KEY);
-      console.log('✅ Resend email service initialized');
     } catch (error: any) {
-      console.error('❌ Resend initialization failed:', error.message);
       resend = null;
     }
   } else if (process.env.EMAIL_SERVICE === 'ethereal') {
@@ -39,14 +37,11 @@ const initializeEmailService = async () => {
 
       // Test connection
       await transporter.verify();
-      console.log('✅ Ethereal email service connected');
     } catch (error: any) {
-      console.error('❌ Ethereal email connection failed:', error.message);
-      console.log('ℹ️ Falling back to mock email service');
       transporter = null;
     }
   } else {
-    console.log('📧 Email service set to: MOCK (console logging)');
+    // Mock email service
   }
 };
 
@@ -91,10 +86,6 @@ export const sendVerificationEmail = async (
         subject: 'Email Verification - Scrapair',
         html: htmlContent,
       });
-      
-      console.log(`\n📧 [RESEND EMAIL] Verification sent to: ${email}`);
-      console.log(`   Code: ${code}`);
-      console.log(`   Status: Success\n`);
     } else if (transporter) {
       // Send via Ethereal
       const info = await transporter.sendMail({
@@ -103,20 +94,12 @@ export const sendVerificationEmail = async (
         subject: 'Email Verification - Scrapair',
         html: htmlContent,
       });
-      
-      console.log(`\n📧 [ETHEREAL EMAIL] Verification sent to: ${email}`);
-      console.log(`   Code: ${code}`);
-      console.log(`   Preview: ${nodemailer.getTestMessageUrl(info)}\n`);
     } else {
       // Fall back to mock (console logging)
-      console.log(`\n📧 [MOCK EMAIL] Verification email sent to: ${email}`);
-      console.log(`   Verification Code: ${code}`);
-      console.log(`   (This code will expire in 15 minutes)\n`);
     }
 
     return { success: true, message: 'Verification email sent' };
   } catch (error: any) {
-    console.error('Email service error:', error);
     return { success: false, message: 'Failed to send verification email' };
   }
 };
@@ -155,11 +138,6 @@ export const sendPasswordResetEmail = async (
         subject: 'Password Reset Request - Scrapair',
         html: htmlContent,
       });
-      
-      console.log(`\n📧 [RESEND EMAIL] Password reset sent to: ${email}`);
-      console.log(`   Code: ${code}`);
-      console.log(`   Reset Link: ${resetLink}`);
-      console.log(`   Status: Success\n`);
     } else if (transporter) {
       // Send via Ethereal
       const info = await transporter.sendMail({
@@ -168,22 +146,12 @@ export const sendPasswordResetEmail = async (
         subject: 'Password Reset Request - Scrapair',
         html: htmlContent,
       });
-      
-      console.log(`\n📧 [ETHEREAL EMAIL] Password reset sent to: ${email}`);
-      console.log(`   Code: ${code}`);
-      console.log(`   Reset Link: ${resetLink}`);
-      console.log(`   Preview: ${nodemailer.getTestMessageUrl(info)}\n`);
     } else {
       // Fall back to mock (console logging)
-      console.log(`\n📧 [MOCK EMAIL] Password reset email sent to: ${email}`);
-      console.log(`   Reset Link: ${resetLink}`);
-      console.log(`   Reset Code: ${code}`);
-      console.log(`   (This code will expire in 1 hour)\n`);
     }
 
     return { success: true, message: 'Password reset email sent' };
   } catch (error: any) {
-    console.error('Email service error:', error);
     return { success: false, message: 'Failed to send password reset email' };
   }
 };
@@ -215,9 +183,6 @@ export const sendAccountVerifiedEmail = async (
         subject: 'Account Verified - Scrapair',
         html: htmlContent,
       });
-      
-      console.log(`\n📧 [RESEND EMAIL] Account verified notification sent to: ${email}`);
-      console.log(`   Status: Success\n`);
     } else if (transporter) {
       // Send via Ethereal
       const info = await transporter.sendMail({
@@ -226,18 +191,12 @@ export const sendAccountVerifiedEmail = async (
         subject: 'Account Verified - Scrapair',
         html: htmlContent,
       });
-      
-      console.log(`\n📧 [ETHEREAL EMAIL] Account verified notification sent to: ${email}`);
-      console.log(`   Preview: ${nodemailer.getTestMessageUrl(info)}\n`);
     } else {
       // Fall back to mock (console logging)
-      console.log(`\n📧 [MOCK EMAIL] Account verified notification sent to: ${email}`);
-      console.log(`   User: ${userName}\n`);
     }
 
     return { success: true, message: 'Verification notification sent' };
   } catch (error: any) {
-    console.error('Email service error:', error);
     return { success: false, message: 'Failed to send verification notification' };
   }
 };
@@ -270,9 +229,6 @@ export const sendAccountDeletedEmail = async (
         subject: 'Account Deleted - Scrapair',
         html: htmlContent,
       });
-      
-      console.log(`\n📧 [RESEND EMAIL] Account deletion confirmation sent to: ${email}`);
-      console.log(`   Status: Success\n`);
     } else if (transporter) {
       // Send via Ethereal
       const info = await transporter.sendMail({
@@ -281,18 +237,12 @@ export const sendAccountDeletedEmail = async (
         subject: 'Account Deleted - Scrapair',
         html: htmlContent,
       });
-      
-      console.log(`\n📧 [ETHEREAL EMAIL] Account deletion confirmation sent to: ${email}`);
-      console.log(`   Preview: ${nodemailer.getTestMessageUrl(info)}\n`);
     } else {
       // Fall back to mock (console logging)
-      console.log(`\n📧 [MOCK EMAIL] Account deletion confirmation sent to: ${email}`);
-      console.log(`   User: ${userName}\n`);
     }
 
     return { success: true, message: 'Deletion confirmation sent' };
   } catch (error: any) {
-    console.error('Email service error:', error);
     return { success: false, message: 'Failed to send deletion confirmation' };
   }
 };

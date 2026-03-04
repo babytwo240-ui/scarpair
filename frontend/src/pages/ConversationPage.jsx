@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+﻿import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import messageService from '../services/messageService';
@@ -90,7 +90,6 @@ const ConversationPage = () => {
         }
       }
     } catch (err) {
-      console.error('Error polling for new messages:', err);
     }
   };
 
@@ -100,11 +99,8 @@ const ConversationPage = () => {
       
       // Join conversation room for real-time updates
       socketService.emit('conversation:join', parseInt(conversationId));
-      console.log('✅ Joined conversation room:', conversationId);
-      
       // Listen for incoming messages - REAL TIME
       socketService.on('message:received', (data) => {
-        console.log('📨 Message received:', data);
         if (data.conversationId === parseInt(conversationId)) {
           setMessages((prev) => {
             // Avoid duplicates
@@ -121,7 +117,6 @@ const ConversationPage = () => {
       // Listen for typing indicator
       socketService.on('user:typing', (data) => {
         if (data.conversationId === parseInt(conversationId) && data.userId !== user.id) {
-          console.log('⌨️  User typing:', data.userName);
           setOtherUserTyping(true);
         }
       });
@@ -129,22 +124,18 @@ const ConversationPage = () => {
       // Listen for stop typing
       socketService.on('user:stop-typing', (data) => {
         if (data.conversationId === parseInt(conversationId)) {
-          console.log('✋ User stopped typing');
           setOtherUserTyping(false);
         }
       });
       
       socketService.on('connect', () => {
-        console.log('✅ Socket connected');
         socketService.emit('conversation:join', parseInt(conversationId));
       });
       
       socketService.on('disconnect', () => {
-        console.log('❌ Socket disconnected - using polling fallback');
       });
       
     } catch (err) {
-      console.warn('⚠️  WebSocket connection failed, using polling fallback:', err);
     }
   };
 
@@ -355,7 +346,7 @@ const ConversationPage = () => {
             fontSize: '20px',
           }}
         >
-          ←
+          â†
         </button>
         <div>
           <h3 style={{ margin: 0 }}>{otherParticipant?.businessName || otherParticipant?.email}</h3>
@@ -495,7 +486,7 @@ const ConversationPage = () => {
                 animation: 'pulse 2s infinite'
               }}
             >
-              ✓ New messages - Jump to latest
+              âœ“ New messages - Jump to latest
             </button>
           </div>
         )}
@@ -540,7 +531,7 @@ const ConversationPage = () => {
                 cursor: 'pointer',
               }}
             >
-              ✕
+              âœ•
             </button>
           </div>
         )}
@@ -590,7 +581,7 @@ const ConversationPage = () => {
               fontSize: '14px',
             }}
           >
-            📎
+            ðŸ“Ž
           </label>
 
           <button
@@ -615,3 +606,4 @@ const ConversationPage = () => {
 };
 
 export default ConversationPage;
+

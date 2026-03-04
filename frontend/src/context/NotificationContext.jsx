@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
+﻿import React, { createContext, useState, useContext, useEffect } from 'react';
 import messageService from '../services/messageService';
 
 const NotificationContext = createContext();
@@ -21,9 +21,6 @@ export const NotificationProvider = ({ children, userId, token }) => {
   const fetchUnreadCount = async () => {
     try {
       const response = await messageService.getUnreadCount();
-      console.log('🔔 Unread Count Response:', response);
-      console.log('🔔 Response.data:', response.data);
-      
       let unreadValue = 0;
       if (typeof response.data?.unreadCount === 'number') {
         unreadValue = response.data.unreadCount;
@@ -32,11 +29,8 @@ export const NotificationProvider = ({ children, userId, token }) => {
       } else if (typeof response.data === 'number') {
         unreadValue = response.data;
       }
-      
-      console.log('🔔 Setting unread count to:', unreadValue);
       setUnreadCount(unreadValue);
     } catch (err) {
-      console.error('❌ Failed to fetch unread count:', err);
     }
   };
 
@@ -88,3 +82,4 @@ export const useNotifications = () => {
 };
 
 export default NotificationContext;
+

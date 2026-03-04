@@ -1,4 +1,4 @@
-"use strict";
+﻿"use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getSystemLogs = exports.getAllReports = exports.getAllPostRatings = exports.getAllUserRatings = exports.deleteWasteCategory = exports.updateWasteCategory = exports.createWasteCategory = exports.getWasteCategories = exports.getStatistics = exports.deleteMaterial = exports.updateMaterial = exports.createMaterial = exports.getMaterialById = exports.getAllMaterials = exports.login = void 0;
 const jwt_1 = require("../config/jwt");
@@ -59,7 +59,6 @@ const getAllMaterials = async (req, res) => {
         });
     }
     catch (error) {
-        console.error('Get materials error:', error.message);
         res.status(500).json({ error: 'Failed to fetch materials' });
     }
 };
@@ -86,7 +85,6 @@ const getMaterialById = async (req, res) => {
         });
     }
     catch (error) {
-        console.error('Get material by ID error:', error.message);
         res.status(500).json({ error: 'Failed to fetch material' });
     }
 };
@@ -122,7 +120,6 @@ const createMaterial = async (req, res) => {
         });
     }
     catch (error) {
-        console.error('Create material error:', error.message);
         res.status(500).json({ error: 'Failed to create material' });
     }
 };
@@ -158,7 +155,6 @@ const updateMaterial = async (req, res) => {
         });
     }
     catch (error) {
-        console.error('Update material error:', error.message);
         res.status(500).json({ error: 'Failed to update material' });
     }
 };
@@ -183,7 +179,6 @@ const deleteMaterial = async (req, res) => {
         });
     }
     catch (error) {
-        console.error('Delete material error:', error.message);
         res.status(500).json({ error: 'Failed to delete material' });
     }
 };
@@ -207,7 +202,6 @@ const getStatistics = async (req, res) => {
         });
     }
     catch (error) {
-        console.error('Get statistics error:', error.message);
         res.status(500).json({ error: 'Failed to get statistics' });
     }
 };
@@ -226,7 +220,6 @@ const getWasteCategories = async (req, res) => {
         });
     }
     catch (error) {
-        console.error('Error fetching categories:', error);
         res.status(500).json({ message: 'Error fetching categories', error: error.message });
     }
 };
@@ -250,7 +243,6 @@ const createWasteCategory = async (req, res) => {
         });
     }
     catch (error) {
-        console.error('Error creating category:', error);
         res.status(500).json({ message: 'Error creating category', error: error.message });
     }
 };
@@ -276,7 +268,6 @@ const updateWasteCategory = async (req, res) => {
         });
     }
     catch (error) {
-        console.error('Error updating category:', error);
         res.status(500).json({ message: 'Error updating category', error: error.message });
     }
 };
@@ -296,7 +287,6 @@ const deleteWasteCategory = async (req, res) => {
         });
     }
     catch (error) {
-        console.error('Error deleting category:', error);
         res.status(500).json({ message: 'Error deleting category', error: error.message });
     }
 };
@@ -331,7 +321,6 @@ const getAllUserRatings = async (req, res) => {
         });
     }
     catch (error) {
-        console.error('Error fetching user ratings:', error);
         res.status(500).json({ message: 'Error fetching user ratings', error: error.message });
     }
 };
@@ -359,7 +348,6 @@ const getAllPostRatings = async (req, res) => {
         });
     }
     catch (error) {
-        console.error('Error fetching post ratings:', error);
         res.status(500).json({ message: 'Error fetching post ratings', error: error.message });
     }
 };
@@ -399,7 +387,6 @@ const getAllReports = async (req, res) => {
         });
     }
     catch (error) {
-        console.error('Error fetching reports:', error);
         res.status(500).json({ message: 'Error fetching reports', error: error.message });
     }
 };
@@ -426,7 +413,6 @@ const getSystemLogs = async (req, res) => {
         });
     }
     catch (error) {
-        console.error('Error fetching system logs:', error);
         res.status(500).json({ message: 'Error fetching system logs', error: error.message });
     }
 };

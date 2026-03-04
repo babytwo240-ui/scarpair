@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import collectionService from '../services/collectionService';
@@ -24,9 +24,7 @@ const ManageCollectionRequestsPage = () => {
       setLoading(true);
       setError('');
       setSuccess('');
-      console.log('Fetching collection requests...');
       const response = await collectionService.getAllCollections();
-      console.log('Collection requests fetched:', response);
       const collectionsData = Array.isArray(response) ? response : (response.data || response);
       // Filter for pending requests only
       const pendingCollections = collectionsData.filter(
@@ -34,8 +32,7 @@ const ManageCollectionRequestsPage = () => {
       );
       setCollections(pendingCollections);
     } catch (err) {
-      console.error('Error fetching collections:', err);
-      setError('❌ Error fetching user collections: ' + (err.message || 'Unknown error'));
+      setError('âŒ Error fetching user collections: ' + (err.message || 'Unknown error'));
       setCollections([]);
     } finally {
       setLoading(false);
@@ -59,16 +56,15 @@ const ManageCollectionRequestsPage = () => {
       try {
         await collectionService.approveCollection(collectionId);
       } catch (collErr) {
-        console.log('Note: Old collection approval may not be needed with new workflow');
       }
 
-      setSuccess('✅ Collection approved! Recycler has 1 hour to pick up.');
+      setSuccess('âœ… Collection approved! Recycler has 1 hour to pick up.');
       setTimeout(() => {
         fetchCollectionRequests();
         setSuccess('');
       }, 2000);
     } catch (err) {
-      setError('❌ Error: ' + (err.message || 'Failed to approve collection'));
+      setError('âŒ Error: ' + (err.message || 'Failed to approve collection'));
     } finally {
       setApproving(null);
     }
@@ -77,7 +73,7 @@ const ManageCollectionRequestsPage = () => {
   const handleRejectRequest = async (collectionId, rejectionCount) => {
     // Check if rejection limit reached
     if (rejectionCount >= 4) {
-      setError('⚠️ You have already rejected this recycler 4 times. The next request will be auto-approved. You must continue or choose another recycler.');
+      setError('âš ï¸ You have already rejected this recycler 4 times. The next request will be auto-approved. You must continue or choose another recycler.');
       return;
     }
 
@@ -89,13 +85,13 @@ const ManageCollectionRequestsPage = () => {
       setApproving(collectionId);
       // Call the reject API to update status in database
       await collectionService.rejectCollection(collectionId);
-      setSuccess('✅ Collection request rejected');
+      setSuccess('âœ… Collection request rejected');
       setTimeout(() => {
         fetchCollectionRequests();
         setSuccess('');
       }, 2000);
     } catch (err) {
-      setError('❌ Error: ' + (err.message || 'Failed to reject request'));
+      setError('âŒ Error: ' + (err.message || 'Failed to reject request'));
     } finally {
       setApproving(null);
     }
@@ -132,7 +128,7 @@ const ManageCollectionRequestsPage = () => {
 
   return (
     <div style={{ padding: '40px 20px', maxWidth: '900px', margin: '0 auto' }}>
-      <h2>📬 Collection Requests</h2>
+      <h2>ðŸ“¬ Collection Requests</h2>
       <p style={{ color: '#666', marginBottom: '20px' }}>
         Review and approve collection requests from recyclers. Approved recyclers will have 1 hour to pick up materials.
       </p>
@@ -178,7 +174,7 @@ const ManageCollectionRequestsPage = () => {
             textAlign: 'center',
           }}
         >
-          <p>📭 No pending collection requests at the moment.</p>
+          <p>ðŸ“­ No pending collection requests at the moment.</p>
           <button
             onClick={() => navigate('/business/posts')}
             style={{
@@ -248,7 +244,7 @@ const ManageCollectionRequestsPage = () => {
                 }}
               >
                 <p style={{ margin: '0 0 10px 0', fontWeight: 'bold' }}>
-                  👤 Recycler Information:
+                  ðŸ‘¤ Recycler Information:
                 </p>
                 <p style={{ margin: '5px 0' }}>
                   <strong>Name:</strong> {collection.recyclerName || collection.recycler?.name || 'Unknown'}
@@ -274,7 +270,7 @@ const ManageCollectionRequestsPage = () => {
                 }}
               >
                 <p style={{ margin: '0 0 10px 0', fontWeight: 'bold' }}>
-                  📦 Material Details:
+                  ðŸ“¦ Material Details:
                 </p>
                 <p style={{ margin: '5px 0' }}>
                   <strong>Type:</strong> {collection.postWasteType || collection.post?.wasteType || 'N/A'}
@@ -290,11 +286,11 @@ const ManageCollectionRequestsPage = () => {
               {/* Request Date */}
               <div style={{ fontSize: '12px', color: '#666', marginBottom: '15px' }}>
                 <p style={{ margin: '5px 0' }}>
-                  📅 Requested on: {collection.requestDate ? formatManila(collection.requestDate) : 'N/A'}
+                  ðŸ“… Requested on: {collection.requestDate ? formatManila(collection.requestDate) : 'N/A'}
                 </p>
                 {collection.scheduledDate && (
                   <p style={{ margin: '5px 0', fontWeight: 'bold', color: '#28a745' }}>
-                    ⏰ Proposed Pickup: {formatManilaInput(collection.scheduledDate)}
+                    â° Proposed Pickup: {formatManilaInput(collection.scheduledDate)}
                   </p>
                 )}
                 {collection.rejectionCount !== undefined && (
@@ -303,7 +299,7 @@ const ManageCollectionRequestsPage = () => {
                     fontWeight: 'bold',
                     color: collection.rejectionCount >= 4 ? '#dc3545' : '#ffc107'
                   }}>
-                    ⚠️ Rejection Count: {collection.rejectionCount}/4
+                    âš ï¸ Rejection Count: {collection.rejectionCount}/4
                     {collection.rejectionCount >= 4 && ' - NEXT REQUEST WILL BE AUTO-APPROVED'}
                   </p>
                 )}
@@ -326,7 +322,7 @@ const ManageCollectionRequestsPage = () => {
                     opacity: approving === collection.id ? 0.7 : 1,
                   }}
                 >
-                  {approving === collection.id ? '⏳ Approving...' : '✅ Approve (1-Hour Pickup)'}
+                  {approving === collection.id ? 'â³ Approving...' : 'âœ… Approve (1-Hour Pickup)'}
                 </button>
 
                 <button
@@ -345,7 +341,7 @@ const ManageCollectionRequestsPage = () => {
                     opacity: approving === collection.id ? 0.7 : 1,
                   }}
                 >
-                  {collection.rejectionCount >= 4 ? '🔒 Reject Locked' : '❌ Reject Request'}
+                  {collection.rejectionCount >= 4 ? 'ðŸ”’ Reject Locked' : 'âŒ Reject Request'}
                 </button>
               </div>
             </div>
@@ -387,3 +383,4 @@ const ManageCollectionRequestsPage = () => {
 };
 
 export default ManageCollectionRequestsPage;
+

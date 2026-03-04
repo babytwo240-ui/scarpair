@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const AdminUsersPage = () => {
@@ -50,7 +50,6 @@ const AdminUsersPage = () => {
       const data = await response.json();
       setUsers(data.users || []);
     } catch (err) {
-      console.error('Fetch users error:', err);
       setError(err.message || 'Failed to load users');
     } finally {
       setLoading(false);
@@ -84,7 +83,6 @@ const AdminUsersPage = () => {
       alert('User deleted successfully');
       fetchUsers();
     } catch (err) {
-      console.error('Delete user error:', err);
       alert('Failed to delete user: ' + err.message);
     }
   };
@@ -108,7 +106,6 @@ const AdminUsersPage = () => {
       alert('User verification status updated');
       fetchUsers();
     } catch (err) {
-      console.error('Verify user error:', err);
       alert('Failed to update verification status: ' + err.message);
     }
   };
@@ -177,7 +174,7 @@ const AdminUsersPage = () => {
               <td style={{ padding: '10px' }}>{user.type}</td>
               <td style={{ padding: '10px' }}>{user.name}</td>
               <td style={{ padding: '10px' }}>{user.phone}</td>
-              <td style={{ padding: '10px' }}>{user.isVerified ? '✓ Yes' : '✗ No'}</td>
+              <td style={{ padding: '10px' }}>{user.isVerified ? 'âœ“ Yes' : 'âœ— No'}</td>
               <td style={{ padding: '10px' }}>{new Date(user.createdAt).toLocaleDateString()}</td>
               <td style={{ padding: '10px' }}>
                 <button onClick={() => navigate(`/admin/users/${user.id}`)} style={{ padding: '4px 8px', marginRight: '5px' }}>View</button>
@@ -203,3 +200,4 @@ const AdminUsersPage = () => {
 };
 
 export default AdminUsersPage;
+

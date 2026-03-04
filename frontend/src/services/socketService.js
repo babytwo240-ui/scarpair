@@ -1,4 +1,4 @@
-import io from 'socket.io-client';
+﻿import io from 'socket.io-client';
 
 const SOCKET_URL = process.env.REACT_APP_SOCKET_URL || 'http://localhost:5000';
 
@@ -9,17 +9,12 @@ class SocketService {
 
   connect(token) {
     if (this.socket) {
-      console.log('🔌 Socket already exists, returning existing connection');
       return this.socket;
     }
 
     if (!token) {
-      console.error('❌ No token provided to Socket.io connect()');
       return null;
     }
-
-    console.log('🔌 Connecting to Socket.io with token:', token.substring(0, 20) + '...');
-
     this.socket = io(SOCKET_URL, {
       auth: {
         token,
@@ -31,15 +26,12 @@ class SocketService {
     });
 
     this.socket.on('connect', () => {
-      console.log('✅ WebSocket connected');
     });
 
     this.socket.on('disconnect', (reason) => {
-      console.log('❌ WebSocket disconnected. Reason:', reason);
     });
 
     this.socket.on('error', (error) => {
-      console.error('❌ WebSocket error:', error);
     });
 
     return this.socket;
@@ -90,6 +82,10 @@ class SocketService {
     this.on('user_status', callback);
   }
 
+  onConversationUpdate(callback) {
+    this.on('conversation:updated', callback);
+  }
+
   getSocket() {
     return this.socket;
   }
@@ -100,3 +96,4 @@ class SocketService {
 }
 
 export default new SocketService();
+

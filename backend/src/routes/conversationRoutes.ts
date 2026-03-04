@@ -1,4 +1,4 @@
-import { Router } from 'express';
+﻿import { Router } from 'express';
 import { ConversationController } from '../controllers/conversationController';
 import { authenticateUser } from '../middleware/userAuthMiddleware';
 import { RateLimiter } from '../middleware/rateLimiter';
@@ -25,7 +25,6 @@ router.post(
         timestamp: new Date()
       });
     } catch (error) {
-      console.error('Clear conversations error:', error);
       res.status(500).json({ error: 'Failed to clear conversations' });
     }
   }
@@ -33,6 +32,7 @@ router.post(
 router.use(authenticateUser);
 router.get(
   '/',
+  RateLimiter.middleware('getConversations'),
   ConversationController.getConversations
 );
 
@@ -53,3 +53,4 @@ router.delete(
 );
 
 export default router;
+

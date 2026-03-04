@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useNavigate } from 'react-router-dom';
 import wastePostService from '../services/wastePostService';
@@ -32,7 +32,6 @@ const RecyclerDashboard = () => {
       const data = await response.json();
       setCategories(Array.isArray(data.data) ? data.data : []);
     } catch (err) {
-      console.error('Failed to fetch categories:', err);
       setCategories([]);
     }
   };
@@ -48,7 +47,6 @@ const RecyclerDashboard = () => {
       });
       setMaterials(response.data || []);
     } catch (err) {
-      console.error('Failed to fetch materials:', err);
       setError(err.message || 'Failed to load materials');
       setMaterials([]);
     } finally {
@@ -104,7 +102,7 @@ const RecyclerDashboard = () => {
               cursor: 'pointer',
             }}
           >
-            ⚙️ Edit Profile
+            âš™ï¸ Edit Profile
           </button>
           <button
             onClick={handleLogout}
@@ -185,7 +183,7 @@ const RecyclerDashboard = () => {
           borderRadius: '8px',
           boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
         }}>
-          <h3>🎯 Approved Collections</h3>
+          <h3>ðŸŽ¯ Approved Collections</h3>
           <p style={{ color: '#666', marginBottom: '10px', fontSize: '14px' }}>
             View and manage your approved waste pickups.
           </p>
@@ -306,7 +304,7 @@ const RecyclerDashboard = () => {
                   {/* ACTIVE MATERIALS */}
                   {activeMaterials.length > 0 && (
                     <>
-                      <h3 style={{ marginBottom: '15px', color: '#28a745' }}>✅ Available ({activeMaterials.length})</h3>
+                      <h3 style={{ marginBottom: '15px', color: '#28a745' }}>âœ… Available ({activeMaterials.length})</h3>
                       <div style={{ display: 'grid', gap: '20px', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', marginBottom: '30px' }}>
                         {activeMaterials.map((material) => (
                           <div
@@ -377,7 +375,7 @@ const RecyclerDashboard = () => {
                                   fontSize: '11px',
                                 }}
                               >
-                                📋 Details
+                                ðŸ“‹ Details
                               </button>
                               <button
                                 onClick={() => handleMessageBusiness(material.businessId, material.id)}
@@ -391,7 +389,7 @@ const RecyclerDashboard = () => {
                                   fontSize: '11px',
                                 }}
                               >
-                                💬 Message
+                                ðŸ’¬ Message
                               </button>
                               <button
                                 onClick={() => handleRequestCollection(material.id)}
@@ -405,7 +403,7 @@ const RecyclerDashboard = () => {
                                   fontSize: '11px',
                                 }}
                               >
-                                🚚 Collect
+                                ðŸšš Collect
                               </button>
                             </div>
                           </div>
@@ -417,7 +415,7 @@ const RecyclerDashboard = () => {
                   {/* IN-COLLECTION MATERIALS */}
                   {inCollectionMaterials.length > 0 && (
                     <>
-                      <h3 style={{ marginBottom: '15px', color: '#ffc107' }}>🔄 In Collection ({inCollectionMaterials.length})</h3>
+                      <h3 style={{ marginBottom: '15px', color: '#ffc107' }}>ðŸ”„ In Collection ({inCollectionMaterials.length})</h3>
                       <div style={{ display: 'grid', gap: '20px', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))' }}>
                         {inCollectionMaterials.map((material) => (
                           <div
@@ -482,7 +480,7 @@ const RecyclerDashboard = () => {
                                   display: 'inline-block',
                                 }}
                               >
-                                🔄 In Collection
+                                ðŸ”„ In Collection
                               </div>
                             </div>
 
@@ -499,7 +497,7 @@ const RecyclerDashboard = () => {
                                   fontSize: '11px',
                                 }}
                               >
-                                📋 Details
+                                ðŸ“‹ Details
                               </button>
                               <button
                                 onClick={() => handleMessageBusiness(material.businessId, material.id)}
@@ -513,7 +511,7 @@ const RecyclerDashboard = () => {
                                   fontSize: '11px',
                                 }}
                               >
-                                💬 Message
+                                ðŸ’¬ Message
                               </button>
                               <button
                                 disabled
@@ -528,7 +526,7 @@ const RecyclerDashboard = () => {
                                 }}
                                 title="This material is already being collected by another recycler"
                               >
-                                🚚 Collect
+                                ðŸšš Collect
                               </button>
                             </div>
                           </div>
@@ -547,3 +545,4 @@ const RecyclerDashboard = () => {
 };
 
 export default RecyclerDashboard;
+

@@ -1,4 +1,4 @@
-import Redis from 'ioredis';
+﻿import Redis from 'ioredis';
 import { Request, Response, NextFunction } from 'express';
 import { rateLimitConfig } from '../config/rateLimits';
 import redisClient from '../config/redis';
@@ -7,7 +7,7 @@ export class RateLimiter {
   static async checkLimit(
     userId: string,
     ip: string,
-    limitType: 'typing' | 'createConversation' | 'sendMessage' | 'getMessages'
+    limitType: 'typing' | 'createConversation' | 'sendMessage' | 'getMessages' | 'getConversations'
   ): Promise<boolean> {
     const config = rateLimitConfig[limitType];
     const keys = config.keyGenerator(userId, ip);
@@ -33,12 +33,11 @@ export class RateLimiter {
 
       return true; 
     } catch (error) {
-      console.error('Rate limiter error:', error);
       return true;
     }
   }
 
-  static middleware(limitType: 'typing' | 'createConversation' | 'sendMessage' | 'getMessages') {
+  static middleware(limitType: 'typing' | 'createConversation' | 'sendMessage' | 'getMessages' | 'getConversations') {
     return async (req: Request, res: Response, next: NextFunction) => {
       const userId = (req as any).user?.id || 'anonymous';
       const ip = req.ip || 'unknown';
@@ -64,7 +63,7 @@ export class RateLimiter {
 
   static async resetLimit(
     userId: string,
-    limitType: 'typing' | 'createConversation' | 'sendMessage' | 'getMessages'
+    limitType: 'typing' | 'createConversation' | 'sendMessage' | 'getMessages' | 'getConversations'
   ): Promise<void> {
     const config = rateLimitConfig[limitType];
     const keys = config.keyGenerator(userId, '');
@@ -72,13 +71,12 @@ export class RateLimiter {
     try {
       await redisClient.del(keys.user);
     } catch (error) {
-      console.error('Error resetting rate limit:', error);
     }
   }
   static async getStatus(
     userId: string,
     ip: string,
-    limitType: 'typing' | 'createConversation' | 'sendMessage' | 'getMessages'
+    limitType: 'typing' | 'createConversation' | 'sendMessage' | 'getMessages' | 'getConversations'
   ): Promise<{
     userCount: number;
     ipCount: number;
@@ -101,7 +99,6 @@ export class RateLimiter {
         windowMs: config.windowMs
       };
     } catch (error) {
-      console.error('Error getting rate limit status:', error);
       return {
         userCount: 0,
         ipCount: 0,
@@ -114,3 +111,4 @@ export class RateLimiter {
 }
 
 export default RateLimiter;
+

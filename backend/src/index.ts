@@ -34,14 +34,10 @@ const validateEnvironment = (): void => {
   const missingVars = requiredVars.filter(v => !process.env[v]);
   
   if (missingVars.length > 0) {
-    console.error(` Missing critical environment variables: ${missingVars.join(', ')}`);
     process.exit(1);
   }
 
   const jwtSecret = process.env.JWT_SECRET || '';
-  if (jwtSecret.length < 32) {
-    console.warn('⚠️  WARNING: JWT_SECRET is less than 32 characters. Use a stronger secret in production.');
-  }
 
   validateAwsConfig();
 };
@@ -101,12 +97,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
-if (process.env.NODE_ENV !== 'production') {
-  app.use((req: Request, res: Response, next: NextFunction) => {
-    console.log(`${new Date().toISOString()} ${req.method} ${req.path}`);
-    next();
-  });
-}
+
 
 const io: SocketIOServer = new SocketIOServer(server, {
   cors: {
@@ -183,7 +174,6 @@ app.use((req: Request, res: Response) => {
   res.status(404).json({ error: 'Route not found' });
 });
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
-  console.error(' Error:', err.stack);
   res.status(err.status || 500).json({
     error: err.message || 'Internal server error',
     ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
@@ -193,38 +183,19 @@ async function startServer() {
   let redisConnected = false;
   
   try {
-    console.log('🔍 Checking Redis connection...');
     try {
       await checkRedisConnection();
-      console.log('✅ Redis connected');
       redisConnected = true;
     } catch (redisError) {
-      console.warn('⚠️  Redis not available - WebSocket features will be limited');
-      console.warn('   Run: docker run -d -p 6379:6379 redis:latest');
     }
 
-    console.log('🔍 Checking database connection...');
     await sequelize.authenticate();
-    console.log('✅ Database connected');
 
     server.listen(PORT, () => {
-      console.log(`\n╔════════════════════════════════════════════╗`);
-      console.log(`║  Scrapair Backend Server Started       ║`);
-      console.log(`║  Port: ${PORT}${' '.repeat(45 - PORT.toString().length - 10)}║`);
-      console.log(`║  Environment: ${(process.env.NODE_ENV || 'development').padEnd(29)}║`);
-      console.log(`║  WebSocket:  ${(redisConnected ? 'Ready' : 'Limited (no Redis)').padEnd(28)}║`);
-      console.log(`║  Database:  Ready                        ║`);
-      console.log(`║                                            ║`);
-      console.log(`║  Endpoints:                                ║`);
       const baseUrl = process.env.BACKEND_BASE_URL || `http://localhost:${PORT}`;
-      console.log(`║  • REST: ${baseUrl}/api/*`.padEnd(44) + '║');
-      console.log(`╚════════════════════════════════════════════╝\n`);
-
-      console.log('🚀 Initializing background jobs...');
       initializePickupDeadlineChecker();
     });
   } catch (error) {
-    console.error(' Failed to start server:', error);
     process.exit(1);
   }
 }

@@ -30,7 +30,6 @@ router.post('/upload', userAuthMiddleware_1.authenticateUser, imageUpload_1.imag
         });
     }
     catch (error) {
-        console.error('Image upload error:', error);
         res.status(500).json({ error: 'Failed to upload image' });
     }
 });
@@ -44,7 +43,6 @@ router.delete('/:imageUrl', userAuthMiddleware_1.authenticateUser, async (req, r
         });
     }
     catch (error) {
-        console.error('Image deletion error:', error);
         res.status(500).json({ error: 'Failed to delete image' });
     }
 });

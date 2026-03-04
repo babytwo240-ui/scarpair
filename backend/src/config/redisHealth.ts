@@ -1,4 +1,4 @@
-import Redis, { RedisOptions } from 'ioredis';
+﻿import Redis, { RedisOptions } from 'ioredis';
 
 export async function checkRedisConnection(): Promise<void> {
   const testOptions: RedisOptions = {
@@ -27,7 +27,6 @@ export async function checkRedisConnection(): Promise<void> {
     const response = await testRedis.ping();
 
     if (response === 'PONG') {
-      console.log('✅ Redis connected successfully');
       await testRedis.quit();
       return;
     } else {
@@ -40,3 +39,4 @@ export async function checkRedisConnection(): Promise<void> {
 }
 
 export default checkRedisConnection;
+

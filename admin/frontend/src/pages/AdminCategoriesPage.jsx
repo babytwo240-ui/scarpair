@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Box,
@@ -56,7 +56,6 @@ const AdminCategoriesPage = () => {
       setCategories(Array.isArray(data.data) ? data.data : []);
     } catch (err) {
       setError(err.message || 'Failed to fetch categories');
-      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -238,3 +237,4 @@ const AdminCategoriesPage = () => {
 };
 
 export default AdminCategoriesPage;
+
