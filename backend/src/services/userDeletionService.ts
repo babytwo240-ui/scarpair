@@ -40,7 +40,10 @@ export const deleteUserWithCascade = async (
     if (Notification) {
       const notificationsDeleted = await Notification.destroy({
         where: {
-          sequelize: sequelizeInstance.literal(`userId = ${userId} OR senderId = ${userId}`)
+          [Op.or]: [
+            { userId: userId },
+            { senderId: userId }
+          ]
         },
         transaction
       });
@@ -71,12 +74,24 @@ export const deleteUserWithCascade = async (
 
     // Step 4: Delete all collections involving this user (regardless of status)
     if (userType === 'business') {
-      // Delete collections where this business posted the waste
-      const collectionsForPostsDeleted = await Collection.destroy({
-        where: sequelizeInstance.literal(`postId IN (SELECT id FROM WastePosts WHERE businessId = ${userId})`),
-        transaction
+      // First, get all waste post IDs for this business
+      const wastePostIds = await WastePost.findAll({
+        where: { businessId: userId },
+        attributes: ['id'],
+        transaction,
+        raw: true
       });
-      deletedCount.collections += collectionsForPostsDeleted;
+
+      if (wastePostIds && wastePostIds.length > 0) {
+        const postIds = wastePostIds.map((p: any) => p.id);
+        
+        // Delete collections where this business posted the waste
+        const collectionsForPostsDeleted = await Collection.destroy({
+          where: { postId: postIds },
+          transaction
+        });
+        deletedCount.collections += collectionsForPostsDeleted;
+      }
 
       // Delete collections where this business is the collector
       const collectionsAsCollectorDeleted = await Collection.destroy({
@@ -93,7 +108,7 @@ export const deleteUserWithCascade = async (
       deletedCount.collections += collectionsDeleted;
     }
 
-    // Step 5: Delete all waste posts
+    // Step 5: Delete all waste posts (business only)
     if (userType === 'business') {
       const postsDeleted = await WastePost.destroy({
         where: { businessId: userId },

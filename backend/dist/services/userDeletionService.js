@@ -23,7 +23,10 @@ const deleteUserWithCascade = async (userId, userType, sequelizeInstance) => {
         if (Notification) {
             const notificationsDeleted = await Notification.destroy({
                 where: {
-                    sequelize: sequelizeInstance.literal(`userId = ${userId} OR senderId = ${userId}`)
+                    [sequelize_1.Op.or]: [
+                        { userId: userId },
+                        { senderId: userId }
+                    ]
                 },
                 transaction
             });
@@ -51,12 +54,22 @@ const deleteUserWithCascade = async (userId, userType, sequelizeInstance) => {
         }
         // Step 4: Delete all collections involving this user (regardless of status)
         if (userType === 'business') {
-            // Delete collections where this business posted the waste
-            const collectionsForPostsDeleted = await Collection.destroy({
-                where: sequelizeInstance.literal(`postId IN (SELECT id FROM WastePosts WHERE businessId = ${userId})`),
-                transaction
+            // First, get all waste post IDs for this business
+            const wastePostIds = await WastePost.findAll({
+                where: { businessId: userId },
+                attributes: ['id'],
+                transaction,
+                raw: true
             });
-            deletedCount.collections += collectionsForPostsDeleted;
+            if (wastePostIds && wastePostIds.length > 0) {
+                const postIds = wastePostIds.map((p) => p.id);
+                // Delete collections where this business posted the waste
+                const collectionsForPostsDeleted = await Collection.destroy({
+                    where: { postId: postIds },
+                    transaction
+                });
+                deletedCount.collections += collectionsForPostsDeleted;
+            }
             // Delete collections where this business is the collector
             const collectionsAsCollectorDeleted = await Collection.destroy({
                 where: { businessId: userId },
@@ -72,7 +85,7 @@ const deleteUserWithCascade = async (userId, userType, sequelizeInstance) => {
             });
             deletedCount.collections += collectionsDeleted;
         }
-        // Step 5: Delete all waste posts
+        // Step 5: Delete all waste posts (business only)
         if (userType === 'business') {
             const postsDeleted = await WastePost.destroy({
                 where: { businessId: userId },
