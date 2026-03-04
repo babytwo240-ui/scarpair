@@ -1,0 +1,174 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.getPostFeedback = exports.getUserFeedback = exports.submitFeedback = void 0;
+const models_1 = require("../models");
+const systemLogger_1 = require("../utils/systemLogger");
+const submitFeedback = async (req, res) => {
+    try {
+        const { collectionId, toUserId, rating, comment } = req.body;
+        const fromUserId = req.user?.id;
+        if (!collectionId || !toUserId || !rating) {
+            return res.status(400).json({ message: 'Missing required fields: collectionId, toUserId, rating' });
+        }
+        if (rating < 1 || rating > 5) {
+            return res.status(400).json({ message: 'Rating must be between 1 and 5' });
+        }
+        const Feedback = models_1.sequelize.models.Feedback;
+        const Collection = models_1.sequelize.models.Collection;
+        const UserRating = models_1.sequelize.models.UserRating;
+        const collection = await Collection.findByPk(collectionId);
+        if (!collection) {
+            return res.status(404).json({ message: 'Collection not found' });
+        }
+        if (collection.status !== 'completed' && collection.status !== 'confirmed') {
+            return res.status(400).json({ message: 'Can only submit feedback for completed collections' });
+        }
+        const existingFeedback = await Feedback.findOne({
+            where: { collectionId, fromUserId }
+        });
+        if (existingFeedback) {
+            return res.status(400).json({ message: 'Feedback already submitted for this collection' });
+        }
+        let feedbackType = 'neutral';
+        if (rating >= 4)
+            feedbackType = 'positive';
+        if (rating <= 2)
+            feedbackType = 'negative';
+        const feedback = await Feedback.create({
+            collectionId,
+            fromUserId,
+            toUserId,
+            rating,
+            comment: comment || null,
+            type: feedbackType
+        });
+        let userRating = await UserRating.findOne({ where: { userId: toUserId } });
+        if (!userRating) {
+            userRating = await UserRating.create({
+                userId: toUserId,
+                averageRating: rating,
+                totalRatings: 1,
+                totalFeedback: comment ? 1 : 0
+            });
+        }
+        else {
+            const newTotal = userRating.totalRatings + 1;
+            userRating.averageRating = (userRating.averageRating * userRating.totalRatings + rating) / newTotal;
+            userRating.totalRatings = newTotal;
+            if (comment)
+                userRating.totalFeedback += 1;
+            await userRating.save();
+        }
+        await (0, systemLogger_1.logFeedbackSubmitted)(fromUserId, feedback.id, req);
+        res.status(201).json({
+            message: 'Feedback submitted successfully',
+            data: {
+                feedback,
+                userRating: {
+                    averageRating: userRating.averageRating,
+                    totalRatings: userRating.totalRatings
+                }
+            }
+        });
+    }
+    catch (error) {
+        console.error('Error submitting feedback:', error);
+        res.status(500).json({ message: 'Error submitting feedback', error: error.message });
+    }
+};
+exports.submitFeedback = submitFeedback;
+const getUserFeedback = async (req, res) => {
+    try {
+        const { userId } = req.params;
+        const { page = 1, limit = 20 } = req.query;
+        const offset = (page - 1) * limit;
+        const Feedback = models_1.sequelize.models.Feedback;
+        const User = models_1.sequelize.models.User;
+        const { count, rows } = await Feedback.findAndCountAll({
+            where: { toUserId: userId },
+            include: [
+                {
+                    model: User,
+                    as: 'fromUser',
+                    attributes: ['id', 'email', 'type', 'businessName', 'companyName'],
+                    required: false
+                },
+                {
+                    model: User,
+                    as: 'toUser',
+                    attributes: ['id', 'email', 'type'],
+                    required: false
+                }
+            ],
+            order: [['createdAt', 'DESC']],
+            limit: limit,
+            offset
+        });
+        res.status(200).json({
+            message: 'User feedback retrieved successfully',
+            data: rows,
+            pagination: {
+                total: count,
+                page,
+                limit,
+                pages: Math.ceil(count / limit)
+            }
+        });
+    }
+    catch (error) {
+        console.error('Error fetching user feedback:', error);
+        res.status(500).json({ message: 'Error fetching user feedback', error: error.message });
+    }
+};
+exports.getUserFeedback = getUserFeedback;
+const getPostFeedback = async (req, res) => {
+    try {
+        const { postId } = req.params;
+        const { page = 1, limit = 20 } = req.query;
+        const offset = (page - 1) * limit;
+        const Feedback = models_1.sequelize.models.Feedback;
+        const Collection = models_1.sequelize.models.Collection;
+        const User = models_1.sequelize.models.User;
+        const collections = await Collection.findAll({
+            where: { postId },
+            attributes: ['id']
+        });
+        const collectionIds = collections.map((c) => c.id);
+        if (collectionIds.length === 0) {
+            return res.status(200).json({
+                message: 'No feedback found for this post',
+                data: [],
+                pagination: { total: 0, page, limit, pages: 0 }
+            });
+        }
+        const { count, rows } = await Feedback.findAndCountAll({
+            where: { collectionId: collectionIds },
+            include: [
+                {
+                    model: User,
+                    as: 'fromUser',
+                    attributes: ['id', 'email', 'type', 'businessName', 'companyName']
+                }
+            ],
+            order: [['createdAt', 'DESC']],
+            limit: limit,
+            offset
+        });
+        res.status(200).json({
+            message: 'Post feedback retrieved successfully',
+            data: rows,
+            pagination: {
+                total: count,
+                page,
+                limit,
+                pages: Math.ceil(count / limit)
+            }
+        });
+    }
+    catch (error) {
+        console.error('Error fetching post feedback:', error);
+        res.status(500).json({ message: 'Error fetching post feedback', error: error.message });
+    }
+};
+exports.getPostFeedback = getPostFeedback;
+//# sourceMappingURL=feedbackController.js.map

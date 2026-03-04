@@ -1,0 +1,21 @@
+import { Request, Response } from 'express';
+declare const getAllUsers: (req: Request, res: Response) => Promise<any>;
+declare const getUserById: (req: Request, res: Response) => Promise<any>;
+declare const verifyUser: (req: Request, res: Response) => Promise<any>;
+declare const deleteUserAdmin: (req: Request, res: Response) => Promise<any>;
+declare const verifyUserAccount: (req: Request, res: Response) => Promise<any>;
+declare const getUserStatistics: (req: Request, res: Response) => any;
+declare const deactivateUser: (req: Request, res: Response) => Promise<any>;
+declare const reactivateUser: (req: Request, res: Response) => Promise<any>;
+declare const createWasteCategory: (req: Request, res: Response) => Promise<any>;
+declare const getWasteCategories: (req: Request, res: Response) => Promise<any>;
+declare const updateWasteCategory: (req: Request, res: Response) => Promise<any>;
+declare const deleteWasteCategory: (req: Request, res: Response) => Promise<any>;
+declare const getSystemLogs: (req: Request, res: Response) => Promise<any>;
+declare const getLogsByAction: (req: Request, res: Response) => Promise<any>;
+declare const getAllUserRatingsAdmin: (req: Request, res: Response) => Promise<any>;
+declare const getAllPostRatingsAdmin: (req: Request, res: Response) => Promise<any>;
+declare const getAllReportsAdmin: (req: Request, res: Response) => Promise<any>;
+declare const seedTestData: (req: Request, res: Response) => Promise<any>;
+export { getAllUsers, getUserById, verifyUser, deleteUserAdmin, verifyUserAccount, getUserStatistics, deactivateUser, reactivateUser, createWasteCategory, getWasteCategories, updateWasteCategory, deleteWasteCategory, getSystemLogs, getLogsByAction, getAllUserRatingsAdmin, getAllPostRatingsAdmin, getAllReportsAdmin, seedTestData };
+//# sourceMappingURL=adminController.d.ts.map

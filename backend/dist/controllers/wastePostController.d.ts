@@ -1,0 +1,19 @@
+import { Request, Response } from 'express';
+export declare const createWastePost: (req: Request, res: Response) => Promise<any>;
+export declare const updateWastePost: (req: Request, res: Response) => Promise<any>;
+export declare const deleteWastePost: (req: Request, res: Response) => Promise<any>;
+export declare const getWastePostStatus: (req: Request, res: Response) => Promise<any>;
+export declare const getMarketplaceFeed: (req: Request, res: Response) => Promise<any>;
+export declare const getNearbyMaterials: (req: Request, res: Response) => Promise<any>;
+export declare const searchMaterials: (req: Request, res: Response) => Promise<any>;
+export declare const filterMaterials: (req: Request, res: Response) => Promise<any>;
+export declare const getBusinessMaterials: (req: Request, res: Response) => Promise<any>;
+export declare const getBusinessProfile: (req: Request, res: Response) => Promise<any>;
+export declare const getUserWastePosts: (req: Request, res: Response) => Promise<any>;
+export declare const getWastePostDetails: (req: Request, res: Response) => Promise<any>;
+export declare const approveRecycler: (req: Request, res: Response) => Promise<any>;
+export declare const cancelApproval: (req: Request, res: Response) => Promise<any>;
+export declare const markAsPickedUp: (req: Request, res: Response) => Promise<any>;
+export declare const getMyApprovedCollections: (req: Request, res: Response) => Promise<any>;
+export declare const getWasteCategories: (req: Request, res: Response) => Promise<any>;
+//# sourceMappingURL=wastePostController.d.ts.map

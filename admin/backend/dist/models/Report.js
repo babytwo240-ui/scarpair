@@ -1,0 +1,119 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const sequelize_1 = require("sequelize");
+module.exports = (sequelize) => {
+    const Report = sequelize.define('Report', {
+        id: {
+            type: sequelize_1.DataTypes.INTEGER,
+            primaryKey: true,
+            autoIncrement: true
+        },
+        reporterId: {
+            type: sequelize_1.DataTypes.INTEGER,
+            allowNull: false,
+            references: {
+                model: 'users',
+                key: 'id'
+            },
+            comment: 'User submitting the report'
+        },
+        reportedUserId: {
+            type: sequelize_1.DataTypes.INTEGER,
+            allowNull: false,
+            references: {
+                model: 'users',
+                key: 'id'
+            },
+            comment: 'User being reported'
+        },
+        collectionId: {
+            type: sequelize_1.DataTypes.INTEGER,
+            allowNull: true,
+            references: {
+                model: 'collections',
+                key: 'id'
+            },
+            comment: 'Associated collection'
+        },
+        postId: {
+            type: sequelize_1.DataTypes.INTEGER,
+            allowNull: true,
+            references: {
+                model: 'waste_posts',
+                key: 'id'
+            },
+            comment: 'Associated waste post'
+        },
+        reason: {
+            type: sequelize_1.DataTypes.ENUM('poor_quality', 'late_pickup', 'damaged_materials', 'incomplete_delivery', 'bad_behavior', 'other'),
+            allowNull: false,
+            comment: 'Reason for report'
+        },
+        description: {
+            type: sequelize_1.DataTypes.TEXT,
+            allowNull: false,
+            comment: 'Detailed description of the issue'
+        },
+        isValid: {
+            type: sequelize_1.DataTypes.BOOLEAN,
+            allowNull: true,
+            comment: 'Admin determination of validity'
+        },
+        validityScore: {
+            type: sequelize_1.DataTypes.FLOAT,
+            allowNull: true,
+            validate: {
+                min: 0,
+                max: 1
+            },
+            comment: 'System-generated validity score (0-1)'
+        },
+        pointsDeducted: {
+            type: sequelize_1.DataTypes.FLOAT,
+            allowNull: true,
+            defaultValue: 0,
+            comment: 'Rating points deducted (0.2-0.5)'
+        },
+        status: {
+            type: sequelize_1.DataTypes.ENUM('pending', 'approved', 'rejected'),
+            allowNull: false,
+            defaultValue: 'pending',
+            comment: 'Status of the report'
+        },
+        approvedBy: {
+            type: sequelize_1.DataTypes.INTEGER,
+            allowNull: true,
+            references: {
+                model: 'users',
+                key: 'id'
+            },
+            comment: 'Admin who approved/rejected'
+        },
+        approvedAt: {
+            type: sequelize_1.DataTypes.DATE,
+            allowNull: true,
+            comment: 'When the report was approved/rejected'
+        },
+        rejectionReason: {
+            type: sequelize_1.DataTypes.TEXT,
+            allowNull: true,
+            comment: 'Reason for rejection'
+        }
+    }, {
+        tableName: 'reports',
+        timestamps: true,
+        indexes: [
+            { fields: ['reporterId'] },
+            { fields: ['reportedUserId'] },
+            { fields: ['status'] },
+            { fields: ['reason'] },
+            { fields: ['createdAt'] }
+        ]
+    });
+    Report.associate = (models) => {
+        Report.belongsTo(models.User, { foreignKey: 'reporterId', as: 'reporter' });
+        Report.belongsTo(models.User, { foreignKey: 'reportedUserId', as: 'reportedUser' });
+    };
+    return Report;
+};
+//# sourceMappingURL=Report.js.map

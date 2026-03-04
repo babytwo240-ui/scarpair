@@ -1,0 +1,26 @@
+import { Sequelize } from 'sequelize';
+import type { ConversationInstance } from './Conversation';
+import type { MessageInstance } from './Message';
+import type { NotificationInstance } from './Notification';
+declare const sequelize: Sequelize;
+declare const User: any;
+declare const Material: any;
+declare const WastePost: any;
+declare const Collection: any;
+declare const Review: any;
+declare const PostMessage: any;
+declare const SystemLog: any;
+declare const WasteCategory: any;
+declare const Feedback: any;
+declare const UserRating: any;
+declare const PostRating: any;
+declare const Report: any;
+declare const Conversation: any;
+declare const Message: any;
+declare const Notification: any;
+declare const PasswordAudit: any;
+declare const models: any;
+export { sequelize, User, Material, WastePost, Collection, Conversation, Message, Notification, Review, PostMessage, SystemLog, WasteCategory, Feedback, UserRating, PostRating, Report, PasswordAudit };
+export type { ConversationInstance, MessageInstance, NotificationInstance };
+export default models;
+//# sourceMappingURL=index.d.ts.map
