@@ -21,6 +21,13 @@ const MessagesPage = () => {
     setLoading(true);
     setError('');
     try {
+      // Debug authentication state
+      const token = localStorage.getItem('token');
+      console.log('=== AUTH DEBUG ===');
+      console.log('Current user:', user);
+      console.log('Token exists:', !!token);
+      console.log('Token preview:', token ? token.substring(0, 30) + '...' : 'NO TOKEN');
+
       const response = await messageService.getConversations();
       // Debug: Log the response structure
       console.log('=== MESSAGES API DEBUG ===');
@@ -45,6 +52,7 @@ const MessagesPage = () => {
       }
       setUnreadCounts(counts);
     } catch (err) {
+      console.error('Full error object:', err);
       setError(err.message || 'Failed to load conversations.');
     } finally {
       setLoading(false);

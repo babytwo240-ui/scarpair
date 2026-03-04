@@ -9,8 +9,16 @@ class SocketService {
 
   connect(token) {
     if (this.socket) {
+      console.log('🔌 Socket already exists, returning existing connection');
       return this.socket;
     }
+
+    if (!token) {
+      console.error('❌ No token provided to Socket.io connect()');
+      return null;
+    }
+
+    console.log('🔌 Connecting to Socket.io with token:', token.substring(0, 20) + '...');
 
     this.socket = io(SOCKET_URL, {
       auth: {
@@ -26,12 +34,12 @@ class SocketService {
       console.log('✅ WebSocket connected');
     });
 
-    this.socket.on('disconnect', () => {
-      console.log('❌ WebSocket disconnected');
+    this.socket.on('disconnect', (reason) => {
+      console.log('❌ WebSocket disconnected. Reason:', reason);
     });
 
     this.socket.on('error', (error) => {
-      console.error('WebSocket error:', error);
+      console.error('❌ WebSocket error:', error);
     });
 
     return this.socket;

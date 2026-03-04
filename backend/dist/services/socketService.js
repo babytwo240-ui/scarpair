@@ -18,13 +18,13 @@ function initializeSocket(io) {
             }
             const decoded = (0, userJwt_1.verifyUserToken)(token);
             if (!decoded) {
-                console.error('❌ Socket middleware: Invalid token');
-                return next(new Error('Invalid token'));
+                console.error('❌ Socket middleware: Invalid or expired token');
+                return next(new Error('Invalid or expired token'));
             }
             socket.userId = decoded.id;
             socket.userType = decoded.type;
             socket.userName = decoded.businessName || decoded.email;
-            console.log(`✅ Socket middleware: Auth passed for user ${socket.userId}`);
+            console.log(`✅ Socket middleware: Auth passed for user ${socket.userId} (${socket.userName})`);
             next();
         }
         catch (error) {
@@ -188,9 +188,9 @@ function initializeSocket(io) {
                 socket.emit('error', 'Failed to send message');
             }
         });
-        socket.on('disconnect', async () => {
+        socket.on('disconnect', async (reason) => {
             try {
-                console.log(`❌ User ${socket.userId} disconnected`);
+                console.log(`❌ User ${socket.userId} disconnected. Reason: ${reason}`);
                 await redis_1.default.hdel(`user:${socket.userId}:sockets`, socket.id);
                 const remainingSockets = await redis_1.default.hlen(`user:${socket.userId}:sockets`);
                 if (remainingSockets === 0) {

@@ -6,17 +6,23 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.checkRedisConnection = checkRedisConnection;
 const ioredis_1 = __importDefault(require("ioredis"));
 async function checkRedisConnection() {
-    const testRedis = new ioredis_1.default({
-        host: process.env.REDIS_HOST || 'localhost',
-        port: parseInt(process.env.REDIS_PORT || '6379'),
-        password: process.env.REDIS_PASSWORD,
+    const testOptions = {
         retryStrategy: () => null,
         enableReadyCheck: false,
         maxRetriesPerRequest: 1,
         connectTimeout: 5000,
         commandTimeout: 5000,
         ...(process.env.REDIS_SSL === 'true' && { tls: {} })
-    });
+    };
+    // Use REDIS_URL if available (Render KV Store), otherwise use individual vars
+    const testRedis = process.env.REDIS_URL
+        ? new ioredis_1.default(process.env.REDIS_URL, testOptions)
+        : new ioredis_1.default({
+            host: process.env.REDIS_HOST || 'localhost',
+            port: parseInt(process.env.REDIS_PORT || '6379'),
+            password: process.env.REDIS_PASSWORD,
+            ...testOptions
+        });
     testRedis.on('error', () => {
     });
     try {

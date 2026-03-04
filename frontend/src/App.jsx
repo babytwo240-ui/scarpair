@@ -46,8 +46,13 @@ const AppContent = () => {
 
   useEffect(() => {
     if (user && token) {
+      console.log('🔌 [APP] Socket connection triggered');
+      console.log('🔌 [APP] User:', user.email || user.businessName);
+      console.log('🔌 [APP] Token preview:', token.substring(0, 30) + '...');
+      
       // Connect socket when user logs in
-      socketService.connect(token);
+      const socket = socketService.connect(token);
+      console.log('🔌 [APP] Socket returned:', !!socket);
 
       // Listen for new notifications (only register listener once)
       if (!notificationListenerRef.current) {

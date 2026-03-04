@@ -50,6 +50,8 @@ validateEnvironment();
 const app = (0, express_1.default)();
 const server = (0, http_1.createServer)(app);
 const PORT = process.env.PORT || 5000;
+// ✅ Trust proxy (needed for Render and other reverse proxies)
+app.set('trust proxy', true);
 const corsOrigins = (process.env.CORS_ORIGINS || 'http://localhost:3000,http://localhost:5173').split(',');
 app.use((0, cors_1.default)({
     origin: corsOrigins,

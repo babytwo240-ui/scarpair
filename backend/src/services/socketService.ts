@@ -21,15 +21,15 @@ export function initializeSocket(io: SocketIOServer) {
 
       const decoded = verifyUserToken(token);
       if (!decoded) {
-        console.error('❌ Socket middleware: Invalid token');
-        return next(new Error('Invalid token'));
+        console.error('❌ Socket middleware: Invalid or expired token');
+        return next(new Error('Invalid or expired token'));
       }
 
       socket.userId = decoded.id;
       socket.userType = decoded.type;
       socket.userName = decoded.businessName || decoded.email;
 
-      console.log(`✅ Socket middleware: Auth passed for user ${socket.userId}`);
+      console.log(`✅ Socket middleware: Auth passed for user ${socket.userId} (${socket.userName})`);
       next();
     } catch (error) {
       console.error('❌ Socket middleware error:', error);
@@ -230,9 +230,9 @@ export function initializeSocket(io: SocketIOServer) {
       }
     });
 
-    socket.on('disconnect', async () => {
+    socket.on('disconnect', async (reason) => {
       try {
-        console.log(`❌ User ${socket.userId} disconnected`);
+        console.log(`❌ User ${socket.userId} disconnected. Reason: ${reason}`);
 
         await redisClient.hdel(`user:${socket.userId}:sockets`, socket.id);
 
