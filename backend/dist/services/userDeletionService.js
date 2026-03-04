@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteUserWithCascade = void 0;
+const sequelize_1 = require("sequelize");
 const deleteUserWithCascade = async (userId, userType, sequelizeInstance) => {
     const transaction = await sequelizeInstance.transaction();
     try {
@@ -17,38 +18,17 @@ const deleteUserWithCascade = async (userId, userType, sequelizeInstance) => {
         const Collection = models.Collection;
         const Message = models.Message;
         const Conversation = models.Conversation;
-        if (userType === 'business') {
-            const wastePostIds = await WastePost.findAll({
-                where: { businessId: userId },
-                attributes: ['id'],
-                transaction
-            }, { raw: true });
-            if (wastePostIds.length > 0) {
-                const postIds = wastePostIds.map((p) => p.id);
-                const collectionsDeleted = await Collection.destroy({
-                    where: { postId: postIds },
-                    transaction
-                });
-                deletedCount.collections += collectionsDeleted;
-                const postsDeleted = await WastePost.destroy({
-                    where: { businessId: userId },
-                    transaction
-                });
-                deletedCount.wastePosts += postsDeleted;
-            }
-            const businessCollectionsDeleted = await Collection.destroy({
-                where: { businessId: userId },
+        const Notification = models.Notification;
+        // Step 1: Delete all notifications related to this user
+        if (Notification) {
+            const notificationsDeleted = await Notification.destroy({
+                where: {
+                    sequelize: sequelizeInstance.literal(`userId = ${userId} OR senderId = ${userId}`)
+                },
                 transaction
             });
-            deletedCount.collections += businessCollectionsDeleted;
         }
-        if (userType === 'recycler') {
-            const collectionsDeleted = await Collection.destroy({
-                where: { recyclerId: userId },
-                transaction
-            });
-            deletedCount.collections += collectionsDeleted;
-        }
+        // Step 2: Delete messages
         if (Message) {
             const messagesDeleted = await Message.destroy({
                 where: { userId: userId },
@@ -56,10 +36,11 @@ const deleteUserWithCascade = async (userId, userType, sequelizeInstance) => {
             });
             deletedCount.messages += messagesDeleted;
         }
+        // Step 3: Delete conversations
         if (Conversation) {
             const conversationsDeleted = await Conversation.destroy({
                 where: {
-                    or: [
+                    [sequelize_1.Op.or]: [
                         { participant1Id: userId },
                         { participant2Id: userId }
                     ]
@@ -68,6 +49,38 @@ const deleteUserWithCascade = async (userId, userType, sequelizeInstance) => {
             });
             deletedCount.conversations += conversationsDeleted;
         }
+        // Step 4: Delete all collections involving this user (regardless of status)
+        if (userType === 'business') {
+            // Delete collections where this business posted the waste
+            const collectionsForPostsDeleted = await Collection.destroy({
+                where: sequelizeInstance.literal(`postId IN (SELECT id FROM WastePosts WHERE businessId = ${userId})`),
+                transaction
+            });
+            deletedCount.collections += collectionsForPostsDeleted;
+            // Delete collections where this business is the collector
+            const collectionsAsCollectorDeleted = await Collection.destroy({
+                where: { businessId: userId },
+                transaction
+            });
+            deletedCount.collections += collectionsAsCollectorDeleted;
+        }
+        else {
+            // For recycler: delete collections where they are the collector
+            const collectionsDeleted = await Collection.destroy({
+                where: { recyclerId: userId },
+                transaction
+            });
+            deletedCount.collections += collectionsDeleted;
+        }
+        // Step 5: Delete all waste posts
+        if (userType === 'business') {
+            const postsDeleted = await WastePost.destroy({
+                where: { businessId: userId },
+                transaction
+            });
+            deletedCount.wastePosts += postsDeleted;
+        }
+        // Step 6: Delete the user
         const userDeleted = await User.destroy({
             where: { id: userId },
             transaction
