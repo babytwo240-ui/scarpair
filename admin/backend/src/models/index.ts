@@ -6,9 +6,6 @@ import config from '../config/database';
 const envFile = process.env.NODE_ENV === 'production' ? '.env.production' : '.env.local';
 dotenv.config({ path: path.join(__dirname, '..', '..', envFile) });
 
-const envFile = process.env.NODE_ENV === 'production' ? '.env.production' : '.env.local';
-dotenv.config({ path: path.join(__dirname, '..', '..', envFile) });
-
 const env = (process.env.NODE_ENV || 'development') as keyof typeof config;
 const dbConfig = config[env];
 
