@@ -85,13 +85,21 @@ This creates the `admin_users` table. The `users` and `materials` tables already
 
 Since we don't have a seeder yet, insert the default admin manually:
 
+**SECURITY NOTE:** Admin credentials are now configured via environment variables (`ADMIN_USERNAME` and `ADMIN_PASSWORD`) in `.env.local` or `.env.production`. Do NOT hardcode credentials in the database.
+
+### For Development Only:
+If you need to set up admin credentials in the database for testing:
+
 ```bash
 mysql -u root -p scrapair_dev
 
+-- First, generate a secure bcrypted password:
+-- Use: node -e "const bcrypt = require('bcryptjs'); console.log(bcrypt.hashSync('YourSecurePassword123!', 10));"
+
 INSERT INTO admin_users (username, password, email, role, isActive, createdAt, updatedAt)
 VALUES (
-  'admin11',
-  '$2a$10$K1x5nxO9K1x5nxO9K1x5nxO9K1x5nxO9K1x5nxO9K1x5nxO9K1x5n',  -- bcrypt: asdqwe123
+  'admin',
+  '[INSERT BCRYPTED PASSWORD HERE]',
   'admin@scrapair.com',
   'super_admin',
   true,
@@ -102,9 +110,12 @@ VALUES (
 EXIT;
 ```
 
-Or use the bcryptjs CLI:
+### For Production:
+Admin credentials MUST be configured via environment variables:
 ```bash
-node -e "const bcrypt = require('bcryptjs'); console.log(bcrypt.hashSync('asdqwe123', 10));"
+# In .env.production:
+ADMIN_USERNAME=your_secure_username
+ADMIN_PASSWORD=your_very_secure_password_here
 ```
 
 ### Step 6: Start Admin Backend
@@ -211,12 +222,29 @@ createdAt, updatedAt
 
 ---
 
-## Default Admin Credentials
+## Admin Credentials Configuration
 
-**Username:** admin11  
-**Password:** asdqwe123
+Admin credentials are now **environment-based** for security:
 
-⚠️ **IMPORTANT**: Change these credentials in production!
+**Development (.env.local):**
+```
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=your_dev_password
+```
+
+**Production (.env.production):**
+```
+ADMIN_USERNAME=your_secure_username
+ADMIN_PASSWORD=your_very_secure_password_here
+```
+
+⚠️ **CRITICAL**: 
+- Never hardcode credentials in the codebase
+- Use strong passwords in production (minimum 12 characters, mixed case, numbers, symbols)
+- Use different credentials for development and production
+- Store credentials securely (environment variables only)
+- If ADMIN_PASSWORD is not set in production, the application will fail to start
+````
 
 ---
 
