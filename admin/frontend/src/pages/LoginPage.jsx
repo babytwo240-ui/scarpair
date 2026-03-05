@@ -112,15 +112,9 @@ const LoginPage = () => {
             </Box>
 
             {/* Demo Credentials */}
-            <Box sx={{ marginTop: 3, padding: 2, backgroundColor: '#e8f5e9', borderRadius: 1 }}>
+            <Box sx={{ marginTop: 3, padding: 2, backgroundColor: '#fff3e0', borderRadius: 1 }}>
               <Typography variant="caption" sx={{ display: 'block', marginBottom: 1, fontWeight: 'bold' }}>
-                Demo Credentials:
-              </Typography>
-              <Typography variant="caption" sx={{ display: 'block' }}>
-                Username: <code>admin11</code>
-              </Typography>
-              <Typography variant="caption">
-                Password: <code>asdqwe123</code>
+                ℹ️ Admin credentials are securely configured. Contact your administrator if you need access.
               </Typography>
             </Box>
           </CardContent>
