@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import path from 'path';
 import morganMiddleware from './config/morganConfig';
 import adminRoutes from './routes/adminRoutes';
+import { sequelize } from './models';
 
 const envFile = process.env.NODE_ENV === 'production' ? '.env.production' : '.env.local';
 dotenv.config({ path: path.join(__dirname, '..', envFile) });
@@ -46,15 +47,31 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
 });
 
 const serverStartTime = Date.now();
-const server = app.listen(PORT, () => {
-  const baseUrl = process.env.ADMIN_BACKEND_BASE_URL || `http://localhost:${PORT}`;
-  logger.info(`✨ Admin server running at ${baseUrl}`);
-  logger.info(`📚 API available at ${baseUrl}/api/admin`);
-});
 
-server.on('error', (err: any) => {
-  logger.error(`Server error: ${err.message}`, err);
-});
+async function startServer() {
+  try {
+    logger.info('🔍 Connecting to database...');
+    await sequelize.authenticate();
+    logger.info('✅ Database connected successfully');
+  } catch (error: any) {
+    logger.error(`❌ Database connection failed: ${error.message}`);
+    logger.error(`Error details: ${JSON.stringify(error, null, 2)}`);
+    logger.error(error);
+    process.exit(1);
+  }
+
+  const server = app.listen(PORT, () => {
+    const baseUrl = process.env.ADMIN_BACKEND_BASE_URL || `http://localhost:${PORT}`;
+    logger.info(`✨ Admin server running at ${baseUrl}`);
+    logger.info(`📚 API available at ${baseUrl}/api/admin`);
+  });
+
+  server.on('error', (err: any) => {
+    logger.error(`Server error: ${err.message}`, err);
+  });
+}
+
+startServer();
 
 export default app;
 

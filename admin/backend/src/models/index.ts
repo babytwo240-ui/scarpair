@@ -6,8 +6,18 @@ import config from '../config/database';
 const envFile = process.env.NODE_ENV === 'production' ? '.env.production' : '.env.local';
 dotenv.config({ path: path.join(__dirname, '..', '..', envFile) });
 
+const envFile = process.env.NODE_ENV === 'production' ? '.env.production' : '.env.local';
+dotenv.config({ path: path.join(__dirname, '..', '..', envFile) });
+
 const env = (process.env.NODE_ENV || 'development') as keyof typeof config;
 const dbConfig = config[env];
+
+console.log('🔧 DEBUG: Database Config');
+console.log('envFile:', envFile);
+console.log('NODE_ENV:', process.env.NODE_ENV);
+console.log('env:', env); 
+console.log('DB_HOST env var:', process.env.DB_HOST);
+console.log('dbConfig:', { host: dbConfig.host, port: dbConfig.port, database: dbConfig.database, username: dbConfig.username });
 
 const sequelize = new Sequelize(
   dbConfig.database,
@@ -18,6 +28,7 @@ const sequelize = new Sequelize(
     port: dbConfig.port,
     dialect: dbConfig.dialect,
     logging: dbConfig.logging,
+    timezone: 'UTC',
     pool: {
       max: 5,
       min: 0,
@@ -28,12 +39,14 @@ const sequelize = new Sequelize(
       timestamps: true,
       underscored: false
     },
-    dialectOptions: {
-      ssl: {
-        require: true,
-        rejectUnauthorized: false
+    ...(dbConfig.host && dbConfig.host.includes('supabase') && {
+      dialectOptions: {
+        ssl: {
+          require: true,
+          rejectUnauthorized: false
+        }
       }
-    }
+    })
   }
 );
 
