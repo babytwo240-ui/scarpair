@@ -1,6 +1,7 @@
 import express from 'express';
 import * as wastePostController from '../controllers/wastePostController';
 import { authenticateUser } from '../middleware/userAuthMiddleware';
+import { RateLimiter } from '../middleware/rateLimiter';
 import { validateCreateWastePost, validateUpdateWastePost, validateSearchFilters } from '../middleware/wastePostValidation';
 
 const router = express.Router();
@@ -67,7 +68,7 @@ router.get('/categories', wastePostController.getWasteCategories);
  *       401:
  *         description: Unauthorized
  */
-router.post('/', authenticateUser, validateCreateWastePost, wastePostController.createWastePost);
+router.post('/', authenticateUser, RateLimiter.middleware('createWastePost'), validateCreateWastePost, wastePostController.createWastePost);
 
 /**
  * @swagger
@@ -368,7 +369,7 @@ router.get('/:id/status', wastePostController.getWastePostStatus);
  *         description: Post not found
  */
 router.get('/:id', wastePostController.getWastePostDetails); 
-router.put('/:id', authenticateUser, validateUpdateWastePost, wastePostController.updateWastePost); 
+router.put('/:id', authenticateUser, RateLimiter.middleware('updateWastePost'), validateUpdateWastePost, wastePostController.updateWastePost); 
 router.delete('/:id', authenticateUser, wastePostController.deleteWastePost); 
 
 export default router;

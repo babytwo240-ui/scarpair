@@ -17,9 +17,20 @@ const corsOrigins = (process.env.CORS_ORIGIN || 'http://localhost:4000,http://12
 app.use(cors({
   origin: corsOrigins,
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  optionsSuccessStatus: 200
 }));
+
+// Explicit OPTIONS handler for preflight requests
+app.options('*', cors({
+  origin: corsOrigins,
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  optionsSuccessStatus: 200
+}));
+
 app.use(express.json());
 app.use(morganMiddleware);
 
@@ -55,8 +66,10 @@ async function startServer() {
     logger.info('✅ Database connected successfully');
   } catch (error: any) {
     logger.error(`❌ Database connection failed: ${error.message}`);
-    logger.error(`Error details: ${JSON.stringify(error, null, 2)}`);
-    logger.error(error);
+    if (NODE_ENV === 'development') {
+      logger.error(`Error details: ${JSON.stringify(error, null, 2)}`);
+      logger.error(error);
+    }
     process.exit(1);
   }
 

@@ -7,9 +7,6 @@ declare global {
         }
     }
 }
-/**
- * Middleware to authenticate JWT tokens
- */
 declare const authenticate: (req: Request, res: Response, next: NextFunction) => any;
 export { authenticate };
 //# sourceMappingURL=authMiddleware.d.ts.map

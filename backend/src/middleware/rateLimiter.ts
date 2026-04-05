@@ -3,13 +3,20 @@ import { Request, Response, NextFunction } from 'express';
 import { rateLimitConfig } from '../config/rateLimits';
 import redisClient from '../config/redis';
 
+export type LimitType = keyof typeof rateLimitConfig;
+
 export class RateLimiter {
   static async checkLimit(
     userId: string,
     ip: string,
-    limitType: 'typing' | 'createConversation' | 'sendMessage' | 'getMessages' | 'getConversations'
+    limitType: LimitType
   ): Promise<boolean> {
     const config = rateLimitConfig[limitType];
+    if (!config) {
+      console.warn(`Unknown rate limit type: ${limitType}`);
+      return true;
+    }
+
     const keys = config.keyGenerator(userId, ip);
 
     try {
@@ -37,7 +44,7 @@ export class RateLimiter {
     }
   }
 
-  static middleware(limitType: 'typing' | 'createConversation' | 'sendMessage' | 'getMessages' | 'getConversations') {
+  static middleware(limitType: LimitType) {
     return async (req: Request, res: Response, next: NextFunction) => {
       const userId = (req as any).user?.id || 'anonymous';
       const ip = req.ip || 'unknown';
@@ -63,20 +70,24 @@ export class RateLimiter {
 
   static async resetLimit(
     userId: string,
-    limitType: 'typing' | 'createConversation' | 'sendMessage' | 'getMessages' | 'getConversations'
+    limitType: LimitType
   ): Promise<void> {
     const config = rateLimitConfig[limitType];
+    if (!config) return;
+
     const keys = config.keyGenerator(userId, '');
 
     try {
       await redisClient.del(keys.user);
     } catch (error) {
+      console.error(`Failed to reset limit ${limitType}:`, error);
     }
   }
+
   static async getStatus(
     userId: string,
     ip: string,
-    limitType: 'typing' | 'createConversation' | 'sendMessage' | 'getMessages' | 'getConversations'
+    limitType: LimitType
   ): Promise<{
     userCount: number;
     ipCount: number;
@@ -85,6 +96,16 @@ export class RateLimiter {
     windowMs: number;
   }> {
     const config = rateLimitConfig[limitType];
+    if (!config) {
+      return {
+        userCount: 0,
+        ipCount: 0,
+        maxPerUser: 0,
+        maxPerIP: 0,
+        windowMs: 0
+      };
+    }
+
     const keys = config.keyGenerator(userId, ip);
 
     try {

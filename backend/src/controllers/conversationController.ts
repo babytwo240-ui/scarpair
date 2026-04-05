@@ -12,6 +12,7 @@ export class ConversationController {
       const offset = (page - 1) * limit;
 
       const conversations = await Conversation.findAll({
+        attributes: ['id', 'participant1Id', 'participant2Id', 'lastMessageAt', 'createdAt'],
         where: {
           [Op.or]: [
             { participant1Id: userId },

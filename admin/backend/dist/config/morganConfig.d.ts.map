@@ -1,1 +1,1 @@
-{"version":3,"file":"morganConfig.d.ts","sourceRoot":"","sources":["../../src/config/morganConfig.ts"],"names":[],"mappings":"AACA,OAAO,EAAE,OAAO,EAAE,QAAQ,EAAE,MAAM,SAAS,CAAC;AAmB5C,QAAA,MAAM,gBAAgB,oLAdpB,CADuC,yBAoCvC,CAAC;AAEH,eAAe,gBAAgB,CAAC"}
+{"version":3,"file":"morganConfig.d.ts","sourceRoot":"","sources":["../../src/config/morganConfig.ts"],"names":[],"mappings":"AACA,OAAO,EAAE,OAAO,EAAE,QAAQ,EAAE,MAAM,SAAS,CAAC;AAe5C,QAAA,MAAM,gBAAgB,oLAXY,CAAC,yBA4BjC,CAAC;AAEH,eAAe,gBAAgB,CAAC"}

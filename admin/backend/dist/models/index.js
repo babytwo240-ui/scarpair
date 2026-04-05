@@ -8,7 +8,6 @@ const sequelize_1 = require("sequelize");
 const dotenv_1 = __importDefault(require("dotenv"));
 const path_1 = __importDefault(require("path"));
 const database_1 = __importDefault(require("../config/database"));
-// Load the correct .env file
 const envFile = process.env.NODE_ENV === 'production' ? '.env.production' : '.env.local';
 dotenv_1.default.config({ path: path_1.default.join(__dirname, '..', '..', envFile) });
 const env = (process.env.NODE_ENV || 'development');
@@ -18,7 +17,8 @@ const sequelize = new sequelize_1.Sequelize(dbConfig.database, dbConfig.username
     port: dbConfig.port,
     dialect: dbConfig.dialect,
     logging: dbConfig.logging,
-    pool: {
+    timezone: 'UTC',
+    pool: dbConfig.pool || {
         max: 5,
         min: 0,
         acquire: 30000,
@@ -28,16 +28,16 @@ const sequelize = new sequelize_1.Sequelize(dbConfig.database, dbConfig.username
         timestamps: true,
         underscored: false
     },
-    // SSL settings for Supabase connection pooler
-    dialectOptions: {
-        ssl: {
-            require: true,
-            rejectUnauthorized: false
+    ...(dbConfig.host && dbConfig.host.includes('supabase') && {
+        dialectOptions: {
+            ssl: {
+                require: true,
+                rejectUnauthorized: false
+            }
         }
-    }
+    })
 });
 exports.sequelize = sequelize;
-// Import models
 const User = require('./User')(sequelize);
 exports.User = User;
 const Material = require('./Material')(sequelize);
@@ -54,7 +54,6 @@ const PostRating = require('./PostRating')(sequelize);
 exports.PostRating = PostRating;
 const SystemLog = require('./SystemLog')(sequelize);
 exports.SystemLog = SystemLog;
-// Register models on sequelize.models
 sequelize.models = {
     User,
     Material,
@@ -65,7 +64,6 @@ sequelize.models = {
     PostRating,
     SystemLog
 };
-// Initialize models with sequelize instance
 const models = {
     User,
     Material,
@@ -76,16 +74,12 @@ const models = {
     PostRating,
     SystemLog
 };
-// Set up associations
 Object.keys(models).forEach((key) => {
     if (models[key].associate) {
         models[key].associate(models);
     }
 });
-// Sync models with database (only in development, and non-blocking)
 if (process.env.NODE_ENV === 'development') {
-    // Don't sync - table already exists from main backend migrations
-    // Just verify connection is working
     sequelize.authenticate()
         .then(() => {
     })
@@ -93,7 +87,6 @@ if (process.env.NODE_ENV === 'development') {
     });
 }
 else {
-    // In production, skip auto-sync to avoid startup delays
 }
 exports.default = models;
 //# sourceMappingURL=index.js.map

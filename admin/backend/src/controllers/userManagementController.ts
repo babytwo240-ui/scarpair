@@ -1,5 +1,9 @@
 ﻿import { Request, Response } from 'express';
 import { sequelize } from '../models';
+import { logUserVerified, logUserDeleted } from '../utils/auditLogger';
+
+const NODE_ENV = process.env.NODE_ENV || 'development';
+
 const getAllUsers = async (req: Request, res: Response): Promise<any> => {
   try {
     const { type, verified, page = 1, limit = 10, search = '' } = req.query;
@@ -7,7 +11,7 @@ const getAllUsers = async (req: Request, res: Response): Promise<any> => {
     const User = (sequelize as any).models.User;
     
     if (!User) {
-      return res.status(500).json({ error: 'User model not initialized', debug: 'User model missing' });
+      return res.status(500).json({ error: 'User model not initialized' });
     }
     const whereClause: any = {};
     
@@ -76,7 +80,10 @@ const getAllUsers = async (req: Request, res: Response): Promise<any> => {
       pages: Math.ceil(totalCount / limitNum)
     });
   } catch (error: any) {
-    res.status(500).json({ error: 'Failed to fetch users', details: error.message });
+    res.status(500).json({ 
+      error: 'Failed to fetch users',
+      ...(NODE_ENV === 'development' && { details: error.message })
+    });
   }
 };
 
@@ -124,7 +131,10 @@ const getUserById = async (req: Request, res: Response): Promise<any> => {
       }
     });
   } catch (error: any) {
-    res.status(500).json({ error: 'Failed to fetch user details', details: error.message });
+    res.status(500).json({ 
+      error: 'Failed to fetch user details',
+      ...(NODE_ENV === 'development' && { details: error.message })
+    });
   }
 };
 const toggleUserVerification = async (req: Request, res: Response): Promise<any> => {
@@ -144,6 +154,17 @@ const toggleUserVerification = async (req: Request, res: Response): Promise<any>
     }
 
     await user.update({ isVerified });
+    
+    // Log user verification change
+    const adminUsername = (req as any)?.admin?.username || 'admin';
+    await logUserVerified(
+      1, // Admin ID (from JWT if available)
+      user.id as any,
+      isVerified,
+      user.email,
+      req
+    );
+    
     const notificationMessage = isVerified
       ? 'Your account has been verified by the admin. You can now post materials and waste.'
       : 'Your account verification has been removed by the admin.';
@@ -187,7 +208,10 @@ const toggleUserVerification = async (req: Request, res: Response): Promise<any>
       }
     });
   } catch (error: any) {
-    res.status(500).json({ error: 'Failed to update user verification status', details: error.message });
+    res.status(500).json({ 
+      error: 'Failed to update user verification status',
+      ...(NODE_ENV === 'development' && { details: error.message })
+    });
   }
 };
 const deleteUser = async (req: Request, res: Response): Promise<any> => {
@@ -203,8 +227,19 @@ const deleteUser = async (req: Request, res: Response): Promise<any> => {
 
     const userId = user.id;
     const userName = user.email;
+    const userType = user.type;
 
     await user.destroy();
+
+    // Log user deletion
+    const adminUsername = (req as any)?.admin?.username || 'admin';
+    await logUserDeleted(
+      1, // Admin ID (from JWT if available)
+      userId as any,
+      userName,
+      userType,
+      req
+    );
 
     res.status(200).json({
       message: 'User deleted successfully',
@@ -215,7 +250,10 @@ const deleteUser = async (req: Request, res: Response): Promise<any> => {
       }
     });
   } catch (error: any) {
-    res.status(500).json({ error: 'Failed to delete user', details: error.message });
+    res.status(500).json({ 
+      error: 'Failed to delete user',
+      ...(NODE_ENV === 'development' && { details: error.message })
+    });
   }
 };
 

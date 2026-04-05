@@ -5,17 +5,32 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.verifyToken = exports.generateToken = exports.verifyCredentials = exports.JWT_EXPIRATION = exports.JWT_SECRET = exports.ADMIN_CREDENTIALS = void 0;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+const dotenv_1 = __importDefault(require("dotenv"));
+const path_1 = __importDefault(require("path"));
+// Load environment variables
+const envFile = process.env.NODE_ENV === 'production' ? '.env.production' : '.env.local';
+dotenv_1.default.config({ path: path_1.default.join(__dirname, '../../', envFile) });
+const NODE_ENV = process.env.NODE_ENV || 'development';
 const ADMIN_CREDENTIALS = {
-    username: 'admin11',
-    password: 'asdqwe123'
+    username: process.env.ADMIN_USERNAME || 'admin',
+    password: process.env.ADMIN_PASSWORD || ''
 };
 exports.ADMIN_CREDENTIALS = ADMIN_CREDENTIALS;
-const JWT_SECRET = process.env.JWT_SECRET || 'your_super_secret_jwt_key_change_in_production';
+// Validate admin credentials are properly configured
+if (!process.env.ADMIN_PASSWORD || process.env.ADMIN_PASSWORD === '') {
+    if (NODE_ENV === 'production') {
+        throw new Error('❌ CRITICAL: ADMIN_PASSWORD must be set in production environment');
+    }
+}
+// Validate JWT_SECRET
+const JWT_SECRET = process.env.JWT_SECRET || (NODE_ENV === 'development' ? 'dev_jwt_secret_key_12345678' : '');
 exports.JWT_SECRET = JWT_SECRET;
+if (!process.env.JWT_SECRET && NODE_ENV === 'production') {
+    throw new Error('❌ CRITICAL: JWT_SECRET must be set in production environment');
+}
 const JWT_EXPIRATION = process.env.JWT_EXPIRATION || '24h';
 exports.JWT_EXPIRATION = JWT_EXPIRATION;
 /**
- * Verify admin credentials
  * @param {string} username
  * @param {string} password
  * @returns {boolean}
@@ -25,9 +40,8 @@ const verifyCredentials = (username, password) => {
 };
 exports.verifyCredentials = verifyCredentials;
 /**
- * Generate JWT token
- * @param {AdminPayload} payload - Token payload
- * @returns {string} JWT token
+ * @param {AdminPayload} payload
+ * @returns {string}
  */
 const generateToken = (payload) => {
     const options = { expiresIn: JWT_EXPIRATION };
@@ -35,9 +49,8 @@ const generateToken = (payload) => {
 };
 exports.generateToken = generateToken;
 /**
- * Verify JWT token
  * @param {string} token
- * @returns {AdminPayload | null} Decoded token or null if invalid
+ * @returns {AdminPayload | null}
  */
 const verifyToken = (token) => {
     try {

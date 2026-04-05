@@ -9,6 +9,10 @@ const redis_1 = __importDefault(require("../config/redis"));
 class RateLimiter {
     static async checkLimit(userId, ip, limitType) {
         const config = rateLimits_1.rateLimitConfig[limitType];
+        if (!config) {
+            console.warn(`Unknown rate limit type: ${limitType}`);
+            return true;
+        }
         const keys = config.keyGenerator(userId, ip);
         try {
             const userCount = await redis_1.default.incr(keys.user);
@@ -53,15 +57,27 @@ class RateLimiter {
     }
     static async resetLimit(userId, limitType) {
         const config = rateLimits_1.rateLimitConfig[limitType];
+        if (!config)
+            return;
         const keys = config.keyGenerator(userId, '');
         try {
             await redis_1.default.del(keys.user);
         }
         catch (error) {
+            console.error(`Failed to reset limit ${limitType}:`, error);
         }
     }
     static async getStatus(userId, ip, limitType) {
         const config = rateLimits_1.rateLimitConfig[limitType];
+        if (!config) {
+            return {
+                userCount: 0,
+                ipCount: 0,
+                maxPerUser: 0,
+                maxPerIP: 0,
+                windowMs: 0
+            };
+        }
         const keys = config.keyGenerator(userId, ip);
         try {
             const userCount = parseInt((await redis_1.default.get(keys.user)) || '0');

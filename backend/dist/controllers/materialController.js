@@ -32,9 +32,13 @@ var __importStar = (this && this.__importStar) || (function () {
         return result;
     };
 })();
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getRecommendedMaterials = exports.getAllMaterials = exports.createMaterial = void 0;
 const materialService = __importStar(require("../services/materialService"));
+const cacheService_1 = __importDefault(require("../services/cacheService"));
 const createMaterial = (req, res) => {
     try {
         const { businessName, materialType, quantity, description, contactEmail } = req.body;
@@ -50,6 +54,8 @@ const createMaterial = (req, res) => {
             description,
             contactEmail
         });
+        // Invalidate cache on create
+        cacheService_1.default.invalidateCachePrefix('materials').catch(err => console.error('Failed to invalidate materials cache:', err));
         res.status(201).json({
             message: 'Material posted successfully',
             data: material
@@ -60,13 +66,30 @@ const createMaterial = (req, res) => {
     }
 };
 exports.createMaterial = createMaterial;
-const getAllMaterials = (req, res) => {
+const getAllMaterials = async (req, res) => {
     try {
+        const cacheKey = cacheService_1.default.generateCacheKey('materials');
+        // Try to get from cache first
+        const cached = await cacheService_1.default.getCached(cacheKey);
+        if (cached) {
+            res.set('X-Cache', 'HIT');
+            return res.status(200).json({
+                message: 'All materials retrieved (from cache)',
+                count: cached.length,
+                data: cached,
+                cached: true
+            });
+        }
+        // Not cached, fetch from service
+        res.set('X-Cache', 'MISS');
         const materials = materialService.getAllMaterials();
+        // Cache the result for 1 hour
+        cacheService_1.default.setCached(cacheKey, materials, 3600).catch(err => console.error('Failed to cache materials:', err));
         res.status(200).json({
             message: 'All materials retrieved',
             count: materials.length,
-            data: materials
+            data: materials,
+            cached: false
         });
     }
     catch (error) {
@@ -75,13 +98,29 @@ const getAllMaterials = (req, res) => {
 };
 exports.getAllMaterials = getAllMaterials;
 // Get recommended materials sa artist
-const getRecommendedMaterials = (req, res) => {
+const getRecommendedMaterials = async (req, res) => {
     try {
+        const cacheKey = cacheService_1.default.generateCacheKey('materials', 'recommended');
+        // Try cache
+        const cached = await cacheService_1.default.getCached(cacheKey);
+        if (cached) {
+            res.set('X-Cache', 'HIT');
+            return res.status(200).json({
+                message: 'Artist recommended materials (from cache)',
+                count: cached.length,
+                data: cached,
+                cached: true
+            });
+        }
+        res.set('X-Cache', 'MISS');
         const recommendedMaterials = materialService.getRecommendedMaterials();
+        // Cache for 1 hour
+        cacheService_1.default.setCached(cacheKey, recommendedMaterials, 3600).catch(err => console.error('Failed to cache recommended materials:', err));
         res.status(200).json({
             message: 'Artist recommended materials',
             count: recommendedMaterials.length,
-            data: recommendedMaterials
+            data: recommendedMaterials,
+            cached: false
         });
     }
     catch (error) {

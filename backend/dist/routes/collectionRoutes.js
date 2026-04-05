@@ -39,6 +39,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const collectionController = __importStar(require("../controllers/collectionController"));
 const userAuthMiddleware_1 = require("../middleware/userAuthMiddleware");
+const rateLimiter_1 = require("../middleware/rateLimiter");
 const collectionValidation_1 = require("../middleware/collectionValidation");
 const router = express_1.default.Router();
 /**
@@ -117,7 +118,7 @@ router.get('/', userAuthMiddleware_1.authenticateUser, collectionValidation_1.va
  *       400:
  *         description: Invalid input
  */
-router.post('/request', userAuthMiddleware_1.authenticateUser, collectionValidation_1.validateCollectionRequest, collectionController.requestCollection);
+router.post('/request', userAuthMiddleware_1.authenticateUser, rateLimiter_1.RateLimiter.middleware('createCollection'), collectionValidation_1.validateCollectionRequest, collectionController.requestCollection);
 /**
  * @swagger
  * /api/collections/{id}/schedule:
@@ -146,7 +147,7 @@ router.post('/request', userAuthMiddleware_1.authenticateUser, collectionValidat
  *       200:
  *         description: Collection scheduled
  */
-router.put('/:id/schedule', userAuthMiddleware_1.authenticateUser, collectionValidation_1.validateScheduleCollection, collectionController.scheduleCollection);
+router.put('/:id/schedule', userAuthMiddleware_1.authenticateUser, rateLimiter_1.RateLimiter.middleware('updateCollection'), collectionValidation_1.validateScheduleCollection, collectionController.scheduleCollection);
 /**
  * @swagger
  * /api/collections/{id}/confirm:

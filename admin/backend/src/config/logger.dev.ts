@@ -36,7 +36,7 @@ const devTransports: winston.transport[] = [
 ];
 
 const devLogger = winston.createLogger({
-  level: 'debug',
+  level: 'info',
   format: devLogFormat,
   transports: devTransports,
   exceptionHandlers: [

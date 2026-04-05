@@ -15,11 +15,16 @@ import {
   Paper,
   Chip,
   TextField,
-  Button
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions
 } from '@mui/material';
 import { format } from 'date-fns';
 import SearchIcon from '@mui/icons-material/Search';
 import RefreshIcon from '@mui/icons-material/Refresh';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 const AdminSystemLogsPage = () => {
   const navigate = useNavigate();
@@ -27,6 +32,8 @@ const AdminSystemLogsPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [search, setSearch] = useState('');
+  const [clearDialogOpen, setClearDialogOpen] = useState(false);
+  const [clearing, setClearing] = useState(false);
 
   useEffect(() => {
     fetchLogs();
@@ -52,6 +59,31 @@ const AdminSystemLogsPage = () => {
       setError(err.message || 'Failed to fetch logs');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const clearLogs = async () => {
+    setClearing(true);
+    try {
+      const token = localStorage.getItem('adminToken');
+      const res = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5498/api'}/admin/logs`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (res.ok) {
+        setLogs([]);
+        setClearDialogOpen(false);
+        setError('');
+        // Optionally show success message
+      } else {
+        const data = await res.json();
+        setError(data.message || 'Failed to clear logs');
+      }
+    } catch (err) {
+      setError(err.message || 'Failed to clear logs');
+    } finally {
+      setClearing(false);
     }
   };
 
@@ -86,13 +118,24 @@ const AdminSystemLogsPage = () => {
         <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
           System Logs
         </Typography>
-        <Button
-          variant="outlined"
-          startIcon={<RefreshIcon />}
-          onClick={fetchLogs}
-        >
-          Refresh
-        </Button>
+        <Box sx={{ display: 'flex', gap: 2 }}>
+          <Button
+            variant="outlined"
+            startIcon={<RefreshIcon />}
+            onClick={fetchLogs}
+          >
+            Refresh
+          </Button>
+          <Button
+            variant="contained"
+            color="error"
+            startIcon={<DeleteIcon />}
+            onClick={() => setClearDialogOpen(true)}
+            disabled={logs.length === 0 || clearing}
+          >
+            Clear Logs
+          </Button>
+        </Box>
       </Box>
 
       {error && <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>}
@@ -153,6 +196,38 @@ const AdminSystemLogsPage = () => {
           </TableBody>
         </Table>
       </TableContainer>
+
+      <Dialog
+        open={clearDialogOpen}
+        onClose={() => setClearDialogOpen(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle sx={{ fontWeight: 'bold' }}>
+          Clear All Logs?
+        </DialogTitle>
+        <DialogContent>
+          <Typography sx={{ mt: 2 }}>
+            Are you sure you want to permanently delete all system logs? This action cannot be undone.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={() => setClearDialogOpen(false)}
+            disabled={clearing}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={clearLogs}
+            variant="contained"
+            color="error"
+            disabled={clearing}
+          >
+            {clearing ? 'Clearing...' : 'Clear All Logs'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Container>
   );
 };

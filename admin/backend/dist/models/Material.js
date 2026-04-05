@@ -82,7 +82,6 @@ module.exports = (sequelize) => {
             }
         ]
     });
-    // Association with User
     Material.associate = (models) => {
         Material.belongsTo(models.User, {
             foreignKey: 'businessUserId',

@@ -112,7 +112,7 @@ const sendPasswordResetEmail = async (email, code) => {
         });
         // Generate reset link with token
         const frontendUrl = process.env.FRONTEND_BASE_URL || 'http://localhost:3000';
-        const resetLink = `${frontendUrl}/reset-password?token=${code}`;
+        const resetLink = `${frontendUrl}/reset-password?email=${encodeURIComponent(email)}&token=${code}`;
         const htmlContent = `
       <h2>Reset Your Password</h2>
       <p>Click the link below to reset your password:</p>

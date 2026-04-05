@@ -15,6 +15,7 @@ class ConversationController {
             const limit = Math.min(parseInt(req.query.limit) || 20, 100);
             const offset = (page - 1) * limit;
             const conversations = await models_1.Conversation.findAll({
+                attributes: ['id', 'participant1Id', 'participant2Id', 'lastMessageAt', 'createdAt'],
                 where: {
                     [sequelize_1.Op.or]: [
                         { participant1Id: userId },
