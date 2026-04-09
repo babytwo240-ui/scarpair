@@ -36,6 +36,7 @@ const Conversation = require('./Conversation')(sequelize);
 const Message = require('./Message')(sequelize);
 const Notification = require('./Notification')(sequelize);
 const PasswordAudit = require('./PasswordAudit')(sequelize);
+const Subscription = require('./Subscription')(sequelize);
 
 
 const models: any = {
@@ -54,7 +55,8 @@ const models: any = {
   UserRating,
   PostRating,
   Report,
-  PasswordAudit
+  PasswordAudit,
+  Subscription
 };
 
 Object.keys(models).forEach((key) => {
@@ -110,7 +112,10 @@ User.hasMany(Report, { foreignKey: 'approvedBy', as: 'reportsApproved' });
 PasswordAudit.belongsTo(User, { foreignKey: 'userId' });
 User.hasMany(PasswordAudit, { foreignKey: 'userId', as: 'passwordAudits' });
 
+Subscription.belongsTo(User, { foreignKey: 'userId', as: 'user' });
+User.hasMany(Subscription, { foreignKey: 'userId', as: 'subscriptions' });
 
-export { sequelize, User, Material, WastePost, Collection, Conversation, Message, Notification, Review, PostMessage, SystemLog, WasteCategory, Feedback, UserRating, PostRating, Report, PasswordAudit };
+
+export { sequelize, User, Material, WastePost, Collection, Conversation, Message, Notification, Review, PostMessage, SystemLog, WasteCategory, Feedback, UserRating, PostRating, Report, PasswordAudit, Subscription };
 export type { ConversationInstance, MessageInstance, NotificationInstance };
 export default models;

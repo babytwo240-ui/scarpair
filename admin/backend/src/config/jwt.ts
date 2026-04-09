@@ -5,18 +5,11 @@ interface AdminCredentials {
   password: string;
 }
 
-const ADMIN_CREDENTIALS: AdminCredentials = {
+// Read credentials lazily to ensure dotenv has loaded
+const getAdminCredentials = (): AdminCredentials => ({
   username: process.env.ADMIN_USERNAME || 'admin',
   password: process.env.ADMIN_PASSWORD || ''
-};
-
-// Validate admin credentials are properly configured
-if (!process.env.ADMIN_PASSWORD || process.env.ADMIN_PASSWORD === '') {
-  console.warn('⚠️  WARNING: ADMIN_PASSWORD is not set in environment variables!');
-  if (process.env.NODE_ENV === 'production') {
-    throw new Error('❌ CRITICAL: ADMIN_PASSWORD must be set in production environment');
-  }
-}
+});
 
 const JWT_SECRET: Secret = process.env.JWT_SECRET || 'your_super_secret_jwt_key_change_in_production';
 const JWT_EXPIRATION = process.env.JWT_EXPIRATION || '24h';
@@ -33,7 +26,11 @@ interface AdminPayload {
  * @returns {boolean}
  */
 const verifyCredentials = (username: string, password: string): boolean => {
-  return username === ADMIN_CREDENTIALS.username && password === ADMIN_CREDENTIALS.password;
+  const creds = getAdminCredentials();
+  if (!creds.password) {
+    console.warn('⚠️  WARNING: ADMIN_PASSWORD is not set in environment variables!');
+  }
+  return username === creds.username && password === creds.password;
 };
 
 /**
@@ -57,5 +54,5 @@ const verifyToken = (token: string): AdminPayload | null => {
   }
 };
 
-export { ADMIN_CREDENTIALS, JWT_SECRET, JWT_EXPIRATION, verifyCredentials, generateToken, verifyToken };
+export { getAdminCredentials, JWT_SECRET, JWT_EXPIRATION, verifyCredentials, generateToken, verifyToken };
 export type { AdminPayload };

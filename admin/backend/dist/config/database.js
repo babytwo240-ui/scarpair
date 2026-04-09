@@ -5,7 +5,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
-// Ensure NODE_ENV defaults to production if not explicitly set
 const NODE_ENV = process.env.NODE_ENV || 'production';
 const DATABASE_DIALECT = (process.env.DB_DIALECT || 'postgres');
 const config = {

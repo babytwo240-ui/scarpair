@@ -21,6 +21,11 @@ interface UserAttributes {
   loginAttempts?: number;
   isLocked?: boolean;
   lockedUntil?: Date;
+  subscriptionStatus?: 'none' | 'pending' | 'active';
+  dailyPostCount?: number;
+  dailyViewCount?: number;
+  lastPostDate?: string;
+  lastViewDate?: string;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -130,6 +135,31 @@ module.exports = (sequelize: Sequelize): ModelStatic<UserInstance> => {
         type: DataTypes.DATE,
         allowNull: true,
         comment: 'When account lock expires'
+      },
+      subscriptionStatus: {
+        type: DataTypes.ENUM('none', 'pending', 'active'),
+        defaultValue: 'none',
+        comment: 'Subscription status for daily limit extension'
+      },
+      dailyPostCount: {
+        type: DataTypes.INTEGER,
+        defaultValue: 0,
+        comment: 'Number of posts created today (business owners)'
+      },
+      dailyViewCount: {
+        type: DataTypes.INTEGER,
+        defaultValue: 0,
+        comment: 'Number of detail views today (recyclers)'
+      },
+      lastPostDate: {
+        type: DataTypes.DATEONLY,
+        allowNull: true,
+        comment: 'Date of last post count reset'
+      },
+      lastViewDate: {
+        type: DataTypes.DATEONLY,
+        allowNull: true,
+        comment: 'Date of last view count reset'
       },
       createdAt: {
         type: DataTypes.DATE,

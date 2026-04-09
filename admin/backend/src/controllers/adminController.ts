@@ -1,4 +1,4 @@
-﻿import { Request, Response } from 'express';
+import { Request, Response } from 'express';
 import { verifyCredentials, generateToken } from '../config/jwt';
 import { sequelize } from '../models';
 

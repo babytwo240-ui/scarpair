@@ -3,9 +3,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getStatistics = exports.deleteMaterial = exports.updateMaterial = exports.createMaterial = exports.getMaterialById = exports.getAllMaterials = void 0;
 let materialsDatabase = [];
 let materialId = 1;
-/**
- * Initialize database with sample data
- */
 const initializeDatabase = () => {
     materialsDatabase = [
         {
@@ -28,25 +25,15 @@ const initializeDatabase = () => {
         }
     ];
 };
-// Initialize on load
 initializeDatabase();
-/**
- * Get all materials
- */
 const getAllMaterials = () => {
     return materialsDatabase;
 };
 exports.getAllMaterials = getAllMaterials;
-/**
- * Get material by ID
- */
 const getMaterialById = (id) => {
     return materialsDatabase.find((m) => m.id === id) || null;
 };
 exports.getMaterialById = getMaterialById;
-/**
- * Create material
- */
 const createMaterial = (material) => {
     const newMaterial = {
         id: materialId++,
@@ -58,9 +45,6 @@ const createMaterial = (material) => {
     return newMaterial;
 };
 exports.createMaterial = createMaterial;
-/**
- * Update material by ID
- */
 const updateMaterial = (id, updates) => {
     const index = materialsDatabase.findIndex((m) => m.id === id);
     if (index > -1) {
@@ -70,9 +54,6 @@ const updateMaterial = (id, updates) => {
     return null;
 };
 exports.updateMaterial = updateMaterial;
-/**
- * Delete material by ID
- */
 const deleteMaterial = (id) => {
     const index = materialsDatabase.findIndex((m) => m.id === id);
     if (index > -1) {
@@ -82,9 +63,6 @@ const deleteMaterial = (id) => {
     return null;
 };
 exports.deleteMaterial = deleteMaterial;
-/**
- * Get statistics
- */
 const getStatistics = () => {
     const materialTypes = {};
     materialsDatabase.forEach((m) => {

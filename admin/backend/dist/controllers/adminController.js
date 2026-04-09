@@ -1,11 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getSystemLogs = exports.getAllReports = exports.getAllPostRatings = exports.getAllUserRatings = exports.deleteWasteCategory = exports.updateWasteCategory = exports.createWasteCategory = exports.getWasteCategories = exports.getStatistics = exports.deleteMaterial = exports.updateMaterial = exports.createMaterial = exports.getMaterialById = exports.getAllMaterials = exports.login = void 0;
+exports.getAllSubscriptions = exports.rejectSubscription = exports.activateSubscription = exports.getPendingSubscriptions = exports.getSystemLogs = exports.getAllReports = exports.getAllPostRatings = exports.getAllUserRatings = exports.deleteWasteCategory = exports.updateWasteCategory = exports.createWasteCategory = exports.getWasteCategories = exports.getStatistics = exports.deleteMaterial = exports.updateMaterial = exports.createMaterial = exports.getMaterialById = exports.getAllMaterials = exports.login = void 0;
 const jwt_1 = require("../config/jwt");
 const models_1 = require("../models");
-/**
- * Admin Login
- */
 const login = (req, res) => {
     try {
         const { username, password } = req.body;
@@ -38,9 +35,6 @@ const login = (req, res) => {
     }
 };
 exports.login = login;
-/**
- * Get all materials (Admin view)
- */
 const getAllMaterials = async (req, res) => {
     try {
         const Material = models_1.sequelize.models.Material;
@@ -63,9 +57,6 @@ const getAllMaterials = async (req, res) => {
     }
 };
 exports.getAllMaterials = getAllMaterials;
-/**
- * Get material by ID
- */
 const getMaterialById = async (req, res) => {
     try {
         const { id } = req.params;
@@ -89,9 +80,6 @@ const getMaterialById = async (req, res) => {
     }
 };
 exports.getMaterialById = getMaterialById;
-/**
- * Create new material (Admin)
- */
 const createMaterial = async (req, res) => {
     try {
         const { businessUserId, materialType, quantity, unit, description, contactEmail, status, isRecommendedForArtists } = req.body;
@@ -124,9 +112,6 @@ const createMaterial = async (req, res) => {
     }
 };
 exports.createMaterial = createMaterial;
-/**
- * Update material by ID
- */
 const updateMaterial = async (req, res) => {
     try {
         const { id } = req.params;
@@ -159,9 +144,6 @@ const updateMaterial = async (req, res) => {
     }
 };
 exports.updateMaterial = updateMaterial;
-/**
- * Delete material by ID
- */
 const deleteMaterial = async (req, res) => {
     try {
         const { id } = req.params;
@@ -183,9 +165,6 @@ const deleteMaterial = async (req, res) => {
     }
 };
 exports.deleteMaterial = deleteMaterial;
-/**
- * Get statistics
- */
 const getStatistics = async (req, res) => {
     try {
         const User = models_1.sequelize.models.User;
@@ -417,4 +396,174 @@ const getSystemLogs = async (req, res) => {
     }
 };
 exports.getSystemLogs = getSystemLogs;
+const getPendingSubscriptions = async (req, res) => {
+    try {
+        const { page = 1, limit = 20 } = req.query;
+        const offset = (page - 1) * limit;
+        const Subscription = models_1.sequelize.models.Subscription;
+        const User = models_1.sequelize.models.User;
+        if (!Subscription) {
+            return res.status(500).json({ error: 'Subscription model not initialized' });
+        }
+        const { count, rows } = await Subscription.findAndCountAll({
+            where: { status: 'pending' },
+            include: [
+                {
+                    model: User,
+                    as: 'user',
+                    attributes: ['id', 'email', 'type', 'businessName', 'companyName', 'phone']
+                }
+            ],
+            order: [['createdAt', 'DESC']],
+            limit: limit,
+            offset
+        });
+        res.status(200).json({
+            message: 'Pending subscriptions retrieved',
+            data: rows,
+            pagination: {
+                total: count,
+                page,
+                limit,
+                pages: Math.ceil(count / limit)
+            }
+        });
+    }
+    catch (error) {
+        res.status(500).json({ message: 'Error fetching pending subscriptions', error: error.message });
+    }
+};
+exports.getPendingSubscriptions = getPendingSubscriptions;
+const activateSubscription = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const Subscription = models_1.sequelize.models.Subscription;
+        const User = models_1.sequelize.models.User;
+        const Notification = models_1.sequelize.models.Notification;
+        if (!Subscription) {
+            return res.status(500).json({ error: 'Subscription model not initialized' });
+        }
+        const subscription = await Subscription.findByPk(id, {
+            include: [
+                {
+                    model: User,
+                    as: 'user',
+                    attributes: ['id', 'email', 'type', 'businessName', 'companyName']
+                }
+            ]
+        });
+        if (!subscription) {
+            return res.status(404).json({ message: 'Subscription not found' });
+        }
+        if (subscription.status !== 'pending') {
+            return res.status(400).json({ message: 'Only pending subscriptions can be activated' });
+        }
+        const now = new Date();
+        const expiresAt = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000); // 30 days
+        subscription.status = 'active';
+        subscription.activatedAt = now;
+        subscription.expiresAt = expiresAt;
+        await subscription.save();
+        // Notify the user
+        if (Notification) {
+            const userType = subscription.user?.type || 'user';
+            await Notification.create({
+                userId: subscription.userId,
+                type: 'VERIFICATION',
+                title: 'Subscription Activated! 🎉',
+                message: `Your subscription has been activated! You now have +10 additional ${userType === 'business' ? 'posts' : 'views'} per day. Expires on ${expiresAt.toLocaleDateString()}.`,
+                relatedId: subscription.id,
+                read: false
+            });
+        }
+        res.status(200).json({
+            message: 'Subscription activated successfully',
+            data: subscription
+        });
+    }
+    catch (error) {
+        res.status(500).json({ message: 'Error activating subscription', error: error.message });
+    }
+};
+exports.activateSubscription = activateSubscription;
+const rejectSubscription = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { reason } = req.body;
+        const Subscription = models_1.sequelize.models.Subscription;
+        const Notification = models_1.sequelize.models.Notification;
+        if (!Subscription) {
+            return res.status(500).json({ error: 'Subscription model not initialized' });
+        }
+        const subscription = await Subscription.findByPk(id);
+        if (!subscription) {
+            return res.status(404).json({ message: 'Subscription not found' });
+        }
+        if (subscription.status !== 'pending') {
+            return res.status(400).json({ message: 'Only pending subscriptions can be rejected' });
+        }
+        subscription.status = 'cancelled';
+        await subscription.save();
+        // Notify the user
+        if (Notification) {
+            await Notification.create({
+                userId: subscription.userId,
+                type: 'VERIFICATION',
+                title: 'Subscription Request Declined',
+                message: `Your subscription request was not approved. ${reason ? `Reason: ${reason}` : 'Please contact support for details.'}`,
+                relatedId: subscription.id,
+                read: false
+            });
+        }
+        res.status(200).json({
+            message: 'Subscription rejected',
+            data: subscription
+        });
+    }
+    catch (error) {
+        res.status(500).json({ message: 'Error rejecting subscription', error: error.message });
+    }
+};
+exports.rejectSubscription = rejectSubscription;
+const getAllSubscriptions = async (req, res) => {
+    try {
+        const { page = 1, limit = 20, status } = req.query;
+        const offset = (page - 1) * limit;
+        const Subscription = models_1.sequelize.models.Subscription;
+        const User = models_1.sequelize.models.User;
+        if (!Subscription) {
+            return res.status(500).json({ error: 'Subscription model not initialized' });
+        }
+        const where = {};
+        if (status)
+            where.status = status;
+        const { count, rows } = await Subscription.findAndCountAll({
+            where,
+            include: [
+                {
+                    model: User,
+                    as: 'user',
+                    attributes: ['id', 'email', 'type', 'businessName', 'companyName', 'phone']
+                }
+            ],
+            order: [['createdAt', 'DESC']],
+            limit: limit,
+            offset
+        });
+        res.status(200).json({
+            message: 'Subscriptions retrieved',
+            data: rows,
+            pagination: {
+                total: count,
+                page,
+                limit,
+                pages: Math.ceil(count / limit)
+            }
+        });
+    }
+    catch (error) {
+        res.status(500).json({ message: 'Error fetching subscriptions', error: error.message });
+    }
+};
+exports.getAllSubscriptions = getAllSubscriptions;
 //# sourceMappingURL=adminController.js.map

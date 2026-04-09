@@ -1,13 +1,15 @@
-﻿import express, { Express, Request, Response, NextFunction } from 'express';
-import cors from 'cors';
+// Load environment variables FIRST, before any other imports
 import dotenv from 'dotenv';
 import path from 'path';
+const envFile = process.env.NODE_ENV === 'production' ? '.env.production' : '.env.local';
+dotenv.config({ path: path.join(__dirname, '..', envFile) });
+
+import express, { Express, Request, Response, NextFunction } from 'express';
+import cors from 'cors';
 import morganMiddleware from './config/morganConfig';
 import adminRoutes from './routes/adminRoutes';
 import { sequelize } from './models';
 
-const envFile = process.env.NODE_ENV === 'production' ? '.env.production' : '.env.local';
-dotenv.config({ path: path.join(__dirname, '..', envFile) });
 const NODE_ENV = process.env.NODE_ENV || 'development';
 const logger = NODE_ENV === 'production' ? require('./config/logger.prod').default : require('./config/logger.dev').default;
 const app: Express = express();

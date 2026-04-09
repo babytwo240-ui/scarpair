@@ -1,4 +1,4 @@
-﻿import express from 'express';
+import express from 'express';
 import * as adminController from '../controllers/adminController';
 import * as userManagementController from '../controllers/userManagementController';
 import { authenticate } from '../middleware/authMiddleware';

@@ -1,5 +1,41 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import {
+  Box,
+  Container,
+  Typography,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  CircularProgress,
+  Alert,
+  TextField,
+  MenuItem,
+  InputAdornment,
+  Button,
+  Chip,
+} from '@mui/material';
+import { format } from 'date-fns';
+import SearchIcon from '@mui/icons-material/Search';
+import DeleteIcon from '@mui/icons-material/Delete';
+import VerifiedUserIcon from '@mui/icons-material/VerifiedUser';
+
+const C = {
+  bright: '#64ff43',
+  deep: '#124d05',
+  darker: '#0a2e03',
+  surface: '#0d3806',
+  border: 'rgba(100,255,67,0.18)',
+  borderHover: 'rgba(100,255,67,0.45)',
+  text: '#e6ffe0',
+  textMid: 'rgba(230,255,224,0.55)',
+  textLow: 'rgba(230,255,224,0.3)',
+  glow: 'rgba(100,255,67,0.22)',
+  glowStrong: 'rgba(100,255,67,0.45)',
+};
 
 const AdminUsersPage = () => {
   const navigate = useNavigate();
@@ -63,7 +99,7 @@ const AdminUsersPage = () => {
   };
 
   const handleDeleteUser = async (userId) => {
-    if (!window.confirm('Are you sure you want to delete this user and all their data? This cannot be undone.')) {
+    if (!window.confirm('Are you sure you want to delete this user?')) {
       return;
     }
 
@@ -80,10 +116,9 @@ const AdminUsersPage = () => {
         throw new Error('Failed to delete user');
       }
 
-      alert('User deleted successfully');
       fetchUsers();
     } catch (err) {
-      alert('Failed to delete user: ' + err.message);
+      setError(err.message || 'Failed to delete user');
     }
   };
 
@@ -103,101 +138,294 @@ const AdminUsersPage = () => {
         throw new Error('Failed to update verification status');
       }
 
-      alert('User verification status updated');
       fetchUsers();
     } catch (err) {
-      alert('Failed to update verification status: ' + err.message);
+      setError(err.message || 'Failed to update verification status');
     }
   };
 
-  if (loading && users.length === 0) {
-    return <div style={{ padding: '20px' }}>Loading users...</div>;
-  }
-
   return (
-    <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
-      <h1>Users Management</h1>
+    <Box sx={{ minHeight: '100vh', background: C.darker, color: C.text, fontFamily: "'DM Sans','Helvetica Neue',sans-serif", overflowX: 'hidden' }}>
+      {/* Grain overlay */}
+      <Box sx={{ position: 'fixed', inset: 0, backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.015'/%3E%3C/svg%3E")`, pointerEvents: 'none', zIndex: 1 }} />
 
-      {error && <div style={{ color: 'red', marginBottom: '20px' }}>{error}</div>}
+      <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 10, py: 6 }}>
+        {/* Header */}
+        <Box sx={{ mb: 5 }}>
+          <Typography sx={{ fontSize: '3rem', fontWeight: 900, color: C.bright, mb: 1 }}>
+            ◉ Users Management
+          </Typography>
+          <Typography sx={{ fontSize: '0.95rem', color: C.textMid }}>
+            View and manage all system users
+          </Typography>
+        </Box>
 
-      <div style={{ marginBottom: '20px' }}>
-        <input
-          type="text"
-          name="search"
-          placeholder="Search by email or name..."
-          value={filters.search}
-          onChange={handleFilterChange}
-          style={{ padding: '8px', marginRight: '10px', width: '200px' }}
-        />
+        {error && (
+          <Box sx={{ p: 2.5, background: 'rgba(255,67,67,0.12)', border: `1px solid rgba(255,67,67,0.35)`, borderRadius: '12px', mb: 3, color: '#ff9b9b' }}>
+            <Typography sx={{ fontSize: '0.9rem' }}>{error}</Typography>
+          </Box>
+        )}
 
-        <select
-          name="type"
-          value={filters.type}
-          onChange={handleFilterChange}
-          style={{ padding: '8px', marginRight: '10px' }}
-        >
-          <option value="">All Types</option>
-          <option value="business">Business</option>
-          <option value="recycler">Recycler</option>
-        </select>
+        {/* Search and Filters */}
+        <Box sx={{ display: 'flex', gap: 2, mb: 3, flexWrap: 'wrap', backgroundColor: C.surface, p: 2.5, borderRadius: '12px', border: `1px solid ${C.border}` }}>
+          <TextField
+            placeholder="Search users..."
+            name="search"
+            value={filters.search}
+            onChange={handleFilterChange}
+            size="small"
+            sx={{
+              flex: 1,
+              minWidth: '200px',
+              '& .MuiOutlinedInput-root': {
+                color: C.text,
+                backgroundColor: `${C.darker}ee`,
+                '& fieldset': { borderColor: C.border },
+                '&:hover fieldset': { borderColor: C.borderHover },
+                '&.Mui-focused fieldset': { borderColor: C.bright }
+              },
+              '& .MuiOutlinedInput-input::placeholder': {
+                color: C.textLow,
+                opacity: 1
+              }
+            }}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon sx={{ color: C.textMid, mr: 1 }} />
+                </InputAdornment>
+              )
+            }}
+          />
 
-        <select
-          name="verified"
-          value={filters.verified}
-          onChange={handleFilterChange}
-          style={{ padding: '8px', marginRight: '10px' }}
-        >
-          <option value="">All Verification Status</option>
-          <option value="true">Verified</option>
-          <option value="false">Unverified</option>
-        </select>
+          <TextField
+            select
+            label="User Type"
+            name="type"
+            value={filters.type}
+            onChange={handleFilterChange}
+            size="small"
+            sx={{
+              minWidth: '150px',
+              '& .MuiOutlinedInput-root': {
+                color: C.text,
+                backgroundColor: `${C.darker}ee`,
+                '& fieldset': { borderColor: C.border },
+                '&:hover fieldset': { borderColor: C.borderHover }
+              },
+              '& .MuiInputBase-root': { color: C.text }
+            }}
+          >
+            <MenuItem value="">All Types</MenuItem>
+            <MenuItem value="seller">Seller</MenuItem>
+            <MenuItem value="collector">Collector</MenuItem>
+          </TextField>
 
-        <button onClick={() => { setFilters({ type: '', verified: '', search: '' }); setPage(1); }} style={{ padding: '8px 12px' }}>Reset Filters</button>
-      </div>
+          <TextField
+            select
+            label="Verification Status"
+            name="verified"
+            value={filters.verified}
+            onChange={handleFilterChange}
+            size="small"
+            sx={{
+              minWidth: '150px',
+              '& .MuiOutlinedInput-root': {
+                color: C.text,
+                backgroundColor: `${C.darker}ee`,
+                '& fieldset': { borderColor: C.border },
+                '&:hover fieldset': { borderColor: C.borderHover }
+              },
+              '& .MuiInputBase-root': { color: C.text }
+            }}
+          >
+            <MenuItem value="">All Status</MenuItem>
+            <MenuItem value="true">Verified</MenuItem>
+            <MenuItem value="false">Unverified</MenuItem>
+          </TextField>
 
-      <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-        <thead>
-          <tr style={{ borderBottom: '2px solid #ddd' }}>
-            <th style={{ padding: '10px', textAlign: 'left' }}>Email</th>
-            <th style={{ padding: '10px', textAlign: 'left' }}>Type</th>
-            <th style={{ padding: '10px', textAlign: 'left' }}>Name</th>
-            <th style={{ padding: '10px', textAlign: 'left' }}>Phone</th>
-            <th style={{ padding: '10px', textAlign: 'left' }}>Verified</th>
-            <th style={{ padding: '10px', textAlign: 'left' }}>Created</th>
-            <th style={{ padding: '10px', textAlign: 'left' }}>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {users.map((user, idx) => (
-            <tr key={user.id} style={{ borderBottom: '1px solid #eee' }}>
-              <td style={{ padding: '10px' }}>{user.email}</td>
-              <td style={{ padding: '10px' }}>{user.type}</td>
-              <td style={{ padding: '10px' }}>{user.name}</td>
-              <td style={{ padding: '10px' }}>{user.phone}</td>
-              <td style={{ padding: '10px' }}>{user.isVerified ? 'âœ“ Yes' : 'âœ— No'}</td>
-              <td style={{ padding: '10px' }}>{new Date(user.createdAt).toLocaleDateString()}</td>
-              <td style={{ padding: '10px' }}>
-                <button onClick={() => navigate(`/admin/users/${user.id}`)} style={{ padding: '4px 8px', marginRight: '5px' }}>View</button>
-                <button onClick={() => handleVerifyUser(user.id, user.isVerified)} style={{ padding: '4px 8px', marginRight: '5px' }}>{user.isVerified ? 'Unverify' : 'Verify'}</button>
-                <button onClick={() => handleDeleteUser(user.id)} style={{ padding: '4px 8px', backgroundColor: '#dc3545', color: 'white' }}>Delete</button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+          <Button
+            onClick={() => {
+              setFilters({ type: '', verified: '', search: '' });
+              setPage(1);
+            }}
+            sx={{
+              background: `linear-gradient(135deg, ${C.bright}22, ${C.bright}00)`,
+              color: C.bright,
+              border: `1px solid ${C.border}`,
+              textTransform: 'none',
+              px: 3,
+              borderRadius: '8px',
+              transition: 'all 0.3s ease',
+              '&:hover': {
+                background: `linear-gradient(135deg, ${C.bright}33, ${C.bright}11)`,
+                borderColor: C.borderHover,
+                boxShadow: `0 0 20px ${C.glow}`
+              }
+            }}
+          >
+            Reset Filters
+          </Button>
+        </Box>
 
-      {users.length === 0 && !loading && (
-        <p style={{ marginTop: '20px', textAlign: 'center', color: '#666' }}>No users found</p>
-      )}
+        {/* Loading indicator */}
+        {loading && (
+          <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
+            <CircularProgress sx={{ color: C.bright }} />
+          </Box>
+        )}
 
-      <div style={{ marginTop: '20px', textAlign: 'center' }}>
-        <button onClick={() => setPage(Math.max(1, page - 1))} disabled={page === 1} style={{ padding: '8px 12px', marginRight: '10px' }}>Previous</button>
-        <span>Page {page}</span>
-        <button onClick={() => setPage(page + 1)} disabled={users.length < limit} style={{ padding: '8px 12px', marginLeft: '10px' }}>Next</button>
-      </div>
-    </div>
+        {/* Users Table */}
+        {!loading && users.length > 0 && (
+          <Box sx={{ backgroundColor: C.surface, borderRadius: '12px', border: `1px solid ${C.border}`, overflow: 'hidden' }}>
+            <TableContainer>
+              <Table>
+                <TableHead>
+                  <TableRow sx={{ backgroundColor: `rgba(100,255,67,0.08)`, borderBottom: `2px solid ${C.border}` }}>
+                    <TableCell sx={{ color: C.bright, fontWeight: 600, fontSize: '0.9rem' }}>Email</TableCell>
+                    <TableCell sx={{ color: C.bright, fontWeight: 600, fontSize: '0.9rem' }}>Type</TableCell>
+                    <TableCell sx={{ color: C.bright, fontWeight: 600, fontSize: '0.9rem' }}>Name</TableCell>
+                    <TableCell sx={{ color: C.bright, fontWeight: 600, fontSize: '0.9rem' }}>Verified</TableCell>
+                    <TableCell sx={{ color: C.bright, fontWeight: 600, fontSize: '0.9rem' }}>Created</TableCell>
+                    <TableCell sx={{ color: C.bright, fontWeight: 600, fontSize: '0.9rem' }}>Actions</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {users.map((user) => (
+                    <TableRow
+                      key={user.id}
+                      sx={{
+                        borderBottom: `1px solid ${C.border}`,
+                        transition: 'all 0.2s ease',
+                        '&:hover': {
+                          backgroundColor: `${C.glow}`,
+                          borderBottomColor: C.borderHover
+                        }
+                      }}
+                    >
+                      <TableCell sx={{ color: C.text, fontSize: '0.9rem' }}>{user.email}</TableCell>
+                      <TableCell>
+                        <Chip
+                          label={user.type === 'seller' ? 'Seller' : 'Collector'}
+                          size="small"
+                          sx={{
+                            background: user.type === 'seller' ? 'rgba(100,255,67,0.2)' : 'rgba(100,255,67,0.15)',
+                            color: C.bright,
+                            fontWeight: 500,
+                            fontSize: '0.8rem'
+                          }}
+                        />
+                      </TableCell>
+                      <TableCell sx={{ color: C.text, fontSize: '0.9rem' }}>{user.name || '—'}</TableCell>
+                      <TableCell>
+                        <Chip
+                          icon={user.isVerified ? <VerifiedUserIcon /> : undefined}
+                          label={user.isVerified ? 'Verified' : 'Unverified'}
+                          size="small"
+                          sx={{
+                            background: user.isVerified ? 'rgba(100,255,67,0.25)' : 'rgba(255,107,107,0.2)',
+                            color: user.isVerified ? C.bright : '#ff9b9b',
+                            fontWeight: 500,
+                            fontSize: '0.8rem'
+                          }}
+                        />
+                      </TableCell>
+                      <TableCell sx={{ color: C.textMid, fontSize: '0.85rem' }}>
+                        {format(new Date(user.createdAt), 'MMM dd, yyyy')}
+                      </TableCell>
+                      <TableCell sx={{ color: C.text }}>
+                        <Box sx={{ display: 'flex', gap: 1 }}>
+                          <Button
+                            size="small"
+                            onClick={() => handleVerifyUser(user.id, user.isVerified)}
+                            sx={{
+                              color: C.bright,
+                              fontSize: '0.75rem',
+                              border: `1px solid ${C.border}`,
+                              textTransform: 'none',
+                              px: 1.5,
+                              transition: 'all 0.2s',
+                              '&:hover': {
+                                borderColor: C.borderHover,
+                                boxShadow: `0 0 10px ${C.glow}`
+                              }
+                            }}
+                          >
+                            {user.isVerified ? 'Unverify' : 'Verify'}
+                          </Button>
+                          <Button
+                            size="small"
+                            onClick={() => handleDeleteUser(user.id)}
+                            startIcon={<DeleteIcon sx={{ fontSize: '1rem' }} />}
+                            sx={{
+                              color: '#ff9b9b',
+                              fontSize: '0.75rem',
+                              border: '1px solid rgba(255,107,107,0.3)',
+                              textTransform: 'none',
+                              px: 1.5,
+                              transition: 'all 0.2s',
+                              '&:hover': {
+                                borderColor: 'rgba(255,107,107,0.6)',
+                                boxShadow: '0 0 10px rgba(255,107,107,0.2)'
+                              }
+                            }}
+                          >
+                            Delete
+                          </Button>
+                        </Box>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </Box>
+        )}
+
+        {/* Empty state */}
+        {!loading && users.length === 0 && !error && (
+          <Box sx={{ textAlign: 'center', py: 6, backgroundColor: C.surface, borderRadius: '12px', border: `1px solid ${C.border}` }}>
+            <Typography sx={{ color: C.textMid, fontSize: '1rem' }}>No users found. Try adjusting your filters.</Typography>
+          </Box>
+        )}
+
+        {/* Pagination */}
+        {!loading && users.length > 0 && (
+          <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 4 }}>
+            <Button
+              disabled={page === 1}
+              onClick={() => setPage(p => p - 1)}
+              sx={{
+                color: C.bright,
+                borderColor: C.bright,
+                textTransform: 'none',
+                '&:disabled': { color: C.textLow, borderColor: C.border }
+              }}
+              variant="outlined"
+            >
+              Previous
+            </Button>
+            <Box sx={{ display: 'flex', alignItems: 'center', px: 2, color: C.textMid }}>
+              Page {page}
+            </Box>
+            <Button
+              disabled={users.length < limit}
+              onClick={() => setPage(p => p + 1)}
+              sx={{
+                color: C.bright,
+                borderColor: C.bright,
+                textTransform: 'none',
+                '&:disabled': { color: C.textLow, borderColor: C.border }
+              }}
+              variant="outlined"
+            >
+              Next
+            </Button>
+          </Box>
+        )}
+      </Container>
+    </Box>
   );
 };
 
 export default AdminUsersPage;
-

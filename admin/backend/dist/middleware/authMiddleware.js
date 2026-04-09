@@ -2,9 +2,6 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.authenticate = void 0;
 const jwt_1 = require("../config/jwt");
-/**
- * Middleware to authenticate JWT tokens
- */
 const authenticate = (req, res, next) => {
     try {
         const authHeader = req.headers['authorization'];
@@ -13,7 +10,6 @@ const authenticate = (req, res, next) => {
                 error: 'Authorization header is missing'
             });
         }
-        // Extract token from "Bearer <token>"
         const token = authHeader.split(' ')[1];
         if (!token) {
             return res.status(401).json({
@@ -26,7 +22,6 @@ const authenticate = (req, res, next) => {
                 error: 'Invalid or expired token'
             });
         }
-        // Attach decoded token to request
         req.admin = decoded;
         next();
     }

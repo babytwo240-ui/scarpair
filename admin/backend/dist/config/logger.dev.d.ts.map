@@ -1,1 +1,1 @@
-{"version":3,"file":"logger.dev.d.ts","sourceRoot":"","sources":["../../src/config/logger.dev.ts"],"names":[],"mappings":"AAAA,OAAO,OAAO,MAAM,SAAS,CAAC;AA2C9B,QAAA,MAAM,SAAS,gBAUb,CAAC;AAEH,eAAe,SAAS,CAAC"}
+{"version":3,"file":"logger.dev.d.ts","sourceRoot":"","sources":["../../src/config/logger.dev.ts"],"names":[],"mappings":"AAAA,OAAO,OAAO,MAAM,SAAS,CAAC;AAqC9B,QAAA,MAAM,SAAS,gBAUb,CAAC;AAEH,eAAe,SAAS,CAAC"}
