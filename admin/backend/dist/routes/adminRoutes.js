@@ -40,34 +40,8 @@ const express_1 = __importDefault(require("express"));
 const adminController = __importStar(require("../controllers/adminController"));
 const userManagementController = __importStar(require("../controllers/userManagementController"));
 const authMiddleware_1 = require("../middleware/authMiddleware");
-const models_1 = require("../models");
 const router = express_1.default.Router();
 router.post('/login', adminController.login);
-router.get('/debug/db-status', async (req, res) => {
-    try {
-        const User = models_1.sequelize.models.User;
-        if (!User) {
-            return res.status(500).json({
-                error: 'User model not initialized',
-                availableModels: Object.keys(models_1.sequelize.models || {})
-            });
-        }
-        const count = await User.count();
-        const sample = await User.findAll({ limit: 3, raw: true });
-        res.status(200).json({
-            status: 'Database connected',
-            userCount: count,
-            sampleUsers: sample
-        });
-    }
-    catch (error) {
-        res.status(500).json({
-            error: 'Database error',
-            details: error.message,
-            stack: error.stack
-        });
-    }
-});
 router.get('/materials', authMiddleware_1.authenticate, adminController.getAllMaterials);
 router.get('/materials/:id', authMiddleware_1.authenticate, adminController.getMaterialById);
 router.post('/materials', authMiddleware_1.authenticate, adminController.createMaterial);
@@ -85,11 +59,7 @@ router.get('/ratings/users', authMiddleware_1.authenticate, adminController.getA
 router.get('/ratings/posts', authMiddleware_1.authenticate, adminController.getAllPostRatings);
 router.get('/reports', authMiddleware_1.authenticate, adminController.getAllReports);
 router.get('/logs', authMiddleware_1.authenticate, adminController.getSystemLogs);
+router.delete('/logs', authMiddleware_1.authenticate, adminController.clearSystemLogs);
 router.get('/statistics', authMiddleware_1.authenticate, adminController.getStatistics);
-// Subscription management
-router.get('/subscriptions', authMiddleware_1.authenticate, adminController.getAllSubscriptions);
-router.get('/subscriptions/pending', authMiddleware_1.authenticate, adminController.getPendingSubscriptions);
-router.post('/subscriptions/:id/activate', authMiddleware_1.authenticate, adminController.activateSubscription);
-router.post('/subscriptions/:id/reject', authMiddleware_1.authenticate, adminController.rejectSubscription);
 exports.default = router;
 //# sourceMappingURL=adminRoutes.js.map

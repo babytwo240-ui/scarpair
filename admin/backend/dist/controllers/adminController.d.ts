@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-declare const login: (req: Request, res: Response) => any;
+declare const login: (req: Request, res: Response) => Promise<any>;
 declare const getAllMaterials: (req: Request, res: Response) => Promise<any>;
 declare const getMaterialById: (req: Request, res: Response) => Promise<any>;
 declare const createMaterial: (req: Request, res: Response) => Promise<any>;
@@ -14,9 +14,6 @@ declare const getAllUserRatings: (req: Request, res: Response) => Promise<any>;
 declare const getAllPostRatings: (req: Request, res: Response) => Promise<any>;
 declare const getAllReports: (req: Request, res: Response) => Promise<any>;
 declare const getSystemLogs: (req: Request, res: Response) => Promise<any>;
-declare const getPendingSubscriptions: (req: Request, res: Response) => Promise<any>;
-declare const activateSubscription: (req: Request, res: Response) => Promise<any>;
-declare const rejectSubscription: (req: Request, res: Response) => Promise<any>;
-declare const getAllSubscriptions: (req: Request, res: Response) => Promise<any>;
-export { login, getAllMaterials, getMaterialById, createMaterial, updateMaterial, deleteMaterial, getStatistics, getWasteCategories, createWasteCategory, updateWasteCategory, deleteWasteCategory, getAllUserRatings, getAllPostRatings, getAllReports, getSystemLogs, getPendingSubscriptions, activateSubscription, rejectSubscription, getAllSubscriptions };
+declare const clearSystemLogs: (req: Request, res: Response) => Promise<any>;
+export { login, getAllMaterials, getMaterialById, createMaterial, updateMaterial, deleteMaterial, getStatistics, getWasteCategories, createWasteCategory, updateWasteCategory, deleteWasteCategory, getAllUserRatings, getAllPostRatings, getAllReports, getSystemLogs, clearSystemLogs };
 //# sourceMappingURL=adminController.d.ts.map

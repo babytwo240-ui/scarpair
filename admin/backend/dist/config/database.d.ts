@@ -6,6 +6,12 @@ interface DatabaseConfig {
     port: number;
     dialect: 'postgres' | 'mysql';
     logging: boolean | typeof console.log;
+    pool?: {
+        min: number;
+        max: number;
+        idle: number;
+        acquire: number;
+    };
 }
 interface Config {
     development: DatabaseConfig;

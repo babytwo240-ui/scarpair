@@ -6,7 +6,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 // Load environment variables FIRST, before any other imports
 const dotenv_1 = __importDefault(require("dotenv"));
 const path_1 = __importDefault(require("path"));
-const envFile = process.env.NODE_ENV === 'production' ? '.env.production' : '.env.local';
+const fs_1 = __importDefault(require("fs"));
+const envFile = process.env.NODE_ENV === 'production' ? '.env.production' : (fs_1.default.existsSync(path_1.default.join(__dirname, '..', '.env.local')) ? '.env.local' : '.env');
 dotenv_1.default.config({ path: path_1.default.join(__dirname, '..', envFile) });
 const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
@@ -21,8 +22,17 @@ const corsOrigins = (process.env.CORS_ORIGIN || 'http://localhost:4000,http://12
 app.use((0, cors_1.default)({
     origin: corsOrigins,
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-    allowedHeaders: ['Content-Type', 'Authorization']
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    optionsSuccessStatus: 200
+}));
+// Explicit OPTIONS handler for preflight requests
+app.options('*', (0, cors_1.default)({
+    origin: corsOrigins,
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    optionsSuccessStatus: 200
 }));
 app.use(express_1.default.json());
 app.use(morganConfig_1.default);
@@ -54,8 +64,10 @@ async function startServer() {
     }
     catch (error) {
         logger.error(`❌ Database connection failed: ${error.message}`);
-        logger.error(`Error details: ${JSON.stringify(error, null, 2)}`);
-        logger.error(error);
+        if (NODE_ENV === 'development') {
+            logger.error(`Error details: ${JSON.stringify(error, null, 2)}`);
+            logger.error(error);
+        }
         process.exit(1);
     }
     const server = app.listen(PORT, () => {

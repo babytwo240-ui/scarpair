@@ -39,6 +39,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const userAuthController = __importStar(require("../controllers/userAuthController"));
 const userAuthMiddleware_1 = require("../middleware/userAuthMiddleware");
+const rateLimiter_1 = require("../middleware/rateLimiter");
 const router = express_1.default.Router();
 /**
  * @swagger
@@ -78,7 +79,7 @@ const router = express_1.default.Router();
  *       500:
  *         description: Server error
  */
-router.post('/business/signup', userAuthController.businessSignup);
+router.post('/business/signup', rateLimiter_1.RateLimiter.middleware('register'), userAuthController.businessSignup);
 /**
  * @swagger
  * /api/auth/recycler/signup:
@@ -111,7 +112,7 @@ router.post('/business/signup', userAuthController.businessSignup);
  *       400:
  *         description: Invalid input or user already exists
  */
-router.post('/recycler/signup', userAuthController.recyclerSignup);
+router.post('/recycler/signup', rateLimiter_1.RateLimiter.middleware('register'), userAuthController.recyclerSignup);
 /**
  * @swagger
  * /api/auth/verify-email:
@@ -176,7 +177,7 @@ router.post('/verify-email', userAuthController.verifyEmail);
  *       401:
  *         description: Invalid credentials
  */
-router.post('/business/login', userAuthController.businessLogin);
+router.post('/business/login', rateLimiter_1.RateLimiter.middleware('login'), userAuthController.businessLogin);
 /**
  * @swagger
  * /api/auth/recycler/login:
@@ -202,7 +203,7 @@ router.post('/business/login', userAuthController.businessLogin);
  *       401:
  *         description: Invalid credentials
  */
-router.post('/recycler/login', userAuthController.recyclerLogin);
+router.post('/recycler/login', rateLimiter_1.RateLimiter.middleware('login'), userAuthController.recyclerLogin);
 /**
  * @swagger
  * /api/auth/logout:
@@ -241,7 +242,7 @@ router.post('/logout', userAuthMiddleware_1.authenticateUser, userAuthController
  *       404:
  *         description: User not found
  */
-router.post('/forgot-password', userAuthController.forgotPassword);
+router.post('/forgot-password', rateLimiter_1.RateLimiter.middleware('passwordReset'), userAuthController.forgotPassword);
 /**
  * @swagger
  * /api/auth/reset-password:
@@ -267,7 +268,7 @@ router.post('/forgot-password', userAuthController.forgotPassword);
  *       400:
  *         description: Invalid or expired reset token
  */
-router.post('/reset-password', userAuthController.resetPassword);
+router.post('/reset-password', rateLimiter_1.RateLimiter.middleware('passwordReset'), userAuthController.resetPassword);
 /**
  * @swagger
  * /api/auth/debug/emails:

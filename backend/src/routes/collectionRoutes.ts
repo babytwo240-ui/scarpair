@@ -1,6 +1,7 @@
 import express from 'express';
 import * as collectionController from '../controllers/collectionController';
 import { authenticateUser } from '../middleware/userAuthMiddleware';
+import { RateLimiter } from '../middleware/rateLimiter';
 import { validateCollectionRequest, validateScheduleCollection, validateCollectionQuery } from '../middleware/collectionValidation';
 
 const router = express.Router();
@@ -84,7 +85,7 @@ router.get('/', authenticateUser, validateCollectionQuery, collectionController.
  *       400:
  *         description: Invalid input
  */
-router.post('/request', authenticateUser, validateCollectionRequest, collectionController.requestCollection);
+router.post('/request', authenticateUser, RateLimiter.middleware('createCollection'), validateCollectionRequest, collectionController.requestCollection);
 
 /**
  * @swagger
@@ -114,7 +115,7 @@ router.post('/request', authenticateUser, validateCollectionRequest, collectionC
  *       200:
  *         description: Collection scheduled
  */
-router.put('/:id/schedule', authenticateUser, validateScheduleCollection, collectionController.scheduleCollection);
+router.put('/:id/schedule', authenticateUser, RateLimiter.middleware('updateCollection'), validateScheduleCollection, collectionController.scheduleCollection);
 
 /**
  * @swagger

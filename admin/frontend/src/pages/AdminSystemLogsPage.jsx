@@ -15,10 +15,15 @@ import {
   TextField,
   Button,
   InputAdornment,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions
 } from '@mui/material';
 import { format } from 'date-fns';
 import SearchIcon from '@mui/icons-material/Search';
 import RefreshIcon from '@mui/icons-material/Refresh';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 const C = {
   bright: '#64ff43',
@@ -40,6 +45,8 @@ const AdminSystemLogsPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [search, setSearch] = useState('');
+  const [clearDialogOpen, setClearDialogOpen] = useState(false);
+  const [clearing, setClearing] = useState(false);
 
   useEffect(() => {
     fetchLogs();
@@ -68,37 +75,59 @@ const AdminSystemLogsPage = () => {
     }
   };
 
+  const clearLogs = async () => {
+    setClearing(true);
+    try {
+      const token = localStorage.getItem('adminToken');
+      const res = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5498/api'}/admin/logs`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (res.ok) {
+        setLogs([]);
+        setClearDialogOpen(false);
+        setError('');
+      } else {
+        const data = await res.json();
+        setError(data.message || 'Failed to clear logs');
+      }
+    } catch (err) {
+      setError(err.message || 'Failed to clear logs');
+    } finally {
+      setClearing(false);
+    }
+  };
+
   const getTypeColor = (type) => {
-    const lowerType = type?.toLowerCase();
-    switch (lowerType) {
+    switch (type?.toLowerCase()) {
       case 'error': return '#ff9b9b';
       case 'warning': return '#ffc857';
-      case 'info': return C.bright;
-      case 'success': return C.bright;
+      case 'info':
+      case 'success':
       default: return C.bright;
     }
   };
 
   const getTypeBackground = (type) => {
-    const lowerType = type?.toLowerCase();
-    switch (lowerType) {
+    switch (type?.toLowerCase()) {
       case 'error': return 'rgba(255,107,107,0.2)';
       case 'warning': return 'rgba(255,200,87,0.2)';
-      case 'info': return 'rgba(100,255,67,0.15)';
       case 'success': return 'rgba(100,255,67,0.2)';
+      case 'info':
       default: return 'rgba(100,255,67,0.15)';
     }
   };
 
   const filteredLogs = logs.filter(log =>
-    search === '' || 
+    search === '' ||
     log.action?.toLowerCase().includes(search.toLowerCase()) ||
     log.type?.toLowerCase().includes(search.toLowerCase())
   );
 
   if (loading) {
     return (
-      <Box sx={{ minHeight: '100vh', background: C.darker, display: 'flex', justifyContent: 'center', alignItems: 'center', color: C.text }}>
+      <Box sx={{ minHeight: '100vh', background: C.darker, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
         <CircularProgress sx={{ color: C.bright }} />
       </Box>
     );
@@ -137,10 +166,7 @@ const AdminSystemLogsPage = () => {
                 '&:hover fieldset': { borderColor: C.borderHover },
                 '&.Mui-focused fieldset': { borderColor: C.bright }
               },
-              '& .MuiOutlinedInput-input::placeholder': {
-                color: C.textLow,
-                opacity: 1
-              }
+              '& .MuiOutlinedInput-input::placeholder': { color: C.textLow, opacity: 1 }
             }}
             InputProps={{
               startAdornment: (
@@ -151,35 +177,56 @@ const AdminSystemLogsPage = () => {
             }}
           />
 
-          <Button
-            startIcon={<RefreshIcon />}
-            onClick={fetchLogs}
-            sx={{
-              background: `linear-gradient(135deg, ${C.bright}22, ${C.bright}00)`,
-              color: C.bright,
-              border: `1px solid ${C.border}`,
-              textTransform: 'none',
-              px: 3,
-              borderRadius: '8px',
-              transition: 'all 0.3s ease',
-              '&:hover': {
-                background: `linear-gradient(135deg, ${C.bright}33, ${C.bright}11)`,
-                borderColor: C.borderHover,
-                boxShadow: `0 0 20px ${C.glow}`
-              }
-            }}
-          >
-            Refresh
-          </Button>
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            <Button
+              startIcon={<RefreshIcon />}
+              onClick={fetchLogs}
+              sx={{
+                background: `linear-gradient(135deg, ${C.bright}22, ${C.bright}00)`,
+                color: C.bright,
+                border: `1px solid ${C.border}`,
+                textTransform: 'none',
+                px: 3,
+                borderRadius: '8px',
+                '&:hover': {
+                  background: `linear-gradient(135deg, ${C.bright}33, ${C.bright}11)`,
+                  borderColor: C.borderHover,
+                  boxShadow: `0 0 20px ${C.glow}`
+                }
+              }}
+            >
+              Refresh
+            </Button>
+
+            <Button
+              startIcon={<DeleteIcon />}
+              onClick={() => setClearDialogOpen(true)}
+              disabled={logs.length === 0 || clearing}
+              sx={{
+                background: 'rgba(255,67,67,0.12)',
+                color: '#ff9b9b',
+                border: '1px solid rgba(255,67,67,0.35)',
+                textTransform: 'none',
+                px: 3,
+                borderRadius: '8px',
+                '&:hover': {
+                  background: 'rgba(255,67,67,0.22)',
+                  borderColor: 'rgba(255,67,67,0.6)',
+                },
+                '&:disabled': { opacity: 0.4 }
+              }}
+            >
+              Clear Logs
+            </Button>
+          </Box>
         </Box>
 
         {error && (
-          <Box sx={{ p: 2.5, background: 'rgba(255,67,67,0.12)', border: `1px solid rgba(255,67,67,0.35)`, borderRadius: '12px', mb: 3, color: '#ff9b9b' }}>
+          <Box sx={{ p: 2.5, background: 'rgba(255,67,67,0.12)', border: '1px solid rgba(255,67,67,0.35)', borderRadius: '12px', mb: 3, color: '#ff9b9b' }}>
             <Typography sx={{ fontSize: '0.9rem' }}>{error}</Typography>
           </Box>
         )}
 
-        {/* Log count */}
         <Typography sx={{ fontSize: '0.9rem', color: C.textMid, mb: 3 }}>
           Found {filteredLogs.length} of {logs.length} logs
         </Typography>
@@ -190,7 +237,7 @@ const AdminSystemLogsPage = () => {
             <TableContainer>
               <Table>
                 <TableHead>
-                  <TableRow sx={{ backgroundColor: `rgba(100,255,67,0.08)`, borderBottom: `2px solid ${C.border}` }}>
+                  <TableRow sx={{ backgroundColor: 'rgba(100,255,67,0.08)', borderBottom: `2px solid ${C.border}` }}>
                     <TableCell sx={{ color: C.bright, fontWeight: 600, fontSize: '0.9rem' }}>Type</TableCell>
                     <TableCell sx={{ color: C.bright, fontWeight: 600, fontSize: '0.9rem' }}>Action</TableCell>
                     <TableCell sx={{ color: C.bright, fontWeight: 600, fontSize: '0.9rem' }}>User ID</TableCell>
@@ -204,23 +251,14 @@ const AdminSystemLogsPage = () => {
                       key={log.id || idx}
                       sx={{
                         borderBottom: `1px solid ${C.border}`,
-                        transition: 'all 0.2s ease',
-                        '&:hover': {
-                          backgroundColor: `${C.glow}`,
-                          borderBottomColor: C.borderHover
-                        }
+                        '&:hover': { backgroundColor: C.glow, borderBottomColor: C.borderHover }
                       }}
                     >
                       <TableCell>
                         <Chip
                           label={log.type || 'Info'}
                           size="small"
-                          sx={{
-                            background: getTypeBackground(log.type),
-                            color: getTypeColor(log.type),
-                            fontWeight: 500,
-                            fontSize: '0.8rem'
-                          }}
+                          sx={{ background: getTypeBackground(log.type), color: getTypeColor(log.type), fontWeight: 500, fontSize: '0.8rem' }}
                         />
                       </TableCell>
                       <TableCell sx={{ color: C.text, fontSize: '0.9rem', fontWeight: 500 }}>
@@ -249,9 +287,50 @@ const AdminSystemLogsPage = () => {
           </Box>
         )}
       </Container>
+
+      {/* Clear Logs Confirmation Dialog */}
+      <Dialog
+        open={clearDialogOpen}
+        onClose={() => setClearDialogOpen(false)}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{
+          sx: { background: C.surface, border: `1px solid ${C.border}`, color: C.text, borderRadius: '16px' }
+        }}
+      >
+        <DialogTitle sx={{ fontWeight: 800, color: C.bright }}>Clear All Logs?</DialogTitle>
+        <DialogContent>
+          <Typography sx={{ color: C.textMid, mt: 1 }}>
+            Are you sure you want to permanently delete all system logs? This action cannot be undone.
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ p: 2.5, gap: 1 }}>
+          <Button
+            onClick={() => setClearDialogOpen(false)}
+            disabled={clearing}
+            sx={{ color: C.textMid, border: `1px solid ${C.border}`, textTransform: 'none', borderRadius: '8px' }}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={clearLogs}
+            disabled={clearing}
+            sx={{
+              background: 'rgba(255,67,67,0.2)',
+              color: '#ff9b9b',
+              border: '1px solid rgba(255,67,67,0.4)',
+              textTransform: 'none',
+              borderRadius: '8px',
+              '&:hover': { background: 'rgba(255,67,67,0.35)' },
+              '&:disabled': { opacity: 0.5 }
+            }}
+          >
+            {clearing ? 'Clearing...' : 'Clear All Logs'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };
 
 export default AdminSystemLogsPage;
-

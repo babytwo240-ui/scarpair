@@ -1,6 +1,7 @@
 import dotenv from 'dotenv';
+import path from 'path';
 
-dotenv.config();
+dotenv.config({ path: path.resolve(__dirname, '../../.env.local') });
 
 // Ensure NODE_ENV defaults to production if not explicitly set
 const NODE_ENV = process.env.NODE_ENV || 'production';

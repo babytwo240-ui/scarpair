@@ -1,8 +1,20 @@
 import { Request, Response } from 'express';
 import { verifyCredentials, generateToken } from '../config/jwt';
 import { sequelize } from '../models';
+import {
+  logAdminLogin,
+  logMaterialCreated,
+  logMaterialUpdated,
+  logMaterialDeleted,
+  logCategoryCreated,
+  logCategoryUpdated,
+  logCategoryDeleted,
+  logActionFailed
+} from '../utils/auditLogger';
 
-const login = (req: Request, res: Response): any => {
+const NODE_ENV = process.env.NODE_ENV || 'development';
+
+const login = async (req: Request, res: Response): Promise<any> => {
   try {
     const { username, password } = req.body;
 
@@ -24,6 +36,9 @@ const login = (req: Request, res: Response): any => {
       loginTime: new Date().toISOString()
     });
 
+    // Log admin login
+    await logAdminLogin(username, req);
+
     res.status(200).json({
       message: 'Login successful',
       token: token,
@@ -33,7 +48,10 @@ const login = (req: Request, res: Response): any => {
       }
     });
   } catch (error: any) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ 
+      error: 'Login failed',
+      ...(NODE_ENV === 'development' && { details: error.message })
+    });
   }
 };
 
@@ -112,6 +130,15 @@ const createMaterial = async (req: Request, res: Response): Promise<any> => {
       isRecommendedForArtists: isRecommendedForArtists || false
     });
 
+    // Log material creation
+    await logMaterialCreated(
+      1, // Admin ID
+      material.id as any,
+      material.materialType,
+      material.quantity,
+      req
+    );
+
     res.status(201).json({
       message: 'Material created successfully',
       data: material
@@ -146,6 +173,22 @@ const updateMaterial = async (req: Request, res: Response): Promise<any> => {
       isRecommendedForArtists: isRecommendedForArtists !== undefined ? isRecommendedForArtists : material.isRecommendedForArtists
     });
 
+    // Log material update
+    const updateChanges = {
+      businessUserId: businessUserId !== undefined,
+      materialType: materialType !== undefined,
+      quantity: quantity !== undefined,
+      status: status !== undefined,
+      isRecommendedForArtists: isRecommendedForArtists !== undefined
+    };
+    await logMaterialUpdated(
+      1, // Admin ID
+      material.id as any,
+      material.materialType,
+      updateChanges,
+      req
+    );
+
     res.status(200).json({
       message: 'Material updated successfully',
       data: material
@@ -169,7 +212,16 @@ const deleteMaterial = async (req: Request, res: Response): Promise<any> => {
       return res.status(404).json({ error: 'Material not found' });
     }
 
+    const materialType = material.materialType;
     await material.destroy();
+
+    // Log material deletion
+    await logMaterialDeleted(
+      1, // Admin ID
+      id as any,
+      materialType,
+      req
+    );
 
     res.status(200).json({
       message: 'Material deleted successfully'
@@ -214,7 +266,11 @@ const getWasteCategories = async (req: Request, res: Response): Promise<any> => 
       data: categories
     });
   } catch (error: any) {
-    res.status(500).json({ message: 'Error fetching categories', error: error.message });
+    res.status(500).json({ 
+      message: 'Error fetching categories', 
+      error: 'Failed to fetch categories',
+      ...(NODE_ENV === 'development' && { details: error.message })
+    });
   }
 };
 
@@ -234,12 +290,24 @@ const createWasteCategory = async (req: Request, res: Response): Promise<any> =>
       isActive: true
     });
 
+    // Log category creation
+    await logCategoryCreated(
+      1, // Admin ID
+      category.id as any,
+      category.name,
+      req
+    );
+
     res.status(201).json({
       message: 'Category created successfully',
       data: category
     });
   } catch (error: any) {
-    res.status(500).json({ message: 'Error creating category', error: error.message });
+    res.status(500).json({ 
+      message: 'Error creating category', 
+      error: 'Failed to create category',
+      ...(NODE_ENV === 'development' && { details: error.message })
+    });
   }
 };
 
@@ -262,12 +330,31 @@ const updateWasteCategory = async (req: Request, res: Response): Promise<any> =>
       isActive: isActive !== undefined ? isActive : category.isActive
     });
 
+    // Log category update
+    const categoryChanges = {
+      name: name !== undefined,
+      description: description !== undefined,
+      icon: icon !== undefined,
+      isActive: isActive !== undefined
+    };
+    await logCategoryUpdated(
+      1, // Admin ID
+      category.id as any,
+      category.name,
+      categoryChanges,
+      req
+    );
+
     res.status(200).json({
       message: 'Category updated successfully',
       data: category
     });
   } catch (error: any) {
-    res.status(500).json({ message: 'Error updating category', error: error.message });
+    res.status(500).json({ 
+      message: 'Error updating category', 
+      error: 'Failed to update category',
+      ...(NODE_ENV === 'development' && { details: error.message })
+    });
   }
 };
 
@@ -282,14 +369,27 @@ const deleteWasteCategory = async (req: Request, res: Response): Promise<any> =>
       return res.status(404).json({ error: 'Category not found' });
     }
 
+    const categoryName = category.name;
     await category.destroy();
+
+    // Log category deletion
+    await logCategoryDeleted(
+      1, // Admin ID
+      category.id as any,
+      categoryName,
+      req
+    );
 
     res.status(200).json({
       message: 'Category deleted successfully',
       data: { id: categoryId }
     });
   } catch (error: any) {
-    res.status(500).json({ message: 'Error deleting category', error: error.message });
+    res.status(500).json({ 
+      message: 'Error deleting category', 
+      error: 'Failed to delete category',
+      ...(NODE_ENV === 'development' && { details: error.message })
+    });
   }
 };
 
@@ -325,7 +425,11 @@ const getAllUserRatings = async (req: Request, res: Response): Promise<any> => {
       }
     });
   } catch (error: any) {
-    res.status(500).json({ message: 'Error fetching user ratings', error: error.message });
+    res.status(500).json({ 
+      message: 'Error fetching user ratings', 
+      error: 'Failed to fetch user ratings',
+      ...(NODE_ENV === 'development' && { details: error.message })
+    });
   }
 };
 
@@ -354,7 +458,11 @@ const getAllPostRatings = async (req: Request, res: Response): Promise<any> => {
       }
     });
   } catch (error: any) {
-    res.status(500).json({ message: 'Error fetching post ratings', error: error.message });
+    res.status(500).json({ 
+      message: 'Error fetching post ratings', 
+      error: 'Failed to fetch post ratings',
+      ...(NODE_ENV === 'development' && { details: error.message })
+    });
   }
 };
 
@@ -395,7 +503,11 @@ const getAllReports = async (req: Request, res: Response): Promise<any> => {
       }
     });
   } catch (error: any) {
-    res.status(500).json({ message: 'Error fetching reports', error: error.message });
+    res.status(500).json({ 
+      message: 'Error fetching reports', 
+      error: 'Failed to fetch reports',
+      ...(NODE_ENV === 'development' && { details: error.message })
+    });
   }
 };
 
@@ -423,7 +535,33 @@ const getSystemLogs = async (req: Request, res: Response): Promise<any> => {
       }
     });
   } catch (error: any) {
-    res.status(500).json({ message: 'Error fetching system logs', error: error.message });
+    res.status(500).json({ 
+      message: 'Error fetching system logs', 
+      error: 'Failed to fetch system logs',
+      ...(NODE_ENV === 'development' && { details: error.message })
+    });
+  }
+};
+
+const clearSystemLogs = async (req: Request, res: Response): Promise<any> => {
+  try {
+    const SystemLog = (sequelize as any).models.SystemLog;
+    
+    const deletedCount = await SystemLog.destroy({
+      where: {},
+      truncate: true
+    });
+
+    res.status(200).json({
+      message: 'All system logs cleared successfully',
+      deletedCount
+    });
+  } catch (error: any) {
+    res.status(500).json({ 
+      message: 'Error clearing system logs', 
+      error: 'Failed to clear system logs',
+      ...(NODE_ENV === 'development' && { details: error.message })
+    });
   }
 };
 
@@ -442,6 +580,7 @@ export {
   getAllUserRatings,
   getAllPostRatings,
   getAllReports,
-  getSystemLogs
+  getSystemLogs,
+  clearSystemLogs
 };
 

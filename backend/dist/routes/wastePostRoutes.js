@@ -39,6 +39,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const wastePostController = __importStar(require("../controllers/wastePostController"));
 const userAuthMiddleware_1 = require("../middleware/userAuthMiddleware");
+const rateLimiter_1 = require("../middleware/rateLimiter");
 const wastePostValidation_1 = require("../middleware/wastePostValidation");
 const router = express_1.default.Router();
 /**
@@ -101,7 +102,7 @@ router.get('/categories', wastePostController.getWasteCategories);
  *       401:
  *         description: Unauthorized
  */
-router.post('/', userAuthMiddleware_1.authenticateUser, wastePostValidation_1.validateCreateWastePost, wastePostController.createWastePost);
+router.post('/', userAuthMiddleware_1.authenticateUser, rateLimiter_1.RateLimiter.middleware('createWastePost'), wastePostValidation_1.validateCreateWastePost, wastePostController.createWastePost);
 /**
  * @swagger
  * /api/waste-posts/user/mine:
@@ -389,7 +390,7 @@ router.get('/:id/status', wastePostController.getWastePostStatus);
  *         description: Post not found
  */
 router.get('/:id', wastePostController.getWastePostDetails);
-router.put('/:id', userAuthMiddleware_1.authenticateUser, wastePostValidation_1.validateUpdateWastePost, wastePostController.updateWastePost);
+router.put('/:id', userAuthMiddleware_1.authenticateUser, rateLimiter_1.RateLimiter.middleware('updateWastePost'), wastePostValidation_1.validateUpdateWastePost, wastePostController.updateWastePost);
 router.delete('/:id', userAuthMiddleware_1.authenticateUser, wastePostController.deleteWastePost);
 exports.default = router;
 //# sourceMappingURL=wastePostRoutes.js.map

@@ -1,5 +1,6 @@
 ﻿import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { ThemeProvider, createTheme, CssBaseline } from '@mui/material';
 import { AuthProvider, useAuth } from './context/AuthContext.jsx';
 import { NotificationProvider, useNotifications } from './context/NotificationContext.jsx';
 import socketService from './services/socketService';
@@ -37,6 +38,44 @@ import AdminReportsPage from './pages/AdminReportsPage.jsx';
 import AdminUserManagementPage from './pages/AdminUserManagementPage.jsx';
 import AdminRatingsPage from './pages/AdminRatingsPage.jsx';
 import UserReportsPage from './pages/UserReportsPage.jsx';
+
+// MUI Theme Configuration (Consistent across all pages)
+const theme = createTheme({
+  palette: {
+    mode: 'light',
+    primary: {
+      main: '#0F172A', // Deep Slate/Midnight
+    },
+    secondary: {
+      main: '#38BDF8', // Sky Blue accent
+    },
+    background: {
+      default: '#F8FAFC',
+      paper: '#FFFFFF',
+    },
+  },
+  typography: {
+    fontFamily: '"Inter", "Roboto", "Helvetica", sans-serif',
+    h1: { fontWeight: 800, letterSpacing: '-0.02em' },
+    h2: { fontWeight: 700 },
+    h5: { color: '#64748B' }
+  },
+  shape: {
+    borderRadius: 12,
+  },
+  components: {
+    MuiButton: {
+      styleOverrides: {
+        root: { textTransform: 'none', fontWeight: 600, padding: '10px 24px' },
+      },
+    },
+    MuiCard: {
+      styleOverrides: {
+        root: { boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)' },
+      },
+    },
+  },
+});
 
 // Component to set up socket connection when user is authenticated
 const AppContent = () => {
@@ -256,13 +295,16 @@ const AppContent = () => {
 
 function App() {
   return (
-    <Router>
-      <AuthProvider>
-        <NotificationProvider>
-          <AppContent />
-        </NotificationProvider>
-      </AuthProvider>
-    </Router>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <Router>
+        <AuthProvider>
+          <NotificationProvider>
+            <AppContent />
+          </NotificationProvider>
+        </AuthProvider>
+      </Router>
+    </ThemeProvider>
   );
 }
 

@@ -3,18 +3,12 @@ import dotenv from 'dotenv';
 import path from 'path';
 import config from '../config/database';
 
-const envFile = process.env.NODE_ENV === 'production' ? '.env.production' : '.env.local';
+import fs from 'fs';
+const envFile = process.env.NODE_ENV === 'production' ? '.env.production' : (fs.existsSync(path.join(__dirname, '..', '..', '.env.local')) ? '.env.local' : '.env');
 dotenv.config({ path: path.join(__dirname, '..', '..', envFile) });
 
 const env = (process.env.NODE_ENV || 'development') as keyof typeof config;
 const dbConfig = config[env];
-
-console.log('🔧 DEBUG: Database Config');
-console.log('envFile:', envFile);
-console.log('NODE_ENV:', process.env.NODE_ENV);
-console.log('env:', env); 
-console.log('DB_HOST env var:', process.env.DB_HOST);
-console.log('dbConfig:', { host: dbConfig.host, port: dbConfig.port, database: dbConfig.database, username: dbConfig.username });
 
 const sequelize = new Sequelize(
   dbConfig.database,
@@ -26,7 +20,7 @@ const sequelize = new Sequelize(
     dialect: dbConfig.dialect,
     logging: dbConfig.logging,
     timezone: 'UTC',
-    pool: {
+    pool: dbConfig.pool || {
       max: 5,
       min: 0,
       acquire: 30000,

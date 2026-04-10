@@ -50,8 +50,132 @@ export const rateLimitConfig = {
     })
   },
 
+  // NEW: Waste Posts endpoints
+  createWastePost: {
+    windowMs: 60 * 60 * 1000, // 1 hour
+    maxPerUser: 10,
+    maxPerIP: 50,
+    keyGenerator: (userId: string, ip: string) => ({
+      user: `ratelimit:waste_create:${userId}`,
+      ip: `ratelimit:waste_create:ip:${ip}`
+    })
+  },
+
+  updateWastePost: {
+    windowMs: 60 * 60 * 1000,
+    maxPerUser: 20,
+    maxPerIP: 100,
+    keyGenerator: (userId: string, ip: string) => ({
+      user: `ratelimit:waste_update:${userId}`,
+      ip: `ratelimit:waste_update:ip:${ip}`
+    })
+  },
+
+  // NEW: Collections endpoints
+  createCollection: {
+    windowMs: 60 * 60 * 1000,
+    maxPerUser: 5,
+    maxPerIP: 20,
+    keyGenerator: (userId: string, ip: string) => ({
+      user: `ratelimit:coll_create:${userId}`,
+      ip: `ratelimit:coll_create:ip:${ip}`
+    })
+  },
+
+  updateCollection: {
+    windowMs: 60 * 60 * 1000,
+    maxPerUser: 10,
+    maxPerIP: 50,
+    keyGenerator: (userId: string, ip: string) => ({
+      user: `ratelimit:coll_update:${userId}`,
+      ip: `ratelimit:coll_update:ip:${ip}`
+    })
+  },
+
+  // NEW: Auth endpoints (stricter limits)
+  login: {
+    windowMs: 60 * 1000, // 1 minute
+    maxPerUser: 5,
+    maxPerIP: 10,
+    keyGenerator: (userId: string, ip: string) => ({
+      user: `ratelimit:login:${userId}`,
+      ip: `ratelimit:login:ip:${ip}`
+    })
+  },
+
   passwordReset: {
-    enabled: true
+    windowMs: 60 * 60 * 1000, // 1 hour
+    maxPerUser: 3,
+    maxPerIP: 10,
+    keyGenerator: (userId: string, ip: string) => ({
+      user: `ratelimit:pwreset:${userId}`,
+      ip: `ratelimit:pwreset:ip:${ip}`
+    })
+  },
+
+  register: {
+    windowMs: 60 * 60 * 1000,
+    maxPerUser: 2,
+    maxPerIP: 5,
+    keyGenerator: (userId: string, ip: string) => ({
+      user: `ratelimit:register:${userId}`,
+      ip: `ratelimit:register:ip:${ip}`
+    })
+  },
+
+  // NEW: Materials endpoints
+  createMaterial: {
+    windowMs: 60 * 60 * 1000,
+    maxPerUser: 5,
+    maxPerIP: 20,
+    keyGenerator: (userId: string, ip: string) => ({
+      user: `ratelimit:mat_create:${userId}`,
+      ip: `ratelimit:mat_create:ip:${ip}`
+    })
+  },
+
+  // NEW: Reviews endpoints
+  createReview: {
+    windowMs: 24 * 60 * 60 * 1000, // 1 day
+    maxPerUser: 20,
+    maxPerIP: 100,
+    keyGenerator: (userId: string, ip: string) => ({
+      user: `ratelimit:review_create:${userId}`,
+      ip: `ratelimit:review_create:ip:${ip}`
+    })
+  },
+
+  // NEW: Ratings endpoints
+  createRating: {
+    windowMs: 24 * 60 * 60 * 1000,
+    maxPerUser: 30,
+    maxPerIP: 150,
+    keyGenerator: (userId: string, ip: string) => ({
+      user: `ratelimit:rating_create:${userId}`,
+      ip: `ratelimit:rating_create:ip:${ip}`
+    })
+  },
+
+  // NEW: Feedback endpoints
+  createFeedback: {
+    windowMs: 24 * 60 * 60 * 1000,
+    maxPerUser: 10,
+    maxPerIP: 50,
+    keyGenerator: (userId: string, ip: string) => ({
+      user: `ratelimit:feedback_create:${userId}`,
+      ip: `ratelimit:feedback_create:ip:${ip}`
+    })
+  },
+
+  // NEW: Notifications endpoints
+  getNotifications: {
+    windowMs: 60 * 1000,
+    maxPerUser: 50,
+    maxPerIP: 200,
+    keyGenerator: (userId: string, ip: string) => ({
+      user: `ratelimit:notif_get:${userId}`,
+      ip: `ratelimit:notif_get:ip:${ip}`
+    })
   }
 };
 

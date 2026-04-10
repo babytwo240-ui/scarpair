@@ -1,9 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getAllSubscriptions = exports.rejectSubscription = exports.activateSubscription = exports.getPendingSubscriptions = exports.getSystemLogs = exports.getAllReports = exports.getAllPostRatings = exports.getAllUserRatings = exports.deleteWasteCategory = exports.updateWasteCategory = exports.createWasteCategory = exports.getWasteCategories = exports.getStatistics = exports.deleteMaterial = exports.updateMaterial = exports.createMaterial = exports.getMaterialById = exports.getAllMaterials = exports.login = void 0;
+exports.clearSystemLogs = exports.getSystemLogs = exports.getAllReports = exports.getAllPostRatings = exports.getAllUserRatings = exports.deleteWasteCategory = exports.updateWasteCategory = exports.createWasteCategory = exports.getWasteCategories = exports.getStatistics = exports.deleteMaterial = exports.updateMaterial = exports.createMaterial = exports.getMaterialById = exports.getAllMaterials = exports.login = void 0;
 const jwt_1 = require("../config/jwt");
 const models_1 = require("../models");
-const login = (req, res) => {
+const auditLogger_1 = require("../utils/auditLogger");
+const NODE_ENV = process.env.NODE_ENV || 'development';
+const login = async (req, res) => {
     try {
         const { username, password } = req.body;
         if (!username || !password) {
@@ -21,6 +23,8 @@ const login = (req, res) => {
             role: 'admin',
             loginTime: new Date().toISOString()
         });
+        // Log admin login
+        await (0, auditLogger_1.logAdminLogin)(username, req);
         res.status(200).json({
             message: 'Login successful',
             token: token,
@@ -31,7 +35,10 @@ const login = (req, res) => {
         });
     }
     catch (error) {
-        res.status(500).json({ error: error.message });
+        res.status(500).json({
+            error: 'Login failed',
+            ...(NODE_ENV === 'development' && { details: error.message })
+        });
     }
 };
 exports.login = login;
@@ -102,6 +109,9 @@ const createMaterial = async (req, res) => {
             status: status || 'available',
             isRecommendedForArtists: isRecommendedForArtists || false
         });
+        // Log material creation
+        await (0, auditLogger_1.logMaterialCreated)(1, // Admin ID
+        material.id, material.materialType, material.quantity, req);
         res.status(201).json({
             message: 'Material created successfully',
             data: material
@@ -134,6 +144,16 @@ const updateMaterial = async (req, res) => {
             status: status || material.status,
             isRecommendedForArtists: isRecommendedForArtists !== undefined ? isRecommendedForArtists : material.isRecommendedForArtists
         });
+        // Log material update
+        const updateChanges = {
+            businessUserId: businessUserId !== undefined,
+            materialType: materialType !== undefined,
+            quantity: quantity !== undefined,
+            status: status !== undefined,
+            isRecommendedForArtists: isRecommendedForArtists !== undefined
+        };
+        await (0, auditLogger_1.logMaterialUpdated)(1, // Admin ID
+        material.id, material.materialType, updateChanges, req);
         res.status(200).json({
             message: 'Material updated successfully',
             data: material
@@ -155,7 +175,11 @@ const deleteMaterial = async (req, res) => {
         if (!material) {
             return res.status(404).json({ error: 'Material not found' });
         }
+        const materialType = material.materialType;
         await material.destroy();
+        // Log material deletion
+        await (0, auditLogger_1.logMaterialDeleted)(1, // Admin ID
+        id, materialType, req);
         res.status(200).json({
             message: 'Material deleted successfully'
         });
@@ -199,7 +223,11 @@ const getWasteCategories = async (req, res) => {
         });
     }
     catch (error) {
-        res.status(500).json({ message: 'Error fetching categories', error: error.message });
+        res.status(500).json({
+            message: 'Error fetching categories',
+            error: 'Failed to fetch categories',
+            ...(NODE_ENV === 'development' && { details: error.message })
+        });
     }
 };
 exports.getWasteCategories = getWasteCategories;
@@ -216,13 +244,20 @@ const createWasteCategory = async (req, res) => {
             icon: icon || '',
             isActive: true
         });
+        // Log category creation
+        await (0, auditLogger_1.logCategoryCreated)(1, // Admin ID
+        category.id, category.name, req);
         res.status(201).json({
             message: 'Category created successfully',
             data: category
         });
     }
     catch (error) {
-        res.status(500).json({ message: 'Error creating category', error: error.message });
+        res.status(500).json({
+            message: 'Error creating category',
+            error: 'Failed to create category',
+            ...(NODE_ENV === 'development' && { details: error.message })
+        });
     }
 };
 exports.createWasteCategory = createWasteCategory;
@@ -241,13 +276,26 @@ const updateWasteCategory = async (req, res) => {
             icon: icon !== undefined ? icon : category.icon,
             isActive: isActive !== undefined ? isActive : category.isActive
         });
+        // Log category update
+        const categoryChanges = {
+            name: name !== undefined,
+            description: description !== undefined,
+            icon: icon !== undefined,
+            isActive: isActive !== undefined
+        };
+        await (0, auditLogger_1.logCategoryUpdated)(1, // Admin ID
+        category.id, category.name, categoryChanges, req);
         res.status(200).json({
             message: 'Category updated successfully',
             data: category
         });
     }
     catch (error) {
-        res.status(500).json({ message: 'Error updating category', error: error.message });
+        res.status(500).json({
+            message: 'Error updating category',
+            error: 'Failed to update category',
+            ...(NODE_ENV === 'development' && { details: error.message })
+        });
     }
 };
 exports.updateWasteCategory = updateWasteCategory;
@@ -259,14 +307,22 @@ const deleteWasteCategory = async (req, res) => {
         if (!category) {
             return res.status(404).json({ error: 'Category not found' });
         }
+        const categoryName = category.name;
         await category.destroy();
+        // Log category deletion
+        await (0, auditLogger_1.logCategoryDeleted)(1, // Admin ID
+        category.id, categoryName, req);
         res.status(200).json({
             message: 'Category deleted successfully',
             data: { id: categoryId }
         });
     }
     catch (error) {
-        res.status(500).json({ message: 'Error deleting category', error: error.message });
+        res.status(500).json({
+            message: 'Error deleting category',
+            error: 'Failed to delete category',
+            ...(NODE_ENV === 'development' && { details: error.message })
+        });
     }
 };
 exports.deleteWasteCategory = deleteWasteCategory;
@@ -300,7 +356,11 @@ const getAllUserRatings = async (req, res) => {
         });
     }
     catch (error) {
-        res.status(500).json({ message: 'Error fetching user ratings', error: error.message });
+        res.status(500).json({
+            message: 'Error fetching user ratings',
+            error: 'Failed to fetch user ratings',
+            ...(NODE_ENV === 'development' && { details: error.message })
+        });
     }
 };
 exports.getAllUserRatings = getAllUserRatings;
@@ -327,7 +387,11 @@ const getAllPostRatings = async (req, res) => {
         });
     }
     catch (error) {
-        res.status(500).json({ message: 'Error fetching post ratings', error: error.message });
+        res.status(500).json({
+            message: 'Error fetching post ratings',
+            error: 'Failed to fetch post ratings',
+            ...(NODE_ENV === 'development' && { details: error.message })
+        });
     }
 };
 exports.getAllPostRatings = getAllPostRatings;
@@ -366,7 +430,11 @@ const getAllReports = async (req, res) => {
         });
     }
     catch (error) {
-        res.status(500).json({ message: 'Error fetching reports', error: error.message });
+        res.status(500).json({
+            message: 'Error fetching reports',
+            error: 'Failed to fetch reports',
+            ...(NODE_ENV === 'development' && { details: error.message })
+        });
     }
 };
 exports.getAllReports = getAllReports;
@@ -392,178 +460,33 @@ const getSystemLogs = async (req, res) => {
         });
     }
     catch (error) {
-        res.status(500).json({ message: 'Error fetching system logs', error: error.message });
+        res.status(500).json({
+            message: 'Error fetching system logs',
+            error: 'Failed to fetch system logs',
+            ...(NODE_ENV === 'development' && { details: error.message })
+        });
     }
 };
 exports.getSystemLogs = getSystemLogs;
-const getPendingSubscriptions = async (req, res) => {
+const clearSystemLogs = async (req, res) => {
     try {
-        const { page = 1, limit = 20 } = req.query;
-        const offset = (page - 1) * limit;
-        const Subscription = models_1.sequelize.models.Subscription;
-        const User = models_1.sequelize.models.User;
-        if (!Subscription) {
-            return res.status(500).json({ error: 'Subscription model not initialized' });
-        }
-        const { count, rows } = await Subscription.findAndCountAll({
-            where: { status: 'pending' },
-            include: [
-                {
-                    model: User,
-                    as: 'user',
-                    attributes: ['id', 'email', 'type', 'businessName', 'companyName', 'phone']
-                }
-            ],
-            order: [['createdAt', 'DESC']],
-            limit: limit,
-            offset
+        const SystemLog = models_1.sequelize.models.SystemLog;
+        const deletedCount = await SystemLog.destroy({
+            where: {},
+            truncate: true
         });
         res.status(200).json({
-            message: 'Pending subscriptions retrieved',
-            data: rows,
-            pagination: {
-                total: count,
-                page,
-                limit,
-                pages: Math.ceil(count / limit)
-            }
+            message: 'All system logs cleared successfully',
+            deletedCount
         });
     }
     catch (error) {
-        res.status(500).json({ message: 'Error fetching pending subscriptions', error: error.message });
+        res.status(500).json({
+            message: 'Error clearing system logs',
+            error: 'Failed to clear system logs',
+            ...(NODE_ENV === 'development' && { details: error.message })
+        });
     }
 };
-exports.getPendingSubscriptions = getPendingSubscriptions;
-const activateSubscription = async (req, res) => {
-    try {
-        const { id } = req.params;
-        const Subscription = models_1.sequelize.models.Subscription;
-        const User = models_1.sequelize.models.User;
-        const Notification = models_1.sequelize.models.Notification;
-        if (!Subscription) {
-            return res.status(500).json({ error: 'Subscription model not initialized' });
-        }
-        const subscription = await Subscription.findByPk(id, {
-            include: [
-                {
-                    model: User,
-                    as: 'user',
-                    attributes: ['id', 'email', 'type', 'businessName', 'companyName']
-                }
-            ]
-        });
-        if (!subscription) {
-            return res.status(404).json({ message: 'Subscription not found' });
-        }
-        if (subscription.status !== 'pending') {
-            return res.status(400).json({ message: 'Only pending subscriptions can be activated' });
-        }
-        const now = new Date();
-        const expiresAt = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000); // 30 days
-        subscription.status = 'active';
-        subscription.activatedAt = now;
-        subscription.expiresAt = expiresAt;
-        await subscription.save();
-        // Notify the user
-        if (Notification) {
-            const userType = subscription.user?.type || 'user';
-            await Notification.create({
-                userId: subscription.userId,
-                type: 'VERIFICATION',
-                title: 'Subscription Activated! 🎉',
-                message: `Your subscription has been activated! You now have +10 additional ${userType === 'business' ? 'posts' : 'views'} per day. Expires on ${expiresAt.toLocaleDateString()}.`,
-                relatedId: subscription.id,
-                read: false
-            });
-        }
-        res.status(200).json({
-            message: 'Subscription activated successfully',
-            data: subscription
-        });
-    }
-    catch (error) {
-        res.status(500).json({ message: 'Error activating subscription', error: error.message });
-    }
-};
-exports.activateSubscription = activateSubscription;
-const rejectSubscription = async (req, res) => {
-    try {
-        const { id } = req.params;
-        const { reason } = req.body;
-        const Subscription = models_1.sequelize.models.Subscription;
-        const Notification = models_1.sequelize.models.Notification;
-        if (!Subscription) {
-            return res.status(500).json({ error: 'Subscription model not initialized' });
-        }
-        const subscription = await Subscription.findByPk(id);
-        if (!subscription) {
-            return res.status(404).json({ message: 'Subscription not found' });
-        }
-        if (subscription.status !== 'pending') {
-            return res.status(400).json({ message: 'Only pending subscriptions can be rejected' });
-        }
-        subscription.status = 'cancelled';
-        await subscription.save();
-        // Notify the user
-        if (Notification) {
-            await Notification.create({
-                userId: subscription.userId,
-                type: 'VERIFICATION',
-                title: 'Subscription Request Declined',
-                message: `Your subscription request was not approved. ${reason ? `Reason: ${reason}` : 'Please contact support for details.'}`,
-                relatedId: subscription.id,
-                read: false
-            });
-        }
-        res.status(200).json({
-            message: 'Subscription rejected',
-            data: subscription
-        });
-    }
-    catch (error) {
-        res.status(500).json({ message: 'Error rejecting subscription', error: error.message });
-    }
-};
-exports.rejectSubscription = rejectSubscription;
-const getAllSubscriptions = async (req, res) => {
-    try {
-        const { page = 1, limit = 20, status } = req.query;
-        const offset = (page - 1) * limit;
-        const Subscription = models_1.sequelize.models.Subscription;
-        const User = models_1.sequelize.models.User;
-        if (!Subscription) {
-            return res.status(500).json({ error: 'Subscription model not initialized' });
-        }
-        const where = {};
-        if (status)
-            where.status = status;
-        const { count, rows } = await Subscription.findAndCountAll({
-            where,
-            include: [
-                {
-                    model: User,
-                    as: 'user',
-                    attributes: ['id', 'email', 'type', 'businessName', 'companyName', 'phone']
-                }
-            ],
-            order: [['createdAt', 'DESC']],
-            limit: limit,
-            offset
-        });
-        res.status(200).json({
-            message: 'Subscriptions retrieved',
-            data: rows,
-            pagination: {
-                total: count,
-                page,
-                limit,
-                pages: Math.ceil(count / limit)
-            }
-        });
-    }
-    catch (error) {
-        res.status(500).json({ message: 'Error fetching subscriptions', error: error.message });
-    }
-};
-exports.getAllSubscriptions = getAllSubscriptions;
+exports.clearSystemLogs = clearSystemLogs;
 //# sourceMappingURL=adminController.js.map

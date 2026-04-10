@@ -30,7 +30,7 @@ const devTransports = [
     })
 ];
 const devLogger = winston_1.default.createLogger({
-    level: 'debug',
+    level: 'info',
     format: devLogFormat,
     transports: devTransports,
     exceptionHandlers: [

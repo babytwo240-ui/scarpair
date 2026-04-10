@@ -45,8 +45,113 @@ export declare const rateLimitConfig: {
             ip: string;
         };
     };
+    createWastePost: {
+        windowMs: number;
+        maxPerUser: number;
+        maxPerIP: number;
+        keyGenerator: (userId: string, ip: string) => {
+            user: string;
+            ip: string;
+        };
+    };
+    updateWastePost: {
+        windowMs: number;
+        maxPerUser: number;
+        maxPerIP: number;
+        keyGenerator: (userId: string, ip: string) => {
+            user: string;
+            ip: string;
+        };
+    };
+    createCollection: {
+        windowMs: number;
+        maxPerUser: number;
+        maxPerIP: number;
+        keyGenerator: (userId: string, ip: string) => {
+            user: string;
+            ip: string;
+        };
+    };
+    updateCollection: {
+        windowMs: number;
+        maxPerUser: number;
+        maxPerIP: number;
+        keyGenerator: (userId: string, ip: string) => {
+            user: string;
+            ip: string;
+        };
+    };
+    login: {
+        windowMs: number;
+        maxPerUser: number;
+        maxPerIP: number;
+        keyGenerator: (userId: string, ip: string) => {
+            user: string;
+            ip: string;
+        };
+    };
     passwordReset: {
-        enabled: boolean;
+        windowMs: number;
+        maxPerUser: number;
+        maxPerIP: number;
+        keyGenerator: (userId: string, ip: string) => {
+            user: string;
+            ip: string;
+        };
+    };
+    register: {
+        windowMs: number;
+        maxPerUser: number;
+        maxPerIP: number;
+        keyGenerator: (userId: string, ip: string) => {
+            user: string;
+            ip: string;
+        };
+    };
+    createMaterial: {
+        windowMs: number;
+        maxPerUser: number;
+        maxPerIP: number;
+        keyGenerator: (userId: string, ip: string) => {
+            user: string;
+            ip: string;
+        };
+    };
+    createReview: {
+        windowMs: number;
+        maxPerUser: number;
+        maxPerIP: number;
+        keyGenerator: (userId: string, ip: string) => {
+            user: string;
+            ip: string;
+        };
+    };
+    createRating: {
+        windowMs: number;
+        maxPerUser: number;
+        maxPerIP: number;
+        keyGenerator: (userId: string, ip: string) => {
+            user: string;
+            ip: string;
+        };
+    };
+    createFeedback: {
+        windowMs: number;
+        maxPerUser: number;
+        maxPerIP: number;
+        keyGenerator: (userId: string, ip: string) => {
+            user: string;
+            ip: string;
+        };
+    };
+    getNotifications: {
+        windowMs: number;
+        maxPerUser: number;
+        maxPerIP: number;
+        keyGenerator: (userId: string, ip: string) => {
+            user: string;
+            ip: string;
+        };
     };
 };
 export default rateLimitConfig;

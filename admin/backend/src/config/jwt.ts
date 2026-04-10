@@ -1,4 +1,13 @@
 import jwt, { Secret, SignOptions } from 'jsonwebtoken';
+import dotenv from 'dotenv';
+import path from 'path';
+
+// Load environment variables
+import fs from 'fs';
+const envFile = process.env.NODE_ENV === 'production' ? '.env.production' : (fs.existsSync(path.join(__dirname, '../../', '.env.local')) ? '.env.local' : '.env');
+dotenv.config({ path: path.join(__dirname, '../../', envFile) });
+
+const NODE_ENV = process.env.NODE_ENV || 'development';
 
 interface AdminCredentials {
   username: string;
@@ -11,7 +20,22 @@ const getAdminCredentials = (): AdminCredentials => ({
   password: process.env.ADMIN_PASSWORD || ''
 });
 
-const JWT_SECRET: Secret = process.env.JWT_SECRET || 'your_super_secret_jwt_key_change_in_production';
+
+
+// Validate admin credentials are properly configured
+if (!process.env.ADMIN_PASSWORD || process.env.ADMIN_PASSWORD === '') {
+  if (NODE_ENV === 'production') {
+    throw new Error('❌ CRITICAL: ADMIN_PASSWORD must be set in production environment');
+  }
+}
+
+// Validate JWT_SECRET
+const JWT_SECRET: Secret = process.env.JWT_SECRET || (NODE_ENV === 'development' ? 'dev_jwt_secret_key_12345678' : '');
+
+if (!process.env.JWT_SECRET && NODE_ENV === 'production') {
+  throw new Error('❌ CRITICAL: JWT_SECRET must be set in production environment');
+}
+
 const JWT_EXPIRATION = process.env.JWT_EXPIRATION || '24h';
 
 interface AdminPayload {

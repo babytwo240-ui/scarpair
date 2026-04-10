@@ -1,6 +1,7 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { NotificationController } from '../controllers/notificationController';
 import { authenticateUser } from '../middleware/userAuthMiddleware';
+import { RateLimiter } from '../middleware/rateLimiter';
 
 const router = Router();
 
@@ -17,6 +18,7 @@ router.post('/admin/create', verifyAdminKey, NotificationController.createNotifi
 router.use(authenticateUser);
 router.get(
   '/',
+  RateLimiter.middleware('getNotifications'),
   NotificationController.getNotifications
 );
 router.get(

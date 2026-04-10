@@ -38,8 +38,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const materialController = __importStar(require("../controllers/materialController"));
+const rateLimiter_1 = require("../middleware/rateLimiter");
 const router = express_1.default.Router();
-router.post('/', materialController.createMaterial);
+router.post('/', rateLimiter_1.RateLimiter.middleware('createMaterial'), materialController.createMaterial);
 router.get('/', materialController.getAllMaterials);
 router.get('/recommended', materialController.getRecommendedMaterials);
 exports.default = router;
