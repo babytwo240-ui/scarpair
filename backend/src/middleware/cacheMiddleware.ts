@@ -24,7 +24,7 @@ export class CacheMiddleware {
       }
 
       const cacheKey = CacheService.generateCacheKey(prefix, req.params.id);
-      
+
       try {
         const cached = await CacheService.getCached(cacheKey);
         if (cached) {
@@ -41,7 +41,7 @@ export class CacheMiddleware {
       const originalSend = res.json.bind(res);
 
       // Override json method to cache response
-      res.json = function(data: any) {
+      res.json = function (data: any) {
         // Only cache successful responses
         if (res.statusCode === 200 && data) {
           CacheService.setCached(cacheKey, data, ttl).catch(err =>
@@ -65,7 +65,7 @@ export class CacheMiddleware {
       const originalSend = res.json.bind(res);
 
       // Override json to invalidate cache after successful mutation
-      res.json = function(data: any) {
+      res.json = function (data: any) {
         // Only invalidate on successful responses (2xx)
         if (res.statusCode >= 200 && res.statusCode < 300) {
           CacheService.invalidateCachePrefix(prefix).catch(err =>
@@ -88,10 +88,10 @@ export class CacheMiddleware {
       if (req.method === 'GET') {
         res.set('Cache-Control', `public, max-age=${maxAge}`);
         res.set('Pragma', 'public');
-        
+
         // Add ETag for conditional requests
         const originalSend = res.json.bind(res);
-        res.json = function(data: any) {
+        res.json = function (data: any) {
           const crypto = require('crypto');
           const hash = crypto
             .createHash('md5')
@@ -118,7 +118,7 @@ export class CacheMiddleware {
     return (req: Request, res: Response, next: NextFunction) => {
       const originalSend = res.json.bind(res);
 
-      res.json = function(data: any) {
+      res.json = function (data: any) {
         const size = Buffer.byteLength(JSON.stringify(data), 'utf8');
         if (size > maxBytes) {
           return res.status(413).json({

@@ -5,7 +5,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const dotenv_1 = __importDefault(require("dotenv"));
 const path_1 = __importDefault(require("path"));
-dotenv_1.default.config({ path: path_1.default.resolve(__dirname, '../.env.local') });
+const fs_1 = __importDefault(require("fs"));
+const envFileLocal = path_1.default.resolve(__dirname, '../.env.local');
+dotenv_1.default.config({ path: fs_1.default.existsSync(envFileLocal) ? envFileLocal : path_1.default.resolve(__dirname, '../.env') });
 const express_1 = __importDefault(require("express"));
 const http_1 = require("http");
 const socket_io_1 = require("socket.io");

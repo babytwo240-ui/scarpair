@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.PasswordAudit = exports.Report = exports.PostRating = exports.UserRating = exports.Feedback = exports.WasteCategory = exports.SystemLog = exports.PostMessage = exports.Review = exports.Notification = exports.Message = exports.Conversation = exports.Collection = exports.WastePost = exports.Material = exports.User = exports.sequelize = void 0;
+exports.Subscription = exports.PasswordAudit = exports.Report = exports.PostRating = exports.UserRating = exports.Feedback = exports.WasteCategory = exports.SystemLog = exports.PostMessage = exports.Review = exports.Notification = exports.Message = exports.Conversation = exports.Collection = exports.WastePost = exports.Material = exports.User = exports.sequelize = void 0;
 const sequelize_1 = require("sequelize");
 const database_1 = __importDefault(require("../config/database"));
 const env = (process.env.NODE_ENV || 'development');
@@ -48,6 +48,8 @@ const Notification = require('./Notification')(sequelize);
 exports.Notification = Notification;
 const PasswordAudit = require('./PasswordAudit')(sequelize);
 exports.PasswordAudit = PasswordAudit;
+const Subscription = require('./Subscription')(sequelize);
+exports.Subscription = Subscription;
 const models = {
     User,
     Material,
@@ -64,7 +66,8 @@ const models = {
     UserRating,
     PostRating,
     Report,
-    PasswordAudit
+    PasswordAudit,
+    Subscription
 };
 Object.keys(models).forEach((key) => {
     if (models[key].associate) {
@@ -105,5 +108,7 @@ User.hasMany(Report, { foreignKey: 'reportedUserId', as: 'reportsReceived' });
 User.hasMany(Report, { foreignKey: 'approvedBy', as: 'reportsApproved' });
 PasswordAudit.belongsTo(User, { foreignKey: 'userId' });
 User.hasMany(PasswordAudit, { foreignKey: 'userId', as: 'passwordAudits' });
+Subscription.belongsTo(User, { foreignKey: 'userId', as: 'user' });
+User.hasMany(Subscription, { foreignKey: 'userId', as: 'subscriptions' });
 exports.default = models;
 //# sourceMappingURL=index.js.map

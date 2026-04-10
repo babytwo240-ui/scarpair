@@ -105,6 +105,31 @@ module.exports = (sequelize) => {
             allowNull: true,
             comment: 'When account lock expires'
         },
+        subscriptionStatus: {
+            type: sequelize_1.DataTypes.ENUM('none', 'pending', 'active'),
+            defaultValue: 'none',
+            comment: 'Subscription status for daily limit extension'
+        },
+        dailyPostCount: {
+            type: sequelize_1.DataTypes.INTEGER,
+            defaultValue: 0,
+            comment: 'Number of posts created today (business owners)'
+        },
+        dailyViewCount: {
+            type: sequelize_1.DataTypes.INTEGER,
+            defaultValue: 0,
+            comment: 'Number of detail views today (recyclers)'
+        },
+        lastPostDate: {
+            type: sequelize_1.DataTypes.DATEONLY,
+            allowNull: true,
+            comment: 'Date of last post count reset'
+        },
+        lastViewDate: {
+            type: sequelize_1.DataTypes.DATEONLY,
+            allowNull: true,
+            comment: 'Date of last view count reset'
+        },
         createdAt: {
             type: sequelize_1.DataTypes.DATE,
             allowNull: false,

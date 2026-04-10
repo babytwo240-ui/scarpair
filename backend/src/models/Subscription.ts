@@ -99,12 +99,5 @@ module.exports = (sequelize: Sequelize): ModelStatic<SubscriptionInstance> => {
     }
   );
 
-  (Subscription as any).associate = (models: any) => {
-    Subscription.belongsTo(models.User, {
-      foreignKey: 'userId',
-      as: 'user'
-    });
-  };
-
   return Subscription as unknown as ModelStatic<SubscriptionInstance>;
 };

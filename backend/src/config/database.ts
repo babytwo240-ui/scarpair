@@ -1,7 +1,9 @@
 import dotenv from 'dotenv';
 import path from 'path';
+import fs from 'fs';
 
-dotenv.config({ path: path.resolve(__dirname, '../../.env.local') });
+const envFileLocal = path.resolve(__dirname, '../../.env.local');
+dotenv.config({ path: fs.existsSync(envFileLocal) ? envFileLocal : path.resolve(__dirname, '../../.env') });
 
 // Ensure NODE_ENV defaults to production if not explicitly set
 const NODE_ENV = process.env.NODE_ENV || 'production';

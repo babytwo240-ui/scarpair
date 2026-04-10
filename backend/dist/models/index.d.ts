@@ -19,8 +19,9 @@ declare const Conversation: any;
 declare const Message: any;
 declare const Notification: any;
 declare const PasswordAudit: any;
+declare const Subscription: any;
 declare const models: any;
-export { sequelize, User, Material, WastePost, Collection, Conversation, Message, Notification, Review, PostMessage, SystemLog, WasteCategory, Feedback, UserRating, PostRating, Report, PasswordAudit };
+export { sequelize, User, Material, WastePost, Collection, Conversation, Message, Notification, Review, PostMessage, SystemLog, WasteCategory, Feedback, UserRating, PostRating, Report, PasswordAudit, Subscription };
 export type { ConversationInstance, MessageInstance, NotificationInstance };
 export default models;
 //# sourceMappingURL=index.d.ts.map
