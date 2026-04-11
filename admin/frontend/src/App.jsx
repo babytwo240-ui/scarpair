@@ -1,9 +1,9 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider, createTheme, CssBaseline } from '@mui/material';
-import ProtectedRoute from './components/ProtectedRoute.jsx';
-import AdminNavigation from './components/AdminNavigation.jsx';
-import LoginPage from './pages/LoginPage.jsx';
+import ProtectedRoute from './shared/components/ProtectedRoute';
+import AdminNavigation from './shared/components/AdminNavigation';
+import LoginPage from './UI/auth/pages/LoginPage';
 import AdminDashboard from './pages/AdminDashboard.jsx';
 import AdminUsersPage from './pages/AdminUsersPage.jsx';
 import AdminUserDetailsPage from './pages/AdminUserDetailsPage.jsx';

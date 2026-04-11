@@ -1,71 +1,44 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { adminAPI } from '../services/adminApi.jsx';
-
-const C = {
-  bright: '#64ff43',
-  darker: '#0a2e03',
-  surface: '#0d3806',
-  border: 'rgba(100,255,67,0.18)',
-  borderHover: 'rgba(100,255,67,0.45)',
-  text: '#e6ffe0',
-  textMid: 'rgba(230,255,224,0.55)',
-  textLow: 'rgba(230,255,224,0.3)',
-  glow: 'rgba(100,255,67,0.22)',
-  glowStrong: 'rgba(100,255,67,0.45)',
-  error: '#ff6b6b',
-  errorBg: 'rgba(255,107,107,0.1)',
-  errorBorder: 'rgba(255,107,107,0.3)',
-};
+import { useLogin } from '../hooks/useLogin';
+import { COLORS } from '../../../shared/constants/colors';
 
 const LoginPage = () => {
   const navigate = useNavigate();
+  const { login, loading, error: loginError } = useLogin();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
   const [mouse, setMouse] = useState({ x: 0, y: 0 });
-  const [scrollY, setScrollY] = useState(0);
   const [focusedInput, setFocusedInput] = useState(null);
 
   useEffect(() => {
     const mm = (e) => setMouse({ x: e.clientX, y: e.clientY });
-    const sc = () => setScrollY(window.scrollY);
     window.addEventListener('mousemove', mm);
-    window.addEventListener('scroll', sc);
-    return () => {
-      window.removeEventListener('mousemove', mm);
-      window.removeEventListener('scroll', sc);
-    };
+    return () => window.removeEventListener('mousemove', mm);
   }, []);
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
-    setLoading(true);
+
+    if (!username || !password) {
+      setError('Username and password are required');
+      return;
+    }
 
     try {
-      if (!username || !password) {
-        setError('Username and password are required');
-        setLoading(false);
-        return;
-      }
-
-      const response = await adminAPI.login(username, password);
-
-      if (response.token) {
-        localStorage.setItem('adminToken', response.token);
-        navigate('/admin/dashboard');
-      }
+      await login(username, password);
+      navigate('/admin/dashboard');
     } catch (err) {
       setError(err.error || 'Login failed. Please try again.');
-    } finally {
-      setLoading(false);
     }
   };
 
+  const displayError = error || loginError;
+
   return (
-    <div style={{ minHeight: '100vh', background: C.darker, fontFamily: "'DM Sans','Helvetica Neue',sans-serif", overflowX: 'hidden', color: C.text }}>
+    <div style={{ minHeight: '100vh', background: COLORS.darker, fontFamily: "'DM Sans','Helvetica Neue',sans-serif", overflowX: 'hidden', color: COLORS.text }}>
 
       {/* Ambient cursor glow */}
       <div style={{ position: 'fixed', top: mouse.y - 320, left: mouse.x - 320, width: 640, height: 640, background: 'radial-gradient(circle, rgba(100,255,67,0.055) 0%, transparent 65%)', borderRadius: '50%', pointerEvents: 'none', zIndex: 0, transition: 'top 0.35s ease, left 0.35s ease' }} />
@@ -81,16 +54,15 @@ const LoginPage = () => {
         <div style={{ position: 'fixed', bottom: '10%', left: '-10%', width: 400, height: 400, border: '1px solid rgba(100,255,67,0.05)', borderRadius: '50%', pointerEvents: 'none' }} />
 
         <div style={{ maxWidth: 520, margin: '0 auto', width: '100%' }}>
-          {/* Header */}
 
           {/* Form Container */}
-          <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 28, padding: 48 }}>
+          <div style={{ background: COLORS.surface, border: `1px solid ${COLORS.border}`, borderRadius: 28, padding: 48 }}>
 
             {/* Error Message */}
-            {error && (
+            {displayError && (
               <div style={{
-                background: C.errorBg,
-                border: `1px solid ${C.errorBorder}`,
+                background: COLORS.errorBg,
+                border: `1px solid ${COLORS.errorBorder}`,
                 borderRadius: 16,
                 padding: '16px 20px',
                 marginBottom: 32,
@@ -99,17 +71,17 @@ const LoginPage = () => {
                 gap: 12,
               }}>
                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none" style={{ flexShrink: 0 }}>
-                  <circle cx="10" cy="10" r="9" stroke={C.error} strokeWidth="2" />
-                  <path d="M10 6v4M10 14h.01" stroke={C.error} strokeWidth="2" strokeLinecap="round" />
+                  <circle cx="10" cy="10" r="9" stroke={COLORS.error} strokeWidth="2" />
+                  <path d="M10 6v4M10 14h.01" stroke={COLORS.error} strokeWidth="2" strokeLinecap="round" />
                 </svg>
-                <span style={{ fontSize: 14, color: C.error, fontWeight: 500 }}>{error}</span>
+                <span style={{ fontSize: 14, color: COLORS.error, fontWeight: 500 }}>{displayError}</span>
               </div>
             )}
 
             <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
               {/* Username Input */}
               <div>
-                <label style={{ display: 'block', fontSize: 13, fontWeight: 700, color: C.textMid, marginBottom: 10, letterSpacing: '0.05em', textTransform: 'uppercase' }}>Username</label>
+                <label style={{ display: 'block', fontSize: 13, fontWeight: 700, color: COLORS.textMid, marginBottom: 10, letterSpacing: '0.05em', textTransform: 'uppercase' }}>Username</label>
                 <input
                   type="text"
                   value={username}
@@ -123,10 +95,10 @@ const LoginPage = () => {
                   style={{
                     width: '100%',
                     padding: '14px 16px',
-                    border: `1px solid ${focusedInput === 'username' ? C.borderHover : C.border}`,
+                    border: `1px solid ${focusedInput === 'username' ? COLORS.borderHover : COLORS.border}`,
                     borderRadius: 14,
                     background: 'rgba(100,255,67,0.03)',
-                    color: C.text,
+                    color: COLORS.text,
                     fontSize: 14,
                     boxSizing: 'border-box',
                     transition: 'all 0.2s ease',
@@ -140,7 +112,7 @@ const LoginPage = () => {
 
               {/* Password Input */}
               <div>
-                <label style={{ fontSize: 13, fontWeight: 700, color: C.textMid, marginBottom: 10, letterSpacing: '0.05em', textTransform: 'uppercase', display: 'block' }}>Password</label>
+                <label style={{ fontSize: 13, fontWeight: 700, color: COLORS.textMid, marginBottom: 10, letterSpacing: '0.05em', textTransform: 'uppercase', display: 'block' }}>Password</label>
                 <input
                   type="password"
                   value={password}
@@ -153,10 +125,10 @@ const LoginPage = () => {
                   style={{
                     width: '100%',
                     padding: '14px 16px',
-                    border: `1px solid ${focusedInput === 'password' ? C.borderHover : C.border}`,
+                    border: `1px solid ${focusedInput === 'password' ? COLORS.borderHover : COLORS.border}`,
                     borderRadius: 14,
                     background: 'rgba(100,255,67,0.03)',
-                    color: C.text,
+                    color: COLORS.text,
                     fontSize: 14,
                     boxSizing: 'border-box',
                     transition: 'all 0.2s ease',
@@ -217,27 +189,27 @@ const LoginPage = () => {
 
             {/* Divider */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '32px 0' }}>
-              <div style={{ flex: 1, height: '1px', background: C.border }} />
-              <span style={{ color: C.textLow, fontSize: 12 }}>secure access</span>
-              <div style={{ flex: 1, height: '1px', background: C.border }} />
+              <div style={{ flex: 1, height: '1px', background: COLORS.border }} />
+              <span style={{ color: COLORS.textLow, fontSize: 12 }}>secure access</span>
+              <div style={{ flex: 1, height: '1px', background: COLORS.border }} />
             </div>
 
             {/* Info Box */}
             <div style={{
               background: 'rgba(100,255,67,0.08)',
-              border: `1px solid ${C.border}`,
+              border: `1px solid ${COLORS.border}`,
               borderRadius: 16,
               padding: '16px 20px',
             }}>
-              <p style={{ margin: 0, fontSize: 12, color: C.textMid, lineHeight: 1.6 }}>
-                <span style={{ color: C.bright, fontWeight: 700 }}>ℹ️ Admin credentials</span> are securely configured. Contact your administrator if you need access to the portal.
+              <p style={{ margin: 0, fontSize: 12, color: COLORS.textMid, lineHeight: 1.6 }}>
+                <span style={{ color: COLORS.bright, fontWeight: 700 }}>ℹ️ Admin credentials</span> are securely configured. Contact your administrator if you need access to the portal.
               </p>
             </div>
           </div>
 
           {/* Footer Info */}
           <div style={{ textAlign: 'center', marginTop: 48 }}>
-            <p style={{ fontSize: 12, color: C.textLow, margin: 0 }}>
+            <p style={{ fontSize: 12, color: COLORS.textLow, margin: 0 }}>
               Need help? Contact the system administrator
             </p>
           </div>
