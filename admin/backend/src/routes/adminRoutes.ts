@@ -3,15 +3,13 @@ import * as adminController from '../controllers/adminController';
 import { authenticate } from '../shared/middleware/authMiddleware';
 import usersRoutes from '../modules/users/users.routes';
 import materialsRoutes from '../modules/materials/materials.routes';
+import categoriesRoutes from '../modules/categories/categories.routes';
 
 const router = express.Router();
 router.post('/login', adminController.login);
 router.use('/materials', materialsRoutes);
 router.use('/users', usersRoutes);
-router.get('/categories', authenticate, adminController.getWasteCategories);
-router.post('/categories', authenticate, adminController.createWasteCategory);
-router.put('/categories/:categoryId', authenticate, adminController.updateWasteCategory);
-router.delete('/categories/:categoryId', authenticate, adminController.deleteWasteCategory);
+router.use('/categories', categoriesRoutes);
 router.get('/ratings/users', authenticate, adminController.getAllUserRatings);
 router.get('/ratings/posts', authenticate, adminController.getAllPostRatings);
 router.get('/reports', authenticate, adminController.getAllReports);
