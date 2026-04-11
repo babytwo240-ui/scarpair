@@ -45,8 +45,9 @@ const categories_routes_1 = __importDefault(require("../modules/categories/categ
 const ratings_routes_1 = __importDefault(require("../modules/ratings/ratings.routes"));
 const reports_routes_1 = __importDefault(require("../modules/reports/reports.routes"));
 const monitoring_routes_1 = __importDefault(require("../modules/monitoring/monitoring.routes"));
+const auth_routes_1 = __importDefault(require("../modules/auth/auth.routes"));
 const router = express_1.default.Router();
-router.post('/login', adminController.login);
+router.use('', auth_routes_1.default);
 router.use('/materials', materials_routes_1.default);
 router.use('/users', users_routes_1.default);
 router.use('/categories', categories_routes_1.default);

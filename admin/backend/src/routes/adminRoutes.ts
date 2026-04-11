@@ -7,9 +7,10 @@ import categoriesRoutes from '../modules/categories/categories.routes';
 import ratingsRoutes from '../modules/ratings/ratings.routes';
 import reportsRoutes from '../modules/reports/reports.routes';
 import monitoringRoutes from '../modules/monitoring/monitoring.routes';
+import authRoutes from '../modules/auth/auth.routes';
 
 const router = express.Router();
-router.post('/login', adminController.login);
+router.use('', authRoutes);
 router.use('/materials', materialsRoutes);
 router.use('/users', usersRoutes);
 router.use('/categories', categoriesRoutes);
