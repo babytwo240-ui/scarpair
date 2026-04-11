@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.clearSystemLogs = exports.getSystemLogs = exports.getAllReports = exports.getAllPostRatings = exports.getAllUserRatings = exports.getStatistics = exports.login = void 0;
+exports.clearSystemLogs = exports.getSystemLogs = exports.getAllReports = exports.getStatistics = exports.login = void 0;
 const jwt_1 = require("../shared/config/jwt");
 const index_1 = require("../shared/db/index");
 const auditLogger_1 = require("../shared/utils/auditLogger");
@@ -62,75 +62,6 @@ const getStatistics = async (req, res) => {
     }
 };
 exports.getStatistics = getStatistics;
-const getAllUserRatings = async (req, res) => {
-    try {
-        const { page = 1, limit = 20 } = req.query;
-        const offset = (page - 1) * limit;
-        const UserRating = index_1.sequelize.models.UserRating;
-        const User = index_1.sequelize.models.User;
-        const { count, rows } = await UserRating.findAndCountAll({
-            include: [
-                {
-                    model: User,
-                    as: 'user',
-                    attributes: ['id', 'email', 'type', 'businessName', 'companyName', 'isActive']
-                }
-            ],
-            order: [['averageRating', 'DESC']],
-            limit: limit,
-            offset
-        });
-        res.status(200).json({
-            message: 'User ratings retrieved successfully',
-            data: rows,
-            pagination: {
-                total: count,
-                page,
-                limit,
-                pages: Math.ceil(count / limit)
-            }
-        });
-    }
-    catch (error) {
-        res.status(500).json({
-            message: 'Error fetching user ratings',
-            error: 'Failed to fetch user ratings',
-            ...(NODE_ENV === 'development' && { details: error.message })
-        });
-    }
-};
-exports.getAllUserRatings = getAllUserRatings;
-const getAllPostRatings = async (req, res) => {
-    try {
-        const { page = 1, limit = 20 } = req.query;
-        const offset = (page - 1) * limit;
-        const PostRating = index_1.sequelize.models.PostRating;
-        const { count, rows } = await PostRating.findAndCountAll({
-            order: [['averageRating', 'DESC']],
-            limit: limit,
-            offset,
-            raw: true
-        });
-        res.status(200).json({
-            message: 'Post ratings retrieved successfully',
-            data: rows,
-            pagination: {
-                total: count,
-                page,
-                limit,
-                pages: Math.ceil(count / limit)
-            }
-        });
-    }
-    catch (error) {
-        res.status(500).json({
-            message: 'Error fetching post ratings',
-            error: 'Failed to fetch post ratings',
-            ...(NODE_ENV === 'development' && { details: error.message })
-        });
-    }
-};
-exports.getAllPostRatings = getAllPostRatings;
 const getAllReports = async (req, res) => {
     try {
         const { page = 1, limit = 20 } = req.query;

@@ -4,14 +4,14 @@ import { authenticate } from '../shared/middleware/authMiddleware';
 import usersRoutes from '../modules/users/users.routes';
 import materialsRoutes from '../modules/materials/materials.routes';
 import categoriesRoutes from '../modules/categories/categories.routes';
+import ratingsRoutes from '../modules/ratings/ratings.routes';
 
 const router = express.Router();
 router.post('/login', adminController.login);
 router.use('/materials', materialsRoutes);
 router.use('/users', usersRoutes);
 router.use('/categories', categoriesRoutes);
-router.get('/ratings/users', authenticate, adminController.getAllUserRatings);
-router.get('/ratings/posts', authenticate, adminController.getAllPostRatings);
+router.use('/ratings', ratingsRoutes);
 router.get('/reports', authenticate, adminController.getAllReports);
 router.get('/logs', authenticate, adminController.getSystemLogs);
 router.delete('/logs', authenticate, adminController.clearSystemLogs);
