@@ -58,7 +58,7 @@ const AdminUserDetailsPage = () => {
         return;
       }
 
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5498/api'}/admin/users/${id}`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/admin/users/${id}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -80,7 +80,7 @@ const AdminUserDetailsPage = () => {
   const handleDeleteUser = async () => {
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5498/api'}/admin/users/${id}`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/admin/users/${id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -101,7 +101,7 @@ const AdminUserDetailsPage = () => {
   const handleVerifyUser = async () => {
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5498/api'}/admin/users/${id}/verify`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/admin/users/${id}/verify`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,

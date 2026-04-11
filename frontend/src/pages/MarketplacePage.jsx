@@ -56,11 +56,15 @@ const MarketplacePage = () => {
     let filtered = posts;
 
     if (filters.wasteType) {
-      filtered = filtered.filter((post) => post.wasteType === filters.wasteType);
+      filtered = filtered.filter((post) => 
+        post.wasteType?.toLowerCase() === filters.wasteType.toLowerCase()
+      );
     }
 
     if (filters.condition) {
-      filtered = filtered.filter((post) => post.condition === filters.condition);
+      filtered = filtered.filter((post) => 
+        post.condition?.toLowerCase() === filters.condition.toLowerCase()
+      );
     }
 
     if (filters.city) {
@@ -72,8 +76,8 @@ const MarketplacePage = () => {
     if (filters.searchQuery) {
       const query = filters.searchQuery.toLowerCase();
       filtered = filtered.filter((post) =>
-        post.title.toLowerCase().includes(query) ||
-        post.description.toLowerCase().includes(query)
+        post.title?.toLowerCase().includes(query) ||
+        post.description?.toLowerCase().includes(query)
       );
     }
 
@@ -157,7 +161,7 @@ const MarketplacePage = () => {
           >
             <option value="">All Materials</option>
             {categories.map((category) => (
-              <option key={category.id} value={category.name.toLowerCase()}>
+              <option key={category.id} value={category.name}>
                 {category.name}
               </option>
             ))}

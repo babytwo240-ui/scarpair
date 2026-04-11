@@ -48,6 +48,7 @@ const AdminUsersPage = () => {
     search: ''
   });
   const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const limit = 10;
 
   useEffect(() => {
@@ -73,7 +74,7 @@ const AdminUsersPage = () => {
         limit: limit.toString()
       });
 
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5498/api'}/admin/users?${queryParams}`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/admin/users?${queryParams}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -85,6 +86,7 @@ const AdminUsersPage = () => {
 
       const data = await response.json();
       setUsers(data.users || []);
+      setTotalPages(data.pages || 1);
     } catch (err) {
       setError(err.message || 'Failed to load users');
     } finally {
@@ -105,7 +107,7 @@ const AdminUsersPage = () => {
 
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5498/api'}/admin/users/${userId}`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/admin/users/${userId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -125,7 +127,7 @@ const AdminUsersPage = () => {
   const handleVerifyUser = async (userId, currentStatus) => {
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5498/api'}/admin/users/${userId}/verify`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/admin/users/${userId}/verify`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -217,8 +219,8 @@ const AdminUsersPage = () => {
             }}
           >
             <MenuItem value="">All Types</MenuItem>
-            <MenuItem value="seller">Seller</MenuItem>
-            <MenuItem value="collector">Collector</MenuItem>
+            <MenuItem value="business">Business</MenuItem>
+            <MenuItem value="recycler">Recycler</MenuItem>
           </TextField>
 
           <TextField
@@ -306,10 +308,10 @@ const AdminUsersPage = () => {
                       <TableCell sx={{ color: C.text, fontSize: '0.9rem' }}>{user.email}</TableCell>
                       <TableCell>
                         <Chip
-                          label={user.type === 'seller' ? 'Seller' : 'Collector'}
+                          label={user.type === 'business' ? 'Business' : 'Recycler'}
                           size="small"
                           sx={{
-                            background: user.type === 'seller' ? 'rgba(100,255,67,0.2)' : 'rgba(100,255,67,0.15)',
+                            background: user.type === 'business' ? 'rgba(100,255,67,0.2)' : 'rgba(100,255,67,0.15)',
                             color: C.bright,
                             fontWeight: 500,
                             fontSize: '0.8rem'
@@ -406,10 +408,10 @@ const AdminUsersPage = () => {
               Previous
             </Button>
             <Box sx={{ display: 'flex', alignItems: 'center', px: 2, color: C.textMid }}>
-              Page {page}
+              Page {page} of {totalPages}
             </Box>
             <Button
-              disabled={users.length < limit}
+              disabled={page >= totalPages}
               onClick={() => setPage(p => p + 1)}
               sx={{
                 color: C.bright,

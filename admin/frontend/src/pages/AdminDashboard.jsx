@@ -76,7 +76,7 @@ const AdminDashboard = () => {
         limit: limit.toString()
       });
 
-      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5498/api';
+      const apiUrl = process.env.REACT_APP_API_URL;
       const [usersRes, statsRes] = await Promise.all([
         fetch(`${apiUrl}/admin/users?${queryParams}`, {
           headers: { 'Authorization': `Bearer ${token}` }
@@ -132,7 +132,7 @@ const AdminDashboard = () => {
 
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5498/api'}/admin/users/${userId}/verify`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/admin/users/${userId}/verify`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -159,7 +159,7 @@ const AdminDashboard = () => {
 
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5498/api'}/admin/users/${userId}`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/admin/users/${userId}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -350,7 +350,7 @@ const AdminDashboard = () => {
               <Table sx={{ '& .MuiTableCell-root': { borderColor: C.border } }}>
                 <TableHead>
                   <TableRow sx={{ background: 'rgba(12,34,2,0.8)' }}>
-                    {['Name', 'Email', 'Type', 'Status', 'Verified', 'Joined', 'Actions'].map(h => (
+                    {['Business Name', 'Business Email', 'Type', 'Status', 'Verification', 'Joined', 'Actions'].map(h => (
                       <TableCell key={h} sx={{ color: C.bright, fontWeight: 700, fontSize: '0.9rem', py: 2 }}>
                         {h}
                       </TableCell>

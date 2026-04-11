@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import wastePostService from '../services/wastePostService';
@@ -64,7 +64,7 @@ const CreateWastePostPage = () => {
 
   const fetchCategories = async () => {
     try {
-      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+      const apiUrl = process.env.REACT_APP_API_URL;
       const response = await fetch(`${apiUrl}/waste-posts/categories`);
       const data = await response.json();
       if (Array.isArray(data.data) && data.data.length > 0) {
@@ -173,7 +173,7 @@ const CreateWastePostPage = () => {
         imageUrl,
       };
 
-      const response = await wastePostService.createWastePost(postData);
+      await wastePostService.createWastePost(postData);
       setSuccess('Waste post created successfully!');
 
       setTimeout(() => {

@@ -70,7 +70,11 @@ const businessSignup = async (req: Request, res: Response): Promise<any> => {
       verificationCodeSent: true
     });
   } catch (error: any) {
-    res.status(500).json({ error: 'Signup failed' });
+    console.error('Business signup error:', error);
+    res.status(500).json({ 
+      error: 'Signup failed',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
   }
 };
 
@@ -137,7 +141,11 @@ const recyclerSignup = async (req: Request, res: Response): Promise<any> => {
       verificationCodeSent: true
     });
   } catch (error: any) {
-    res.status(500).json({ error: 'Signup failed' });
+    console.error('Recycler signup error:', error);
+    res.status(500).json({ 
+      error: 'Signup failed',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
   }
 };
 

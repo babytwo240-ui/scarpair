@@ -15,7 +15,7 @@ const NODE_ENV = process.env.NODE_ENV || 'development';
 const logger = NODE_ENV === 'production' ? require('./config/logger.prod').default : require('./config/logger.dev').default;
 const app: Express = express();
 const PORT = process.env.PORT || 5498;
-const corsOrigins = (process.env.CORS_ORIGIN || 'http://localhost:4000,http://127.0.0.1:4000').split(',').map(origin => origin.trim());
+const corsOrigins = (process.env.CORS_ORIGINS || 'http://localhost:4000,http://127.0.0.1:4000').split(',').map(origin => origin.trim());
 
 app.use(cors({
   origin: corsOrigins,

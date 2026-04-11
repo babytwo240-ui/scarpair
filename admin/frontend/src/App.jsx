@@ -1,8 +1,8 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider, createTheme, CssBaseline } from '@mui/material';
-import AdminNavigation from './components/AdminNavigation.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
+import AdminNavigation from './components/AdminNavigation.jsx';
 import LoginPage from './pages/LoginPage.jsx';
 import AdminDashboard from './pages/AdminDashboard.jsx';
 import AdminUsersPage from './pages/AdminUsersPage.jsx';
@@ -61,7 +61,6 @@ function App() {
               </ProtectedRoute>
             }
           />
-          
           <Route
             path="/admin/ratings"
             element={
@@ -70,7 +69,6 @@ function App() {
               </ProtectedRoute>
             }
           />
-          
           <Route
             path="/admin/reports"
             element={
@@ -79,7 +77,6 @@ function App() {
               </ProtectedRoute>
             }
           />
-          
           <Route
             path="/admin/categories"
             element={
@@ -88,7 +85,6 @@ function App() {
               </ProtectedRoute>
             }
           />
-          
           <Route
             path="/admin/logs"
             element={
@@ -97,7 +93,6 @@ function App() {
               </ProtectedRoute>
             }
           />
-          
           <Route path="/" element={<Navigate to="/admin/dashboard" replace />} />
         </Routes>
       </BrowserRouter>

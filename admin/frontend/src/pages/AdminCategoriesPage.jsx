@@ -62,7 +62,7 @@ const AdminCategoriesPage = () => {
       }
 
       // Get categories from admin backend
-      const res = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5498/api'}/admin/categories`, {
+      const res = await fetch(`${process.env.REACT_APP_API_URL}/admin/categories`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 
@@ -101,7 +101,7 @@ const AdminCategoriesPage = () => {
       }
 
       const method = editingId ? 'PUT' : 'POST';
-      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5498/api';
+      const apiUrl = process.env.REACT_APP_API_URL;
       const url = editingId
         ? `${apiUrl}/admin/categories/${editingId}`
         : `${apiUrl}/admin/categories`;
@@ -134,7 +134,7 @@ const AdminCategoriesPage = () => {
         return;
       }
 
-      const res = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5498/api'}/admin/categories/${id}`, {
+      const res = await fetch(`${process.env.REACT_APP_API_URL}/admin/categories/${id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });

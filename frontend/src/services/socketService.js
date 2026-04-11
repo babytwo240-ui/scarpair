@@ -1,4 +1,5 @@
-﻿import io from 'socket.io-client';
+﻿/* eslint-disable unicode-bom */
+import io from 'socket.io-client';
 
 // Determine socket URL based on environment
 const determineSocketUrl = () => {
@@ -7,13 +8,18 @@ const determineSocketUrl = () => {
     return process.env.REACT_APP_SOCKET_URL;
   }
 
+  // Warn if not configured
+  if (typeof window !== 'undefined') {
+    console.warn('REACT_APP_SOCKET_URL is not defined, falling back to current origin');
+  }
+
   // If in browser, use the same domain as the frontend
   if (typeof window !== 'undefined') {
     return window.location.origin;
   }
 
-  // Fallback for development (should use .env file instead)
-  return 'http://localhost:5000';
+  console.error('REACT_APP_SOCKET_URL must be set for server-side socket connections');
+  return undefined;
 };
 
 const SOCKET_URL = determineSocketUrl();
@@ -123,5 +129,6 @@ class SocketService {
   }
 }
 
-export default new SocketService();
+const socketService = new SocketService();
+export default socketService;
 

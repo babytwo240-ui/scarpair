@@ -1,4 +1,5 @@
-﻿import React, { useState, useEffect } from 'react';
+﻿/* eslint-disable unicode-bom */
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import wastePostService from '../services/wastePostService';
@@ -36,11 +37,11 @@ const EditWastePostPage = () => {
   useEffect(() => {
     fetchCategories();
     loadPost();
-  }, [postId]);
+  }, [postId, loadPost]);
 
   const fetchCategories = async () => {
     try {
-      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+      const apiUrl = process.env.REACT_APP_API_URL;
       const response = await fetch(`${apiUrl}/waste-posts/categories`);
       const data = await response.json();
       setCategories(Array.isArray(data.data) ? data.data : []);

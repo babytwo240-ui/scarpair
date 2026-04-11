@@ -59,7 +59,7 @@ const AdminRatingsPage = () => {
         return;
       }
 
-      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5498/api';
+      const apiUrl = process.env.REACT_APP_API_URL;
       const [userRes, postRes] = await Promise.all([
         fetch(`${apiUrl}/admin/ratings/users`, {
           headers: { 'Authorization': `Bearer ${token}` }

@@ -115,8 +115,8 @@ export const rateLimitConfig = {
 
   register: {
     windowMs: 60 * 60 * 1000,
-    maxPerUser: 2,
-    maxPerIP: 5,
+    maxPerUser: process.env.NODE_ENV === 'development' ? 50 : 2,
+    maxPerIP: process.env.NODE_ENV === 'development' ? 100 : 5,
     keyGenerator: (userId: string, ip: string) => ({
       user: `ratelimit:register:${userId}`,
       ip: `ratelimit:register:ip:${ip}`

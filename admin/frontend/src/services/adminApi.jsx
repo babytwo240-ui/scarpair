@@ -1,6 +1,9 @@
 import axios from 'axios';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5498/api';
+if (!process.env.REACT_APP_API_URL) {
+  console.warn('REACT_APP_API_URL is not defined in environment variables');
+}
+const API_BASE_URL = process.env.REACT_APP_API_URL;
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,

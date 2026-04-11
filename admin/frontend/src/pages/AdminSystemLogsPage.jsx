@@ -62,7 +62,7 @@ const AdminSystemLogsPage = () => {
         return;
       }
 
-      const res = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5498/api'}/admin/logs`, {
+      const res = await fetch(`${process.env.REACT_APP_API_URL}/admin/logs`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 
@@ -79,7 +79,7 @@ const AdminSystemLogsPage = () => {
     setClearing(true);
     try {
       const token = localStorage.getItem('adminToken');
-      const res = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5498/api'}/admin/logs`, {
+      const res = await fetch(`${process.env.REACT_APP_API_URL}/admin/logs`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });

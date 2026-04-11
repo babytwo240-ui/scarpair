@@ -52,7 +52,7 @@ const AdminReportsPage = () => {
         return;
       }
 
-      const res = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5498/api'}/admin/reports`, {
+      const res = await fetch(`${process.env.REACT_APP_API_URL}/admin/reports`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 

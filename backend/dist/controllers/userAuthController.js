@@ -91,7 +91,11 @@ const businessSignup = async (req, res) => {
         });
     }
     catch (error) {
-        res.status(500).json({ error: 'Signup failed' });
+        console.error('Business signup error:', error);
+        res.status(500).json({
+            error: 'Signup failed',
+            details: process.env.NODE_ENV === 'development' ? error.message : undefined
+        });
     }
 };
 exports.businessSignup = businessSignup;
@@ -144,7 +148,11 @@ const recyclerSignup = async (req, res) => {
         });
     }
     catch (error) {
-        res.status(500).json({ error: 'Signup failed' });
+        console.error('Recycler signup error:', error);
+        res.status(500).json({
+            error: 'Signup failed',
+            details: process.env.NODE_ENV === 'development' ? error.message : undefined
+        });
     }
 };
 exports.recyclerSignup = recyclerSignup;
