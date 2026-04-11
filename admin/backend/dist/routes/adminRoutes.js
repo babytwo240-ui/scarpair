@@ -43,13 +43,14 @@ const users_routes_1 = __importDefault(require("../modules/users/users.routes"))
 const materials_routes_1 = __importDefault(require("../modules/materials/materials.routes"));
 const categories_routes_1 = __importDefault(require("../modules/categories/categories.routes"));
 const ratings_routes_1 = __importDefault(require("../modules/ratings/ratings.routes"));
+const reports_routes_1 = __importDefault(require("../modules/reports/reports.routes"));
 const router = express_1.default.Router();
 router.post('/login', adminController.login);
 router.use('/materials', materials_routes_1.default);
 router.use('/users', users_routes_1.default);
 router.use('/categories', categories_routes_1.default);
 router.use('/ratings', ratings_routes_1.default);
-router.get('/reports', authMiddleware_1.authenticate, adminController.getAllReports);
+router.use('/reports', reports_routes_1.default);
 router.get('/logs', authMiddleware_1.authenticate, adminController.getSystemLogs);
 router.delete('/logs', authMiddleware_1.authenticate, adminController.clearSystemLogs);
 router.get('/statistics', authMiddleware_1.authenticate, adminController.getStatistics);

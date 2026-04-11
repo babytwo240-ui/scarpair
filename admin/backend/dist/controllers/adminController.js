@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.clearSystemLogs = exports.getSystemLogs = exports.getAllReports = exports.getStatistics = exports.login = void 0;
+exports.clearSystemLogs = exports.getSystemLogs = exports.getStatistics = exports.login = void 0;
 const jwt_1 = require("../shared/config/jwt");
 const index_1 = require("../shared/db/index");
 const auditLogger_1 = require("../shared/utils/auditLogger");
@@ -62,49 +62,6 @@ const getStatistics = async (req, res) => {
     }
 };
 exports.getStatistics = getStatistics;
-const getAllReports = async (req, res) => {
-    try {
-        const { page = 1, limit = 20 } = req.query;
-        const offset = (page - 1) * limit;
-        const Report = index_1.sequelize.models.Report;
-        const User = index_1.sequelize.models.User;
-        const { count, rows } = await Report.findAndCountAll({
-            include: [
-                {
-                    model: User,
-                    as: 'reportedUser',
-                    attributes: ['id', 'email', 'type', 'businessName', 'companyName']
-                },
-                {
-                    model: User,
-                    as: 'reporter',
-                    attributes: ['id', 'email', 'type', 'businessName', 'companyName']
-                }
-            ],
-            order: [['createdAt', 'DESC']],
-            limit: limit,
-            offset
-        });
-        res.status(200).json({
-            message: 'Reports retrieved successfully',
-            data: rows,
-            pagination: {
-                total: count,
-                page,
-                limit,
-                pages: Math.ceil(count / limit)
-            }
-        });
-    }
-    catch (error) {
-        res.status(500).json({
-            message: 'Error fetching reports',
-            error: 'Failed to fetch reports',
-            ...(NODE_ENV === 'development' && { details: error.message })
-        });
-    }
-};
-exports.getAllReports = getAllReports;
 const getSystemLogs = async (req, res) => {
     try {
         const { page = 1, limit = 50 } = req.query;
