@@ -44,7 +44,7 @@ const materials_routes_1 = __importDefault(require("../modules/materials/materia
 const categories_routes_1 = __importDefault(require("../modules/categories/categories.routes"));
 const ratings_routes_1 = __importDefault(require("../modules/ratings/ratings.routes"));
 const reports_routes_1 = __importDefault(require("../modules/reports/reports.routes"));
-const monitoring_routes_1 = __importDefault(require("../modules/monitoring/monitoring.routes"));
+const monitoring_controller_1 = require("../modules/monitoring/monitoring.controller");
 const auth_routes_1 = __importDefault(require("../modules/auth/auth.routes"));
 const router = express_1.default.Router();
 router.use('', auth_routes_1.default);
@@ -53,7 +53,8 @@ router.use('/users', users_routes_1.default);
 router.use('/categories', categories_routes_1.default);
 router.use('/ratings', ratings_routes_1.default);
 router.use('/reports', reports_routes_1.default);
-router.use('/monitoring', monitoring_routes_1.default);
+router.get('/logs', authMiddleware_1.authenticate, monitoring_controller_1.getSystemLogs);
+router.delete('/logs', authMiddleware_1.authenticate, monitoring_controller_1.clearSystemLogs);
 router.get('/statistics', authMiddleware_1.authenticate, adminController.getStatistics);
 exports.default = router;
 //# sourceMappingURL=adminRoutes.js.map
