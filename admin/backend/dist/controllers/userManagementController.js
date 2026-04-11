@@ -54,7 +54,7 @@ const getAllUsers = async (req, res) => {
         const mappedUsers = users.map((user) => ({
             id: user.id,
             email: user.email,
-            type: user.type,
+            type: user.type || 'business',
             name: user.type === 'business' ? user.businessName : user.companyName,
             phone: user.phone,
             specialization: user.specialization || null,

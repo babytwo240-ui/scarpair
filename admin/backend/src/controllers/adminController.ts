@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
-import { verifyCredentials, generateToken } from '../config/jwt';
-import { sequelize } from '../models';
+import { verifyCredentials, generateToken } from '../shared/config/jwt';
+import { sequelize } from '../shared/db/index';
 import {
   logAdminLogin,
   logMaterialCreated,
@@ -10,7 +10,7 @@ import {
   logCategoryUpdated,
   logCategoryDeleted,
   logActionFailed
-} from '../utils/auditLogger';
+} from '../shared/utils/auditLogger';
 
 const NODE_ENV = process.env.NODE_ENV || 'development';
 

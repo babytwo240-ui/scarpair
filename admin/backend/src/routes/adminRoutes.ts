@@ -1,7 +1,7 @@
 import express from 'express';
 import * as adminController from '../controllers/adminController';
-import * as userManagementController from '../controllers/userManagementController';
-import { authenticate } from '../middleware/authMiddleware';
+import { authenticate } from '../shared/middleware/authMiddleware';
+import usersRoutes from '../modules/users/users.routes';
 
 const router = express.Router();
 router.post('/login', adminController.login);
@@ -10,10 +10,7 @@ router.get('/materials/:id', authenticate, adminController.getMaterialById);
 router.post('/materials', authenticate, adminController.createMaterial);
 router.put('/materials/:id', authenticate, adminController.updateMaterial);
 router.delete('/materials/:id', authenticate, adminController.deleteMaterial);
-router.get('/users', authenticate, userManagementController.getAllUsers);
-router.get('/users/:id', authenticate, userManagementController.getUserById);
-router.put('/users/:id/verify', authenticate, userManagementController.toggleUserVerification);
-router.delete('/users/:id', authenticate, userManagementController.deleteUser);
+router.use('/users', usersRoutes);
 router.get('/categories', authenticate, adminController.getWasteCategories);
 router.post('/categories', authenticate, adminController.createWasteCategory);
 router.put('/categories/:categoryId', authenticate, adminController.updateWasteCategory);

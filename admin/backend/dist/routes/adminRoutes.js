@@ -38,8 +38,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const adminController = __importStar(require("../controllers/adminController"));
-const userManagementController = __importStar(require("../controllers/userManagementController"));
-const authMiddleware_1 = require("../middleware/authMiddleware");
+const authMiddleware_1 = require("../shared/middleware/authMiddleware");
+const users_routes_1 = __importDefault(require("../modules/users/users.routes"));
 const router = express_1.default.Router();
 router.post('/login', adminController.login);
 router.get('/materials', authMiddleware_1.authenticate, adminController.getAllMaterials);
@@ -47,10 +47,7 @@ router.get('/materials/:id', authMiddleware_1.authenticate, adminController.getM
 router.post('/materials', authMiddleware_1.authenticate, adminController.createMaterial);
 router.put('/materials/:id', authMiddleware_1.authenticate, adminController.updateMaterial);
 router.delete('/materials/:id', authMiddleware_1.authenticate, adminController.deleteMaterial);
-router.get('/users', authMiddleware_1.authenticate, userManagementController.getAllUsers);
-router.get('/users/:id', authMiddleware_1.authenticate, userManagementController.getUserById);
-router.put('/users/:id/verify', authMiddleware_1.authenticate, userManagementController.toggleUserVerification);
-router.delete('/users/:id', authMiddleware_1.authenticate, userManagementController.deleteUser);
+router.use('/users', users_routes_1.default);
 router.get('/categories', authMiddleware_1.authenticate, adminController.getWasteCategories);
 router.post('/categories', authMiddleware_1.authenticate, adminController.createWasteCategory);
 router.put('/categories/:categoryId', authMiddleware_1.authenticate, adminController.updateWasteCategory);

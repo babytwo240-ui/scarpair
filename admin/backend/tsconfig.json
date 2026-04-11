@@ -5,6 +5,16 @@
     "lib": ["ES2020"],
     "outDir": "./dist",
     "rootDir": "./src",
+    "baseUrl": ".",
+    "paths": {
+      "@modules/*": ["dist/modules/*"],
+      "@shared/*": ["dist/shared/*"],
+      "@config/*": ["dist/shared/config/*"],
+      "@middleware/*": ["dist/shared/middleware/*"],
+      "@utils/*": ["dist/shared/utils/*"],
+      "@types/*": ["dist/shared/types/*"],
+      "@db/*": ["dist/shared/db/*"]
+    },
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
@@ -20,6 +30,22 @@
     "noUnusedParameters": false,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true
+  },
+  "ts-node": {
+    "compilerOptions": {
+      "baseUrl": "./src",
+      "paths": {
+        "@modules/*": ["modules/*"],
+        "@shared/*": ["shared/*"],
+        "@config/*": ["shared/config/*"],
+        "@middleware/*": ["shared/middleware/*"],
+        "@utils/*": ["shared/utils/*"],
+        "@types/*": ["shared/types/*"],
+        "@db/*": ["shared/db/*"]
+      }
+    },
+    "transpileOnly": true,
+    "esm": false
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]

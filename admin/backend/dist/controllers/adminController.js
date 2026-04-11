@@ -1,9 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.clearSystemLogs = exports.getSystemLogs = exports.getAllReports = exports.getAllPostRatings = exports.getAllUserRatings = exports.deleteWasteCategory = exports.updateWasteCategory = exports.createWasteCategory = exports.getWasteCategories = exports.getStatistics = exports.deleteMaterial = exports.updateMaterial = exports.createMaterial = exports.getMaterialById = exports.getAllMaterials = exports.login = void 0;
-const jwt_1 = require("../config/jwt");
-const models_1 = require("../models");
-const auditLogger_1 = require("../utils/auditLogger");
+const jwt_1 = require("../shared/config/jwt");
+const index_1 = require("../shared/db/index");
+const auditLogger_1 = require("../shared/utils/auditLogger");
 const NODE_ENV = process.env.NODE_ENV || 'development';
 const login = async (req, res) => {
     try {
@@ -44,7 +44,7 @@ const login = async (req, res) => {
 exports.login = login;
 const getAllMaterials = async (req, res) => {
     try {
-        const Material = models_1.sequelize.models.Material;
+        const Material = index_1.sequelize.models.Material;
         if (!Material) {
             return res.status(500).json({ error: 'Material model not initialized' });
         }
@@ -67,7 +67,7 @@ exports.getAllMaterials = getAllMaterials;
 const getMaterialById = async (req, res) => {
     try {
         const { id } = req.params;
-        const Material = models_1.sequelize.models.Material;
+        const Material = index_1.sequelize.models.Material;
         if (!Material) {
             return res.status(500).json({ error: 'Material model not initialized' });
         }
@@ -95,7 +95,7 @@ const createMaterial = async (req, res) => {
                 error: 'Missing required fields: businessUserId, materialType, quantity, contactEmail'
             });
         }
-        const Material = models_1.sequelize.models.Material;
+        const Material = index_1.sequelize.models.Material;
         if (!Material) {
             return res.status(500).json({ error: 'Material model not initialized' });
         }
@@ -126,7 +126,7 @@ const updateMaterial = async (req, res) => {
     try {
         const { id } = req.params;
         const { businessUserId, materialType, quantity, unit, description, contactEmail, status, isRecommendedForArtists } = req.body;
-        const Material = models_1.sequelize.models.Material;
+        const Material = index_1.sequelize.models.Material;
         if (!Material) {
             return res.status(500).json({ error: 'Material model not initialized' });
         }
@@ -167,7 +167,7 @@ exports.updateMaterial = updateMaterial;
 const deleteMaterial = async (req, res) => {
     try {
         const { id } = req.params;
-        const Material = models_1.sequelize.models.Material;
+        const Material = index_1.sequelize.models.Material;
         if (!Material) {
             return res.status(500).json({ error: 'Material model not initialized' });
         }
@@ -191,8 +191,8 @@ const deleteMaterial = async (req, res) => {
 exports.deleteMaterial = deleteMaterial;
 const getStatistics = async (req, res) => {
     try {
-        const User = models_1.sequelize.models.User;
-        const Material = models_1.sequelize.models.Material;
+        const User = index_1.sequelize.models.User;
+        const Material = index_1.sequelize.models.Material;
         const userCount = User ? await User.count() : 0;
         const materialCount = Material ? await Material.count() : 0;
         res.status(200).json({
@@ -211,7 +211,7 @@ const getStatistics = async (req, res) => {
 exports.getStatistics = getStatistics;
 const getWasteCategories = async (req, res) => {
     try {
-        const WasteCategory = models_1.sequelize.models.WasteCategory;
+        const WasteCategory = index_1.sequelize.models.WasteCategory;
         const categories = await WasteCategory.findAll({
             attributes: ['id', 'name', 'description', 'icon', 'isActive'],
             order: [['name', 'ASC']],
@@ -237,7 +237,7 @@ const createWasteCategory = async (req, res) => {
         if (!name) {
             return res.status(400).json({ error: 'Category name is required' });
         }
-        const WasteCategory = models_1.sequelize.models.WasteCategory;
+        const WasteCategory = index_1.sequelize.models.WasteCategory;
         const category = await WasteCategory.create({
             name,
             description: description || '',
@@ -265,7 +265,7 @@ const updateWasteCategory = async (req, res) => {
     try {
         const { categoryId } = req.params;
         const { name, description, icon, isActive } = req.body;
-        const WasteCategory = models_1.sequelize.models.WasteCategory;
+        const WasteCategory = index_1.sequelize.models.WasteCategory;
         const category = await WasteCategory.findByPk(categoryId);
         if (!category) {
             return res.status(404).json({ error: 'Category not found' });
@@ -302,7 +302,7 @@ exports.updateWasteCategory = updateWasteCategory;
 const deleteWasteCategory = async (req, res) => {
     try {
         const { categoryId } = req.params;
-        const WasteCategory = models_1.sequelize.models.WasteCategory;
+        const WasteCategory = index_1.sequelize.models.WasteCategory;
         const category = await WasteCategory.findByPk(categoryId);
         if (!category) {
             return res.status(404).json({ error: 'Category not found' });
@@ -330,8 +330,8 @@ const getAllUserRatings = async (req, res) => {
     try {
         const { page = 1, limit = 20 } = req.query;
         const offset = (page - 1) * limit;
-        const UserRating = models_1.sequelize.models.UserRating;
-        const User = models_1.sequelize.models.User;
+        const UserRating = index_1.sequelize.models.UserRating;
+        const User = index_1.sequelize.models.User;
         const { count, rows } = await UserRating.findAndCountAll({
             include: [
                 {
@@ -368,7 +368,7 @@ const getAllPostRatings = async (req, res) => {
     try {
         const { page = 1, limit = 20 } = req.query;
         const offset = (page - 1) * limit;
-        const PostRating = models_1.sequelize.models.PostRating;
+        const PostRating = index_1.sequelize.models.PostRating;
         const { count, rows } = await PostRating.findAndCountAll({
             order: [['averageRating', 'DESC']],
             limit: limit,
@@ -399,8 +399,8 @@ const getAllReports = async (req, res) => {
     try {
         const { page = 1, limit = 20 } = req.query;
         const offset = (page - 1) * limit;
-        const Report = models_1.sequelize.models.Report;
-        const User = models_1.sequelize.models.User;
+        const Report = index_1.sequelize.models.Report;
+        const User = index_1.sequelize.models.User;
         const { count, rows } = await Report.findAndCountAll({
             include: [
                 {
@@ -442,7 +442,7 @@ const getSystemLogs = async (req, res) => {
     try {
         const { page = 1, limit = 50 } = req.query;
         const offset = (page - 1) * limit;
-        const SystemLog = models_1.sequelize.models.SystemLog;
+        const SystemLog = index_1.sequelize.models.SystemLog;
         const { count, rows } = await SystemLog.findAndCountAll({
             order: [['timestamp', 'DESC']],
             limit: limit,
@@ -470,7 +470,7 @@ const getSystemLogs = async (req, res) => {
 exports.getSystemLogs = getSystemLogs;
 const clearSystemLogs = async (req, res) => {
     try {
-        const SystemLog = models_1.sequelize.models.SystemLog;
+        const SystemLog = index_1.sequelize.models.SystemLog;
         const deletedCount = await SystemLog.destroy({
             where: {},
             truncate: true
