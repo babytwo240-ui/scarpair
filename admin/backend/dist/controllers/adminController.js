@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.clearSystemLogs = exports.getSystemLogs = exports.getStatistics = exports.login = void 0;
+exports.getStatistics = exports.login = void 0;
 const jwt_1 = require("../shared/config/jwt");
 const index_1 = require("../shared/db/index");
 const auditLogger_1 = require("../shared/utils/auditLogger");
@@ -62,55 +62,4 @@ const getStatistics = async (req, res) => {
     }
 };
 exports.getStatistics = getStatistics;
-const getSystemLogs = async (req, res) => {
-    try {
-        const { page = 1, limit = 50 } = req.query;
-        const offset = (page - 1) * limit;
-        const SystemLog = index_1.sequelize.models.SystemLog;
-        const { count, rows } = await SystemLog.findAndCountAll({
-            order: [['timestamp', 'DESC']],
-            limit: limit,
-            offset
-        });
-        res.status(200).json({
-            message: 'System logs retrieved successfully',
-            data: rows,
-            pagination: {
-                total: count,
-                page,
-                limit,
-                pages: Math.ceil(count / limit)
-            }
-        });
-    }
-    catch (error) {
-        res.status(500).json({
-            message: 'Error fetching system logs',
-            error: 'Failed to fetch system logs',
-            ...(NODE_ENV === 'development' && { details: error.message })
-        });
-    }
-};
-exports.getSystemLogs = getSystemLogs;
-const clearSystemLogs = async (req, res) => {
-    try {
-        const SystemLog = index_1.sequelize.models.SystemLog;
-        const deletedCount = await SystemLog.destroy({
-            where: {},
-            truncate: true
-        });
-        res.status(200).json({
-            message: 'All system logs cleared successfully',
-            deletedCount
-        });
-    }
-    catch (error) {
-        res.status(500).json({
-            message: 'Error clearing system logs',
-            error: 'Failed to clear system logs',
-            ...(NODE_ENV === 'development' && { details: error.message })
-        });
-    }
-};
-exports.clearSystemLogs = clearSystemLogs;
 //# sourceMappingURL=adminController.js.map
