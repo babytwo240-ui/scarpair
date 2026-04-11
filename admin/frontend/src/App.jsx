@@ -4,13 +4,12 @@ import { ThemeProvider, createTheme, CssBaseline } from '@mui/material';
 import ProtectedRoute from './shared/components/ProtectedRoute';
 import AdminNavigation from './shared/components/AdminNavigation';
 import LoginPage from './UI/auth/pages/LoginPage';
-import AdminDashboard from './pages/AdminDashboard.jsx';
-import AdminUsersPage from './pages/AdminUsersPage.jsx';
-import AdminUserDetailsPage from './pages/AdminUserDetailsPage.jsx';
-import AdminRatingsPage from './pages/AdminRatingsPage.jsx';
-import AdminReportsPage from './pages/AdminReportsPage.jsx';
-import AdminCategoriesPage from './pages/AdminCategoriesPage.jsx';
-import AdminSystemLogsPage from './pages/AdminSystemLogsPage.jsx';
+import AdminDashboard from './UI/dashboard/pages/AdminDashboard';
+import AdminUsersPage from './UI/users/pages/AdminUsersPage';
+import AdminUserDetailsPage from './UI/users/pages/AdminUserDetailsPage';
+import AdminRatingsPage from './UI/ratings/pages/AdminRatingsPage';
+import AdminReportsPage from './UI/reports/pages/AdminReportsPage';
+import AdminSystemLogsPage from './UI/monitoring/pages/AdminSystemLogsPage';
 
 const theme = createTheme({
   palette: {
@@ -74,14 +73,6 @@ function App() {
             element={
               <ProtectedRoute>
                 <AdminReportsPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin/categories"
-            element={
-              <ProtectedRoute>
-                <AdminCategoriesPage />
               </ProtectedRoute>
             }
           />
