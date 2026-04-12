@@ -15,7 +15,7 @@ export const useFetchLogs = () => {
       setLoading(true);
       setError('');
       const response = await monitoringAPI.getLogs();
-      setLogs(response.logs || []);
+      setLogs(response.data || []);
     } catch (err) {
       setError(err.error || 'Failed to fetch logs');
     } finally {

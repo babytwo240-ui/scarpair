@@ -19,3 +19,6 @@ export { monitoringAPI } from './monitoring';
 
 // Dashboard API
 export { dashboardAPI } from './dashboard';
+
+// Categories API
+export { categoriesAPI } from './categories';

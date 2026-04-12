@@ -10,6 +10,7 @@ import AdminUserDetailsPage from './UI/users/pages/AdminUserDetailsPage';
 import AdminRatingsPage from './UI/ratings/pages/AdminRatingsPage';
 import AdminReportsPage from './UI/reports/pages/AdminReportsPage';
 import AdminSystemLogsPage from './UI/monitoring/pages/AdminSystemLogsPage';
+import AdminCategoriesPage from './UI/categories/pages/AdminCategoriesPage';
 
 const theme = createTheme({
   palette: {
@@ -81,6 +82,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <AdminSystemLogsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/categories"
+            element={
+              <ProtectedRoute>
+                <AdminCategoriesPage />
               </ProtectedRoute>
             }
           />

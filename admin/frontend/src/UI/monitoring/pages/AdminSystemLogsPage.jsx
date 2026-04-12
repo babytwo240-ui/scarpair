@@ -55,25 +55,48 @@ const AdminSystemLogsPage = () => {
                 <TableHead>
                   <TableRow sx={{ backgroundColor: `rgba(100,255,67,0.08)` }}>
                     <TableCell sx={{ color: COLORS.bright, fontWeight: 600 }}>Timestamp</TableCell>
-                    <TableCell sx={{ color: COLORS.bright, fontWeight: 600 }}>Level</TableCell>
-                    <TableCell sx={{ color: COLORS.bright, fontWeight: 600 }}>Message</TableCell>
+                    <TableCell sx={{ color: COLORS.bright, fontWeight: 600 }}>Action</TableCell>
+                    <TableCell sx={{ color: COLORS.bright, fontWeight: 600 }}>Status</TableCell>
+                    <TableCell sx={{ color: COLORS.bright, fontWeight: 600 }}>IP Address</TableCell>
+                    <TableCell sx={{ color: COLORS.bright, fontWeight: 600 }}>Details</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {logs.length > 0 ? (
-                    logs.map((log, idx) => (
-                      <TableRow key={idx} sx={{ borderBottom: `1px solid ${COLORS.border}` }}>
-                        <TableCell sx={{ color: COLORS.textMid, fontSize: '0.85rem' }}>{new Date(log.timestamp).toLocaleString()}</TableCell>
-                        <TableCell>
-                          <Box sx={{ display: 'inline-block', px: 1.5, py: 0.5, borderRadius: '4px', background: log.level === 'ERROR' ? 'rgba(255,107,107,0.2)' : 'rgba(100,255,67,0.2)', color: log.level === 'ERROR' ? '#ff9b9b' : COLORS.bright, fontSize: '0.75rem', fontWeight: 600 }}>
-                            {log.level}
-                          </Box>
-                        </TableCell>
-                        <TableCell sx={{ color: COLORS.text }}>{log.message}</TableCell>
-                      </TableRow>
-                    ))
+                    logs.map((log) => {
+                      let details = {};
+                      try {
+                        details = typeof log.details === 'string' ? JSON.parse(log.details) : log.details;
+                      } catch (e) {
+                        details = { action: log.details };
+                      }
+                      
+                      // Format details for display
+                      const formatDetails = () => {
+                        const parts = [];
+                        if (details.action) parts.push(details.action);
+                        if (details.username) parts.push(`User: ${details.username}`);
+                        if (details.environment) parts.push(`Env: ${details.environment}`);
+                        if (details.sessionExpiry) parts.push(`Session: ${details.sessionExpiry}`);
+                        return parts.join(' • ');
+                      };
+
+                      return (
+                        <TableRow key={log.id} sx={{ borderBottom: `1px solid ${COLORS.border}` }}>
+                          <TableCell sx={{ color: COLORS.textMid, fontSize: '0.85rem' }}>{new Date(log.timestamp).toLocaleString()}</TableCell>
+                          <TableCell sx={{ color: COLORS.text }}>{log.action}</TableCell>
+                          <TableCell>
+                            <Box sx={{ display: 'inline-block', px: 1.5, py: 0.5, borderRadius: '4px', background: log.status === 'success' ? 'rgba(100,255,67,0.2)' : 'rgba(255,107,107,0.2)', color: log.status === 'success' ? COLORS.bright : '#ff9b9b', fontSize: '0.75rem', fontWeight: 600 }}>
+                              {log.status}
+                            </Box>
+                          </TableCell>
+                          <TableCell sx={{ color: COLORS.text, fontSize: '0.85rem' }}>{log.ipAddress}</TableCell>
+                          <TableCell sx={{ color: COLORS.textMid, fontSize: '0.8rem' }}>{formatDetails()}</TableCell>
+                        </TableRow>
+                      );
+                    })
                   ) : (
-                    <TableRow><TableCell colSpan={3} sx={{ textAlign: 'center', color: COLORS.textMid, py: 3 }}>No logs found</TableCell></TableRow>
+                    <TableRow><TableCell colSpan={5} sx={{ textAlign: 'center', color: COLORS.textMid, py: 3 }}>No logs found</TableCell></TableRow>
                   )}
                 </TableBody>
               </Table>
