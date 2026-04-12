@@ -1,4 +1,37 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -18,21 +51,21 @@ const compression_1 = __importDefault(require("compression"));
 const swagger_ui_express_1 = __importDefault(require("swagger-ui-express"));
 const swagger_1 = require("./config/swagger");
 const morganConfig_1 = __importDefault(require("./config/morganConfig"));
-const authRoutes_1 = __importDefault(require("./routes/authRoutes"));
-const userRoutes_1 = __importDefault(require("./routes/userRoutes"));
-const adminRoutes_1 = __importDefault(require("./routes/adminRoutes"));
-const materialRoutes_1 = __importDefault(require("./routes/materialRoutes"));
-const wastePostRoutes_1 = __importDefault(require("./routes/wastePostRoutes"));
-const collectionRoutes_1 = __importDefault(require("./routes/collectionRoutes"));
-const messageRoutes_1 = __importDefault(require("./routes/messageRoutes"));
-const conversationRoutes_1 = __importDefault(require("./routes/conversationRoutes"));
-const notificationRoutes_1 = __importDefault(require("./routes/notificationRoutes"));
-const imageRoutes_1 = __importDefault(require("./routes/imageRoutes"));
-const postMessageRoutes_1 = __importDefault(require("./routes/postMessageRoutes"));
-const reviewRoutes_1 = __importDefault(require("./routes/reviewRoutes"));
-const feedbackRoutes_1 = __importDefault(require("./routes/feedbackRoutes"));
-const reportRoutes_1 = __importDefault(require("./routes/reportRoutes"));
-const ratingRoutes_1 = __importDefault(require("./routes/ratingRoutes"));
+// Import modules from new modular structure
+const authModule = __importStar(require("./modules/auth"));
+const userProfileModule = __importStar(require("./modules/user-profile"));
+const materialModule = __importStar(require("./modules/material"));
+const imageModule = __importStar(require("./modules/image"));
+const wastePostModule = __importStar(require("./modules/waste-post"));
+const collectionModule = __importStar(require("./modules/collection"));
+const messageModule = __importStar(require("./modules/message"));
+const conversationModule = __importStar(require("./modules/conversation"));
+const notificationModule = __importStar(require("./modules/notification"));
+const postMessageModule = __importStar(require("./modules/post-message"));
+const reviewModule = __importStar(require("./modules/review"));
+const feedbackModule = __importStar(require("./modules/feedback"));
+const reportModule = __importStar(require("./modules/report"));
+const ratingModule = __importStar(require("./modules/rating"));
 const redisHealth_1 = require("./config/redisHealth");
 const socketService_1 = require("./services/socketService");
 const aws_1 = require("./config/aws");
@@ -229,21 +262,20 @@ app.get('/api-docs', swagger_ui_express_1.default.setup(swagger_1.swaggerSpec, {
         displayOperationId: true
     }
 }));
-app.use('/api/auth', authRoutes_1.default);
-app.use('/api/users', userRoutes_1.default);
-app.use('/api/admin', adminRoutes_1.default);
-app.use('/api/materials', materialRoutes_1.default);
-app.use('/api/waste-posts', wastePostRoutes_1.default);
-app.use('/api/collections', collectionRoutes_1.default);
-app.use('/api/messages', messageRoutes_1.default);
-app.use('/api/conversations', conversationRoutes_1.default);
-app.use('/api/notifications', notificationRoutes_1.default);
-app.use('/api/images', imageRoutes_1.default);
-app.use('/api/post-messages', postMessageRoutes_1.default);
-app.use('/api/reviews', reviewRoutes_1.default);
-app.use('/api/feedback', feedbackRoutes_1.default);
-app.use('/api/reports', reportRoutes_1.default);
-app.use('/api/ratings', ratingRoutes_1.default);
+app.use('/api/auth', authModule.router);
+app.use('/api/users', userProfileModule.router);
+app.use('/api/materials', materialModule.router);
+app.use('/api/waste-posts', wastePostModule.router);
+app.use('/api/collections', collectionModule.router);
+app.use('/api/messages', messageModule.router);
+app.use('/api/conversations', conversationModule.router);
+app.use('/api/notifications', notificationModule.router);
+app.use('/api/images', imageModule.router);
+app.use('/api/post-messages', postMessageModule.router);
+app.use('/api/reviews', reviewModule.router);
+app.use('/api/feedback', feedbackModule.router);
+app.use('/api/reports', reportModule.router);
+app.use('/api/ratings', ratingModule.router);
 const serverStartTime = new Date();
 app.get('/api/health', (req, res) => {
     const uptime = new Date().getTime() - serverStartTime.getTime();

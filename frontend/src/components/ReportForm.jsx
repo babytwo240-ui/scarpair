@@ -1,5 +1,5 @@
-﻿import React, { useState } from 'react';
-import { useAuth } from '../context/AuthContext';
+import React, { useState } from 'react';
+import { useAuth } from '../shared/context/AuthContext';
 import reportService from '../services/reportService';
 import '../styles/ReportForm.css';
 
@@ -105,14 +105,14 @@ const ReportForm = ({ reportedUserId, collectionId, postId, onSubmitSuccess }) =
             {description.length}/1000 characters
             {description.length > 0 && (
               <span className="validity-hint">
-                {description.length < 10 ? 'âš ï¸ Too short' : 'âœ“ Good detail'}
+                {description.length < 10 ? '⚠️ Too short' : '✓ Good detail'}
               </span>
             )}
           </small>
         </div>
 
         <div className="form-info">
-          <p>ðŸ’¡ <strong>Tip:</strong> Include specific details and examples to help with validation. Detailed reports are more likely to be auto-approved.</p>
+          <p>💡 <strong>Tip:</strong> Include specific details and examples to help with validation. Detailed reports are more likely to be auto-approved.</p>
         </div>
 
         <button 

@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext.jsx';
+import { useAuth } from '../shared/context/AuthContext';
 import { usePreventBackButton } from '../hooks/usePreventBackButton.js';
 
 const ProtectedRoute = ({ children, requiredRole }) => {

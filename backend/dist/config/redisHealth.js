@@ -14,7 +14,6 @@ async function checkRedisConnection() {
         commandTimeout: 5000,
         ...(process.env.REDIS_SSL === 'true' && { tls: {} })
     };
-    // Use REDIS_URL if available (Render KV Store), otherwise use individual vars
     const testRedis = process.env.REDIS_URL
         ? new ioredis_1.default(process.env.REDIS_URL, testOptions)
         : new ioredis_1.default({

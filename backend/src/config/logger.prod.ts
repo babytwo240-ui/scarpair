@@ -1,6 +1,4 @@
 import winston from 'winston';
-
-// Production log format - clean and minimal
 const prodLogFormat = winston.format.combine(
   winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
   winston.format.errors({ stack: true }),
@@ -9,16 +7,14 @@ const prodLogFormat = winston.format.combine(
   })
 );
 
-// Production transports: console only (Render captures stdout)
 const prodTransports: winston.transport[] = [
-  // Plain console for production (no colors, Render handles output)
   new winston.transports.Console({
     format: prodLogFormat
   })
 ];
 
 const prodLogger = winston.createLogger({
-  level: process.env.LOG_LEVEL || 'warn', // Only warnings and errors in production
+  level: process.env.LOG_LEVEL || 'warn', 
   format: prodLogFormat,
   transports: prodTransports,
   exceptionHandlers: [

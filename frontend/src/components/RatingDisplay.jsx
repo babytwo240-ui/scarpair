@@ -1,5 +1,5 @@
-﻿import React, { useState, useEffect } from 'react';
-import { useAuth } from '../context/AuthContext';
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '../shared/context/AuthContext';
 import ratingService from '../services/ratingService';
 import '../styles/RatingDisplay.css';
 
@@ -54,16 +54,16 @@ const RatingDisplay = ({ userId = null, postId = null, variant = 'compact' }) =>
     const stars = [];
 
     for (let i = 0; i < fullStars; i++) {
-      stars.push(<span key={`star-${i}`} className="star full">â˜…</span>);
+      stars.push(<span key={`star-${i}`} className="star full">★</span>);
     }
 
     if (hasHalf) {
-      stars.push(<span key="star-half" className="star half">â˜…</span>);
+      stars.push(<span key="star-half" className="star half">★</span>);
     }
 
     const emptyStars = 5 - Math.ceil(avg);
     for (let i = 0; i < emptyStars; i++) {
-      stars.push(<span key={`empty-${i}`} className="star empty">â˜…</span>);
+      stars.push(<span key={`empty-${i}`} className="star empty">★</span>);
     }
 
     return stars;
@@ -101,7 +101,7 @@ const RatingDisplay = ({ userId = null, postId = null, variant = 'compact' }) =>
                   <ul>
                     {rating.recentFeedback.slice(0, 3).map((fb, idx) => (
                       <li key={idx}>
-                        <span className="rating-value">{fb.rating} â˜…</span>
+                        <span className="rating-value">{fb.rating} ★</span>
                         {fb.fromUser && (
                           <span className="reviewer">
                             {fb.fromUser.businessName || fb.fromUser.companyName || fb.fromUser.email}

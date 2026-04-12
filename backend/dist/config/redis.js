@@ -17,7 +17,6 @@ const redisOptions = {
     enableOfflineQueue: false,
     ...(process.env.REDIS_SSL === 'true' && { tls: {} })
 };
-// If REDIS_URL is provided (Render KV Store), use it; otherwise use individual vars
 exports.redisClient = process.env.REDIS_URL
     ? new ioredis_1.default(process.env.REDIS_URL, redisOptions)
     : new ioredis_1.default({

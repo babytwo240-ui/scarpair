@@ -1,43 +1,51 @@
-﻿import React, { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider, createTheme, CssBaseline } from '@mui/material';
-import { AuthProvider, useAuth } from './context/AuthContext.jsx';
-import { NotificationProvider, useNotifications } from './context/NotificationContext.jsx';
+import { AuthProvider, useAuth } from './shared/context/AuthContext';
+import { RoleProvider, useRoleContext } from './shared/context/RoleContext';
+import { NotificationProvider, useNotifications } from './shared/context/NotificationContext';
 import socketService from './services/socketService';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
-import LandingPage from './pages/LandingPage.jsx';
-import RoleSelectionPage from './pages/RoleSelectionPage.jsx';
-import BusinessLoginPage from './pages/BusinessLoginPage.jsx';
-import BusinessSignupPage from './pages/BusinessSignupPage.jsx';
-import RecyclerLoginPage from './pages/RecyclerLoginPage.jsx';
-import RecyclerSignupPage from './pages/RecyclerSignupPage.jsx';
-import EmailVerificationPage from './pages/EmailVerificationPage.jsx';
-import ForgotPasswordPage from './pages/ForgotPasswordPage.jsx';
-import ResetPasswordPage from './pages/ResetPasswordPage.jsx';
-import BusinessDashboard from './pages/BusinessDashboard.jsx';
-import RecyclerDashboard from './pages/RecyclerDashboard.jsx';
-import CreateWastePostPage from './pages/CreateWastePostPage.jsx';
-import EditWastePostPage from './pages/EditWastePostPage.jsx';
-import MyPostsPage from './pages/MyPostsPage.jsx';
-import MarketplacePage from './pages/MarketplacePage.jsx';
-import RequestCollectionPage from './pages/RequestCollectionPage.jsx';
-import CollectionsPage from './pages/CollectionsPage.jsx';
-import ScheduleCollectionPage from './pages/ScheduleCollectionPage.jsx';
-import MessagesPage from './pages/MessagesPage.jsx';
-import ConversationPage from './pages/ConversationPage.jsx';
-import NotificationsPage from './pages/NotificationsPage.jsx';
-import WastePostDetailsPage from './pages/WastePostDetailsPage.jsx';
-import EditProfilePage from './pages/EditProfilePage.jsx';
-import ApprovedCollectionsPage from './pages/ApprovedCollectionsPage.jsx';
-import PendingApprovalsPage from './pages/PendingApprovalsPage.jsx';
-import ManageCollectionRequestsPage from './pages/ManageCollectionRequestsPage.jsx';
-import CollectionDetailPage from './pages/CollectionDetailPage.jsx';
-import AdminCategoriesPage from './pages/AdminCategoriesPage.jsx';
-import AdminSystemLogsPage from './pages/AdminSystemLogsPage.jsx';
-import AdminReportsPage from './pages/AdminReportsPage.jsx';
-import AdminUserManagementPage from './pages/AdminUserManagementPage.jsx';
-import AdminRatingsPage from './pages/AdminRatingsPage.jsx';
-import UserReportsPage from './pages/UserReportsPage.jsx';
+import { USER_ROLES, ROLE_ROUTES } from './shared/constants/roles';
+// Common Pages
+import {
+  LandingPage,
+  RoleSelectionPage,
+  EmailVerificationPage,
+  ForgotPasswordPage,
+  ResetPasswordPage,
+  EditProfilePage,
+  ConversationPage,
+  MessagesPage,
+  NotificationsPage,
+  WastePostDetailsPage,
+  CollectionDetailPage,
+  UserReportsPage
+} from './UI/common/pages';
+
+// Business Pages
+import {
+  BusinessLoginPage,
+  BusinessSignupPage,
+  BusinessDashboard,
+  CreateWastePostPage,
+  EditWastePostPage,
+  MyPostsPage,
+  ManageCollectionRequestsPage,
+  PendingApprovalsPage,
+  RequestCollectionPage
+} from './UI/business/pages';
+
+// Recycler Pages
+import {
+  RecyclerLoginPage,
+  RecyclerSignupPage,
+  RecyclerDashboard,
+  MarketplacePage,
+  ScheduleCollectionPage,
+  ApprovedCollectionsPage,
+  CollectionsPage
+} from './UI/recycler/pages';
 
 // MUI Theme Configuration (Consistent across all pages)
 const theme = createTheme({
@@ -231,52 +239,6 @@ const AppContent = () => {
         } 
       />
 
-      {/* Admin Pages - Phase 4 Features */}
-      <Route 
-        path="/admin/categories" 
-        element={
-          <ProtectedRoute>
-            <AdminCategoriesPage />
-          </ProtectedRoute>
-        } 
-      />
-      
-      <Route 
-        path="/admin/logs" 
-        element={
-          <ProtectedRoute>
-            <AdminSystemLogsPage />
-          </ProtectedRoute>
-        } 
-      />
-      
-      <Route 
-        path="/admin/reports" 
-        element={
-          <ProtectedRoute>
-            <AdminReportsPage />
-          </ProtectedRoute>
-        } 
-      />
-      
-      <Route 
-        path="/admin/users" 
-        element={
-          <ProtectedRoute>
-            <AdminUserManagementPage />
-          </ProtectedRoute>
-        } 
-      />
-      
-      <Route 
-        path="/admin/ratings" 
-        element={
-          <ProtectedRoute>
-            <AdminRatingsPage />
-          </ProtectedRoute>
-        } 
-      />
-      
       {/* User Reports Page */}
       <Route 
         path="/my-reports" 

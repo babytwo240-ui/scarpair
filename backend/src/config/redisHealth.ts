@@ -10,7 +10,6 @@ export async function checkRedisConnection(): Promise<void> {
     ...(process.env.REDIS_SSL === 'true' && { tls: {} })
   };
 
-  // Use REDIS_URL if available (Render KV Store), otherwise use individual vars
   const testRedis = process.env.REDIS_URL
     ? new Redis(process.env.REDIS_URL, testOptions)
     : new Redis({

@@ -27,6 +27,7 @@ const SOCKET_URL = determineSocketUrl();
 class SocketService {
   constructor() {
     this.socket = null;
+    this.firstConnectErrorLogged = false;
   }
 
   connect(token) {
@@ -53,15 +54,25 @@ class SocketService {
       });
 
       this.socket.on('connect', () => {
+        console.log('[Socket] ✅ WebSocket connected');
       });
 
       this.socket.on('disconnect', (reason) => {
+        if (reason !== 'io client namespace disconnect') {
+          console.warn('[Socket] ❌ Disconnected:', reason);
+        }
       });
 
       this.socket.on('error', (error) => {
+        console.error('[Socket] 🚨 Error:', error?.message || 'Unknown error');
       });
 
       this.socket.on('connect_error', (error) => {
+        // Only log first connection error, not every retry
+        if (error?.message && !this.firstConnectErrorLogged) {
+          console.error('[Socket] ⚠️ Connection failed:', error.message);
+          this.firstConnectErrorLogged = true;
+        }
       });
     } catch (error) {
       this.socket = null;

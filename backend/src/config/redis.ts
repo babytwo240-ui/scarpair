@@ -13,7 +13,6 @@ const redisOptions: RedisOptions = {
   ...(process.env.REDIS_SSL === 'true' && { tls: {} })
 };
 
-// If REDIS_URL is provided (Render KV Store), use it; otherwise use individual vars
 export const redisClient = process.env.REDIS_URL
   ? new Redis(process.env.REDIS_URL, redisOptions)
   : new Redis({

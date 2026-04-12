@@ -50,7 +50,6 @@ export const rateLimitConfig = {
     })
   },
 
-  // NEW: Waste Posts endpoints
   createWastePost: {
     windowMs: 60 * 60 * 1000, // 1 hour
     maxPerUser: 10,
@@ -71,7 +70,6 @@ export const rateLimitConfig = {
     })
   },
 
-  // NEW: Collections endpoints
   createCollection: {
     windowMs: 60 * 60 * 1000,
     maxPerUser: 5,
@@ -92,7 +90,6 @@ export const rateLimitConfig = {
     })
   },
 
-  // NEW: Auth endpoints (stricter limits)
   login: {
     windowMs: 60 * 1000, // 1 minute
     maxPerUser: 5,
@@ -104,7 +101,7 @@ export const rateLimitConfig = {
   },
 
   passwordReset: {
-    windowMs: 60 * 60 * 1000, // 1 hour
+    windowMs: 60 * 60 * 1000, 
     maxPerUser: 3,
     maxPerIP: 10,
     keyGenerator: (userId: string, ip: string) => ({
@@ -123,7 +120,6 @@ export const rateLimitConfig = {
     })
   },
 
-  // NEW: Materials endpoints
   createMaterial: {
     windowMs: 60 * 60 * 1000,
     maxPerUser: 5,
@@ -134,7 +130,6 @@ export const rateLimitConfig = {
     })
   },
 
-  // NEW: Reviews endpoints
   createReview: {
     windowMs: 24 * 60 * 60 * 1000, // 1 day
     maxPerUser: 20,
@@ -145,7 +140,6 @@ export const rateLimitConfig = {
     })
   },
 
-  // NEW: Ratings endpoints
   createRating: {
     windowMs: 24 * 60 * 60 * 1000,
     maxPerUser: 30,
@@ -156,7 +150,6 @@ export const rateLimitConfig = {
     })
   },
 
-  // NEW: Feedback endpoints
   createFeedback: {
     windowMs: 24 * 60 * 60 * 1000,
     maxPerUser: 10,
@@ -167,7 +160,6 @@ export const rateLimitConfig = {
     })
   },
 
-  // NEW: Notifications endpoints
   getNotifications: {
     windowMs: 60 * 1000,
     maxPerUser: 50,
