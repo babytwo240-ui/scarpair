@@ -369,6 +369,121 @@ export const recyclerLogin = async (req: Request, res: Response): Promise<any> =
   }
 };
 
+// Forgot Password - Send reset email
+export const forgotPassword = async (req: Request, res: Response): Promise<any> => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ error: 'Email is required' });
+    }
+
+    if (!isValidEmail(email)) {
+      return res.status(400).json({ error: 'Invalid email format' });
+    }
+
+    // Check if email exists in either business or recycler
+    let user: any = await userService.findBusinessByEmail(email);
+    let type: 'business' | 'recycler' = 'business';
+
+    if (!user) {
+      user = await userService.findRecyclerByEmail(email);
+      type = 'recycler';
+    }
+
+    // Always return success even if email doesn't exist (security best practice)
+    if (!user) {
+      return res.status(200).json({
+        message: 'If an account exists with this email, a password reset link has been sent.'
+      });
+    }
+
+    // Generate reset code
+    const resetCode = generateVerificationCode();
+    const resetTokenExpiry = generateExpiry(3600); // 1 hour expiry
+
+    // Save reset code to user
+    await userService.setPasswordResetToken(email, type, resetCode, resetTokenExpiry);
+
+    // Send reset email
+    await emailService.sendPasswordResetEmail(email, resetCode);
+
+    res.status(200).json({
+      message: 'Password reset link has been sent to your email.'
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      error: 'Failed to process password reset request',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+};
+
+// Reset Password - Verify code and update password
+export const resetPassword = async (req: Request, res: Response): Promise<any> => {
+  try {
+    const { email, code, newPassword } = req.body;
+
+    if (!email || !code || !newPassword) {
+      return res.status(400).json({ error: 'Email, code, and new password are required' });
+    }
+
+    if (!isValidEmail(email)) {
+      return res.status(400).json({ error: 'Invalid email format' });
+    }
+
+    // Check if email exists and get user type
+    let user: any = await userService.findBusinessByEmail(email);
+    let type: 'business' | 'recycler' = 'business';
+
+    if (!user) {
+      user = await userService.findRecyclerByEmail(email);
+      type = 'recycler';
+    }
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Verify reset code
+    if (user.verificationCode !== code) {
+      return res.status(400).json({ error: 'Invalid reset code' });
+    }
+
+    // Check if code has expired
+    if (user.resetTokenExpiry && isExpired(user.resetTokenExpiry)) {
+      return res.status(400).json({ error: 'Reset code has expired. Please request a new one.' });
+    }
+
+    // Validate new password
+    const passwordCheck = isStrongPassword(newPassword);
+    if (!passwordCheck.valid) {
+      return res.status(400).json({
+        error: 'Password does not meet security requirements',
+        requirements: passwordCheck.errors
+      });
+    }
+
+    // Validate password against history
+    const validation = await userService.validateResetPassword(email, newPassword);
+    if (!validation.valid) {
+      return res.status(400).json({ error: validation.error });
+    }
+
+    // Update password
+    await userService.updateUserPassword(email, type, newPassword);
+
+    res.status(200).json({
+      message: 'Password has been reset successfully. Please login with your new password.'
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      error: 'Failed to reset password',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+};
+
 // Logout
 export const logout = async (req: Request, res: Response): Promise<any> => {
   try {

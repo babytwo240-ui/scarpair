@@ -39,16 +39,24 @@ apiClient.interceptors.response.use(
     if (error.response) {
       // Server responded with error status
       const { status, data } = error.response;
+      const requestUrl = error.config?.url || '';
 
       if (status === 401) {
-        // âœ… Token is invalid or expired - clear everything
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        localStorage.removeItem('refreshToken');
+        // Don't auto-logout on login/auth endpoints - let components handle validation errors
+        const isAuthEndpoint = requestUrl.includes('/auth/') && 
+          (requestUrl.includes('/login') || requestUrl.includes('/signup') || 
+           requestUrl.includes('/forgot-password') || requestUrl.includes('/reset-password'));
         
-        // Redirect to login
-        if (window.location.pathname !== '/') {
-          window.location.href = '/';
+        if (!isAuthEndpoint) {
+          // Only auto-logout for protected route 401s (actual token expiration)
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          localStorage.removeItem('refreshToken');
+          
+          // Redirect to login
+          if (window.location.pathname !== '/') {
+            window.location.href = '/';
+          }
         }
       } else if (status === 403) {
       } else if (status === 404) {

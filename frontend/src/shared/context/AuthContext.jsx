@@ -58,8 +58,8 @@ export const AuthProvider = ({ children }) => {
   }, [login]);
 
   // Business signup wrapper
-  const businessSignup = useCallback(async (email, password, businessName, phoneNumber) => {
-    const response = await authService.businessSignup(email, password, businessName, phoneNumber);
+  const businessSignup = useCallback(async (data) => {
+    const response = await authService.businessSignup(data.email, data.password, data.businessName, data.phone);
     if (response.token && response.user) {
       login(response.user, response.token);
     }
@@ -67,8 +67,8 @@ export const AuthProvider = ({ children }) => {
   }, [login]);
 
   // Recycler signup wrapper
-  const recyclerSignup = useCallback(async (email, password, name, phoneNumber) => {
-    const response = await authService.recyclerSignup(email, password, name, phoneNumber);
+  const recyclerSignup = useCallback(async (data) => {
+    const response = await authService.recyclerSignup(data.email, data.password, data.companyName, data.phone);
     if (response.token && response.user) {
       login(response.user, response.token);
     }
