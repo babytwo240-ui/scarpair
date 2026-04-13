@@ -9,8 +9,8 @@ router.post('/recycler/signup', RateLimiter.middleware('register'), authControll
 router.post('/verify-email', authController.verifyEmail);
 router.post('/business/login', RateLimiter.middleware('login'), authController.businessLogin);
 router.post('/recycler/login', RateLimiter.middleware('login'), authController.recyclerLogin);
-router.post('/forgot-password', RateLimiter.middleware('register'), authController.forgotPassword);
-router.post('/reset-password', authController.resetPassword);
+router.post('/forgot-password', RateLimiter.middleware('passwordReset'), authController.forgotPassword);
+router.post('/reset-password', RateLimiter.middleware('passwordReset'), authController.resetPassword);
 router.post('/logout', authController.logout);
 
 export default router;

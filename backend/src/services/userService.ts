@@ -276,9 +276,13 @@ const updateUserPassword = async (email: string, type: 'business' | 'recycler', 
     // Clear password reset token from Redis cache if it exists
     try {
       await redisClient.del(`pwd_reset:${email}`);
-    } catch (error) {
+    } catch (redisError) {
+      // Non-critical Redis failure, log but don't throw
+      console.warn(`Failed to clear Redis password reset token for ${email}:`, redisError);
     }
-  } catch (error) {
+  } catch (error: any) {
+    // Throw error so caller can handle it properly
+    throw new Error(`Password update failed: ${error.message}`);
   }
 };
 
