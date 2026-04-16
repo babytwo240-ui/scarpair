@@ -3,19 +3,7 @@
  * Import all API service modules for easy access
  */
 
-// Import all service modules first
-import * as authAPI from './auth';
-import * as userAPI from './user';
-import * as wastePostAPI from './waste-post';
-import * as collectionAPI from './collection';
-import * as messageAPI from './message';
-import * as conversationAPI from './conversation';
-import * as materialAPI from './material';
-import * as ratingAPI from './rating';
-import * as notificationAPI from './notification';
-import * as imageAPI from './image';
-import * as reportAPI from './report';
-import * as feedbackAPI from './feedback';
+// Import service implementations
 import authService from './auth/authService';
 import userService from './users/userService';
 import wastePostService from './wastePosts/wastePostService';
@@ -23,10 +11,9 @@ import collectionService from './collections/collectionService';
 import messageService from './messages/messageService';
 import notificationService from './notifications/notificationService';
 import ratingService from './ratings/ratingService';
-import feedbackServiceModule from './feedback/feedbackService';
+import feedbackService from './feedback/feedbackService';
 import subscriptionService from './subscriptions/subscriptionService';
-import { reportAPI as reportAPIExport } from './report';
-import { feedbackAPI as feedbackAPIExport } from './feedback';
+import reportService from './report/reportService';
 
 // Export individual services
 export {
@@ -37,24 +24,21 @@ export {
   messageService,
   notificationService,
   ratingService,
-  feedbackServiceModule as feedbackService,
+  feedbackService,
   subscriptionService,
-  reportAPIExport as reportAPI,
-  feedbackAPIExport as feedbackAPI,
+  reportService,
 };
 
-// Export as namespace
+// Export as default namespace for easier imports
 export default {
-  authAPI,
-  userAPI,
-  wastePostAPI,
-  collectionAPI,
-  messageAPI,
-  conversationAPI,
-  materialAPI,
-  ratingAPI,
-  notificationAPI,
-  imageAPI,
-  reportAPI,
-  feedbackAPI,
+  authService,
+  userService,
+  wastePostService,
+  collectionService,
+  messageService,
+  notificationService,
+  ratingService,
+  feedbackService,
+  subscriptionService,
+  reportService,
 };

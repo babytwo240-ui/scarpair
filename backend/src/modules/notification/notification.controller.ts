@@ -12,7 +12,7 @@ export const getUserNotifications = async (req: Request, res: Response): Promise
 
     const Notification = (sequelize as any).models.Notification;
     const whereClause: any = { userId };
-    if (read !== undefined) whereClause.isRead = read === 'true';
+    if (read !== undefined) whereClause.read = read === 'true';
 
     const { count, rows } = await Notification.findAndCountAll({
       where: whereClause,
@@ -43,7 +43,7 @@ export const markAsRead = async (req: Request, res: Response): Promise<any> => {
       return res.status(404).json({ error: 'Notification not found' });
     }
 
-    notification.isRead = true;
+    notification.read = true;
     await notification.save();
 
     res.status(200).json({
@@ -61,7 +61,7 @@ export const getUnreadCount = async (req: Request, res: Response): Promise<any> 
     const Notification = (sequelize as any).models.Notification;
 
     const count = await Notification.count({
-      where: { userId, isRead: false }
+      where: { userId, read: false }
     });
 
     res.status(200).json({

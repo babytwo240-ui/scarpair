@@ -46,7 +46,7 @@ module.exports = (sequelize) => {
             comment: 'ISO string - Date scheduled for the collection'
         },
         status: {
-            type: sequelize_1.DataTypes.ENUM('pending', 'approved', 'scheduled', 'completed', 'confirmed', 'cancelled', 'expired'),
+            type: sequelize_1.DataTypes.ENUM('pending', 'requested', 'approved', 'scheduled', 'completed', 'confirmed', 'rejected', 'cancelled', 'expired'),
             allowNull: false,
             defaultValue: 'pending',
             comment: 'Status of the collection request'

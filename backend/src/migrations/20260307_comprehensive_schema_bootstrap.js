@@ -367,7 +367,7 @@ module.exports = {
             comment: 'ISO string format to avoid timezone conversion'
           },
           status: {
-            type: Sequelize.ENUM('pending', 'approved', 'scheduled', 'completed', 'confirmed'),
+            type: Sequelize.ENUM('pending', 'requested', 'approved', 'scheduled', 'completed', 'confirmed', 'rejected', 'cancelled', 'expired'),
             allowNull: false,
             defaultValue: 'pending'
           },

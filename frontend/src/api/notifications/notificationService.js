@@ -13,23 +13,13 @@ const notificationService = {
     return res.data;
   },
 
-  markAllAsRead: async () => {
-    const res = await axios.put(`${API_BASE}/notifications/read-all`, {}, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } });
+  getUnreadCount: async () => {
+    const res = await axios.get(`${API_BASE}/notifications/unread-count`, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } });
     return res.data;
   },
 
   deleteNotification: async (notificationId) => {
     const res = await axios.delete(`${API_BASE}/notifications/${notificationId}`, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } });
-    return res.data;
-  },
-
-  getUnreadCount: async () => {
-    const res = await axios.get(`${API_BASE}/notifications/unread/count`, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } });
-    return res.data;
-  },
-
-  subscribeToNotifications: async (settings) => {
-    const res = await axios.post(`${API_BASE}/notifications/subscribe`, settings, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } });
     return res.data;
   },
 };

@@ -3,33 +3,42 @@ import axios from 'axios';
 const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
 const collectionService = {
-  requestCollection: async (wastePostId, collectionData) => {
-    const res = await axios.post(`${API_BASE}/collections/request`, { wastePostId, ...collectionData }, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } });
+  // Get available waste posts for collection
+  getAvailablePosts: async (filters = {}, page = 1, limit = 20) => {
+    const params = new URLSearchParams({ page, limit, ...filters });
+    const res = await axios.get(`${API_BASE}/collections/available?${params}`, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } });
     return res.data;
   },
 
-  getMyRequests: async (userId, page = 1) => {
-    const res = await axios.get(`${API_BASE}/collections/my-requests?page=${page}`, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } });
+  // Request a collection for a specific waste post
+  requestCollection: async (postId, proposedDate, notes = null) => {
+    const res = await axios.post(`${API_BASE}/collections/request`, { postId, proposedDate, notes }, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } });
     return res.data;
   },
 
-  getReceivedRequests: async (userId, page = 1) => {
-    const res = await axios.get(`${API_BASE}/collections/received?page=${page}`, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } });
+  // Get all collections for the current user (as business or recycler)
+  getUserCollections: async (status = null, page = 1, limit = 20) => {
+    const params = new URLSearchParams({ page, limit });
+    if (status) params.append('status', status);
+    const res = await axios.get(`${API_BASE}/collections?${params}`, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } });
     return res.data;
   },
 
-  approveRequest: async (collectionId) => {
-    const res = await axios.put(`${API_BASE}/collections/${collectionId}/approve`, {}, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } });
+  // Approve a collection request (business owner)
+  approveCollection: async (collectionId, scheduledDate) => {
+    const res = await axios.put(`${API_BASE}/collections/${collectionId}/approve`, { scheduledDate }, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } });
     return res.data;
   },
 
-  rejectRequest: async (collectionId, reason) => {
+  // Reject a collection request (business owner)
+  rejectCollection: async (collectionId, reason = null) => {
     const res = await axios.put(`${API_BASE}/collections/${collectionId}/reject`, { reason }, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } });
     return res.data;
   },
 
-  getRequestDetails: async (collectionId) => {
-    const res = await axios.get(`${API_BASE}/collections/${collectionId}`, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } });
+  // Confirm pickup (both recycler and business can confirm)
+  confirmPickup: async (collectionId) => {
+    const res = await axios.put(`${API_BASE}/collections/${collectionId}/confirm-pickup`, {}, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } });
     return res.data;
   },
 };

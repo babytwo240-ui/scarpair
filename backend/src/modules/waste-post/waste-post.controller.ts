@@ -16,6 +16,7 @@ export const getWasteCategories = async (req: Request, res: Response): Promise<a
       data: categories
     });
   } catch (error: any) {
+    console.error('Error fetching waste categories:', error);
     res.status(500).json({ error: 'Failed to fetch categories' });
   }
 };
@@ -45,6 +46,9 @@ export const createWastePost = async (req: Request, res: Response): Promise<any>
       imageArray = [imageUrl];
     }
 
+    // Construct location from address (required field)
+    const location = address;
+
     const wastePost = await WastePost.create({
       businessId,
       title,
@@ -53,6 +57,7 @@ export const createWastePost = async (req: Request, res: Response): Promise<any>
       quantity,
       unit: unit || 'kg',
       condition,
+      location,
       latitude,
       longitude,
       city,
@@ -68,6 +73,7 @@ export const createWastePost = async (req: Request, res: Response): Promise<any>
       data: wastePost
     });
   } catch (error: any) {
+    console.error('Error creating waste post:', error);
     res.status(500).json({ error: 'Failed to create waste post' });
   }
 };
@@ -94,6 +100,7 @@ export const getUserWastePosts = async (req: Request, res: Response): Promise<an
       data: rows
     });
   } catch (error: any) {
+    console.error('Error fetching user waste posts:', error);
     res.status(500).json({ error: 'Failed to fetch user waste posts' });
   }
 };
@@ -124,6 +131,7 @@ export const getWastePosts = async (req: Request, res: Response): Promise<any> =
       data: rows
     });
   } catch (error: any) {
+    console.error('Error fetching waste posts:', error);
     res.status(500).json({ error: 'Failed to fetch waste posts' });
   }
 };
@@ -145,6 +153,7 @@ export const getWastePostById = async (req: Request, res: Response): Promise<any
       data: post
     });
   } catch (error: any) {
+    console.error('Error fetching waste post:', error);
     res.status(500).json({ error: 'Failed to fetch waste post' });
   }
 };
@@ -171,6 +180,7 @@ export const updateWastePost = async (req: Request, res: Response): Promise<any>
       data: post
     });
   } catch (error: any) {
+    console.error('Error updating waste post:', error);
     res.status(500).json({ error: 'Failed to update waste post' });
   }
 };
@@ -195,6 +205,7 @@ export const deleteWastePost = async (req: Request, res: Response): Promise<any>
       message: 'Waste post deleted successfully'
     });
   } catch (error: any) {
+    console.error('Error deleting waste post:', error);
     res.status(500).json({ error: 'Failed to delete waste post' });
   }
 };
@@ -221,6 +232,7 @@ export const getMyApprovedCollections = async (req: Request, res: Response): Pro
       data: rows
     });
   } catch (error: any) {
+    console.error('Error fetching approved collections:', error);
     res.status(500).json({ error: 'Failed to fetch approved collections' });
   }
 };

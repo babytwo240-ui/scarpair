@@ -499,3 +499,32 @@ export const logout = async (req: Request, res: Response): Promise<any> => {
     res.status(500).json({ error: 'Logout failed' });
   }
 };
+
+// Verify Token - Check if JWT token is valid
+export const verifyToken = async (req: Request, res: Response): Promise<any> => {
+  try {
+    // If we reach here, the token is valid (authMiddleware passed)
+    const user = (req as any).user;
+
+    if (!user) {
+      return res.status(401).json({ 
+        valid: false,
+        error: 'Invalid token' 
+      });
+    }
+
+    res.status(200).json({
+      valid: true,
+      user: {
+        id: user.id,
+        email: user.email,
+        type: user.type
+      }
+    });
+  } catch (error: any) {
+    res.status(401).json({ 
+      valid: false,
+      error: 'Token verification failed'
+    });
+  }
+};

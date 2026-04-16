@@ -1,5 +1,6 @@
 import express from 'express';
 import * as authController from './auth.controller';
+import { authenticateUser } from '../../middleware/userAuthMiddleware';
 import { RateLimiter } from '../../middleware/rateLimiter';
 
 const router = express.Router();
@@ -12,5 +13,6 @@ router.post('/recycler/login', RateLimiter.middleware('login'), authController.r
 router.post('/forgot-password', RateLimiter.middleware('passwordReset'), authController.forgotPassword);
 router.post('/reset-password', RateLimiter.middleware('passwordReset'), authController.resetPassword);
 router.post('/logout', authController.logout);
+router.get('/verify', authenticateUser, authController.verifyToken);
 
 export default router;

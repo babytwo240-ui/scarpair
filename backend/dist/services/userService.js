@@ -240,10 +240,14 @@ const updateUserPassword = async (email, type, newPassword) => {
         try {
             await redis_1.redisClient.del(`pwd_reset:${email}`);
         }
-        catch (error) {
+        catch (redisError) {
+            // Non-critical Redis failure, log but don't throw
+            console.warn(`Failed to clear Redis password reset token for ${email}:`, redisError);
         }
     }
     catch (error) {
+        // Throw error so caller can handle it properly
+        throw new Error(`Password update failed: ${error.message}`);
     }
 };
 exports.updateUserPassword = updateUserPassword;
