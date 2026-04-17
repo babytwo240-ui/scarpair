@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../../shared/context/AuthContext';
 import messageService from '../../../../services/messageService';
@@ -37,76 +37,119 @@ const ConversationPage = () => {
   const [showProductPreview, setShowProductPreview] = useState(false);
   const messagesEndRef = useRef(null);
 
-  useEffect(() => {
-    loadConversation();
-    loadMessages();
-    initializeSocket();
-
-    return () => {
-      if (socketService.isConnected()) {
-        socketService.emit('conversation:leave', parseInt(conversationId));
-      }
-    };
-  }, [conversationId]);
+  const scrollToBottom = useCallback(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, []);
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+  }, [messages, scrollToBottom]);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-
-  const initializeSocket = () => {
+  const initializeSocket = useCallback(() => {
     try {
       const socket = socketService.connect(token);
-      socketService.emit('conversation:join', parseInt(conversationId));
+      const activeConversationId = Number(conversationId);
 
-      socketService.on('message:received', (data) => {
-        if (data.conversationId === parseInt(conversationId)) {
-          setMessages((prev) => {
-            if (prev.find(m => m.id === data.id)) return prev;
-            return [...prev, data];
-          });
+      if (!socket || Number.isNaN(activeConversationId)) {
+        return undefined;
+      }
+
+      socketService.emit('conversation:join', activeConversationId);
+
+      const handleMessageReceived = (data) => {
+        if (data.conversationId !== activeConversationId) {
+          return;
         }
-      });
 
-      socketService.on('user:typing', (data) => {
-        if (data.conversationId === parseInt(conversationId) && data.userId !== user.id) {
+        const incomingSenderId = data.senderId ?? data.sender?.id;
+
+        setMessages((prev) => {
+          const filtered = prev.filter(
+            (message) =>
+              !(
+                message._optimistic &&
+                message.senderId === incomingSenderId &&
+                message.content === data.content &&
+                (message.imageUrl || null) === (data.imageUrl || null)
+              )
+          );
+
+          if (filtered.find((message) => message.id === data.id)) {
+            return filtered;
+          }
+
+          return [...filtered, { ...data, senderId: incomingSenderId }];
+        });
+      };
+
+      const handleUserTyping = (data) => {
+        if (data.conversationId === activeConversationId && data.userId !== user.id) {
           setOtherUserTyping(true);
         }
-      });
+      };
 
-      socketService.on('user:stop-typing', (data) => {
-        if (data.conversationId === parseInt(conversationId)) {
+      const handleUserStopTyping = (data) => {
+        if (data.conversationId === activeConversationId) {
           setOtherUserTyping(false);
         }
-      });
+      };
+
+      socketService.on('message:received', handleMessageReceived);
+      socketService.on('user:typing', handleUserTyping);
+      socketService.on('user:stop-typing', handleUserStopTyping);
+
+      return () => {
+        socketService.emit('conversation:leave', activeConversationId);
+        socketService.off('message:received', handleMessageReceived);
+        socketService.off('user:typing', handleUserTyping);
+        socketService.off('user:stop-typing', handleUserStopTyping);
+      };
     } catch (err) {
       console.error('Socket error:', err);
+      return undefined;
     }
-  };
+  }, [conversationId, token, user?.id]);
 
-  const loadConversation = async () => {
+  const loadConversation = useCallback(async () => {
     try {
       const response = await messageService.getConversation(conversationId);
-      setConversation(response.data);
+      setConversation(response || null);
+      setError('');
     } catch (err) {
-      setError('Failed to load conversation');
+      console.error('[ConversationPage] Failed to load conversation:', err.status, err.data?.error, err.message);
+      setConversation(null);
+      setError(err.data?.error || err.message || 'Failed to load conversation');
     }
-  };
+  }, [conversationId]);
 
-  const loadMessages = async () => {
+  const loadMessages = useCallback(async () => {
     setLoading(true);
     try {
       const response = await messageService.getConversationMessages(conversationId, 1, 100);
-      setMessages(response.data || []);
+      setMessages(Array.isArray(response) ? response : []);
     } catch (err) {
       setError('Failed to load messages');
+      console.error('[ConversationPage] Error loading messages:', err);
     } finally {
       setLoading(false);
     }
-  };
+  }, [conversationId]);
+
+  useEffect(() => {
+    if (!conversationId || !token) {
+      return undefined;
+    }
+
+    loadConversation();
+    loadMessages();
+    const cleanupSocket = initializeSocket();
+
+    return () => {
+      if (cleanupSocket) {
+        cleanupSocket();
+      }
+    };
+  }, [conversationId, token, loadConversation, loadMessages, initializeSocket]);
 
   const handleImageChange = (e) => {
     const file = e.target.files?.[0];
@@ -124,10 +167,8 @@ const ConversationPage = () => {
     if (!imageFile) return '';
     setImageUploading(true);
     try {
-      const formData = new FormData();
-      formData.append('image', imageFile);
-      const response = await messageService.uploadMessageImage(formData);
-      return response.data?.imageUrl || '';
+      const response = await messageService.uploadMessageImage(imageFile);
+      return response.url || '';
     } catch (err) {
       setError('Failed to upload image');
       return '';
@@ -187,7 +228,8 @@ const ConversationPage = () => {
         },
         content: messageContent,
         imageUrl: imageUrl || null,
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
+        _optimistic: true  // Mark as optimistic for deduplication
       };
 
       setMessages((prev) => [...prev, optimisticMessage]);
@@ -217,12 +259,41 @@ const ConversationPage = () => {
     );
   }
 
+  if (loading) {
+    return (
+      <div style={{ padding: '40px 20px', textAlign: 'center', background: C.darker, color: C.text, minHeight: '100vh', fontFamily: "'DM Sans','Helvetica Neue',sans-serif", display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ width: 40, height: 40, borderRadius: '50%', border: `3px solid ${C.border}`, borderTopColor: C.bright, animation: 'spin 1s linear infinite' }} />
+      </div>
+    );
+  }
+
+  if (error || !conversation) {
+    return (
+      <div style={{ padding: '40px 20px', textAlign: 'center', background: C.darker, color: C.text, minHeight: '100vh', fontFamily: "'DM Sans','Helvetica Neue',sans-serif", display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ background: C.surface, padding: '24px', borderRadius: '12px', border: `1px solid ${C.border}`, maxWidth: '400px' }}>
+          <p style={{ color: '#ff6b6b', fontWeight: 700, marginBottom: 12 }}>⚠️ {error || 'Conversation not found'}</p>
+          <button onClick={() => navigate('/messages')} style={{ padding: '10px 16px', background: C.bright, color: C.darker, border: 'none', borderRadius: 6, cursor: 'pointer', fontWeight: 700 }}>
+            Back to Messages
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   const otherParticipant =
     conversation?.participant1?.id === user.id
       ? conversation?.participant2
       : conversation?.participant1;
 
-  const wastePost = conversation?.wastePost;
+  const wastePost = conversation?.wastePost
+    ? {
+        ...conversation.wastePost,
+        imageUrls: conversation.wastePost.imageUrls || conversation.wastePost.images || [],
+        pricePerUnit: conversation.wastePost.pricePerUnit ?? conversation.wastePost.price
+      }
+    : null;
+  const wastePostImages = wastePost?.imageUrls || [];
+  const wastePostPrice = wastePost?.pricePerUnit;
 
   return (
     <div style={{ minHeight: '100vh', background: C.darker, fontFamily: "'DM Sans','Helvetica Neue',sans-serif", overflow: 'hidden', display: 'flex', flexDirection: 'column', color: C.text }}>
@@ -295,7 +366,7 @@ const ConversationPage = () => {
               </div>
             ) : (
               messages.map((msg, idx) => (
-                <div key={idx} style={{ display: 'flex', justifyContent: msg.senderId === user.id ? 'flex-end' : 'flex-start', animation: 'slideIn 0.3s ease' }}>
+                <div key={msg.id || idx} style={{ display: 'flex', justifyContent: msg.senderId === user.id ? 'flex-end' : 'flex-start', animation: 'slideIn 0.3s ease' }}>
                   <div style={{
                     maxWidth: '70%',
                     backgroundColor: msg.senderId === user.id ? C.bright : C.darker,
@@ -392,8 +463,8 @@ const ConversationPage = () => {
         {showProductPreview && wastePost && (
           <div style={{ width: 320, background: C.surface, borderRadius: 12, border: `1px solid ${C.border}`, padding: 16, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 16 }}>
             <div style={{ backgroundColor: C.darker, borderRadius: 8, overflow: 'hidden', aspectRatio: '1', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.3)' }}>
-              {wastePost.imageUrls?.[0] ? (
-                <img src={wastePost.imageUrls[0]} alt={wastePost.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              {wastePostImages[0] ? (
+                <img src={wastePostImages[0]} alt={wastePost.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               ) : (
                 <div style={{ color: C.textMid, fontSize: 12 }}>No image</div>
               )}
@@ -403,7 +474,7 @@ const ConversationPage = () => {
               <h3 style={{ margin: '0 0 8px 0', fontSize: 16, fontWeight: 700, color: C.bright, lineHeight: 1.2 }}>
                 {wastePost.title}
               </h3>
-              {wastePost.pricePerUnit && (
+              {wastePostPrice && (
                 <p style={{ margin: 0, fontSize: 18, fontWeight: 700, color: C.bright }}>
                   ₱{Number(wastePost.pricePerUnit).toLocaleString('en-US', { minimumFractionDigits: 2 })}
                   {wastePost.unit && <span style={{ fontSize: 12, color: C.textMid, marginLeft: 6 }}>per {wastePost.unit}</span>}

@@ -24,6 +24,22 @@ const determineSocketUrl = () => {
 
 const SOCKET_URL = determineSocketUrl();
 
+const getSocketErrorMessage = (error) => {
+  if (typeof error === 'string') {
+    return error;
+  }
+
+  if (error?.message) {
+    return error.message;
+  }
+
+  if (error?.error) {
+    return error.error;
+  }
+
+  return 'Unknown error';
+};
+
 class SocketService {
   constructor() {
     this.socket = null;
@@ -32,6 +48,13 @@ class SocketService {
 
   connect(token) {
     if (this.socket) {
+      this.socket.auth = {
+        token,
+      };
+
+      if (!this.socket.connected) {
+        this.socket.connect();
+      }
       return this.socket;
     }
 
@@ -48,12 +71,12 @@ class SocketService {
         reconnectionDelay: 1000,
         reconnectionDelayMax: 5000,
         reconnectionAttempts: 5,
-        transports: ['websocket', 'polling'],
-        // Add path explicitly to ensure correct endpoint
+        transports: ['websocket'],
         path: '/socket.io',
       });
 
       this.socket.on('connect', () => {
+        this.firstConnectErrorLogged = false;
         console.log('[Socket] ✅ WebSocket connected');
       });
 
@@ -64,7 +87,11 @@ class SocketService {
       });
 
       this.socket.on('error', (error) => {
-        console.error('[Socket] 🚨 Error:', error?.message || 'Unknown error');
+        console.error('[Socket] 🚨 Transport error:', getSocketErrorMessage(error));
+      });
+
+      this.socket.on('socket:error', (error) => {
+        console.error('[Socket] 🚨 App error:', getSocketErrorMessage(error));
       });
 
       this.socket.on('connect_error', (error) => {
@@ -101,9 +128,13 @@ class SocketService {
     }
   }
 
-  off(event) {
+  off(event, callback) {
     if (this.socket) {
-      this.socket.off(event);
+      if (callback) {
+        this.socket.off(event, callback);
+      } else {
+        this.socket.off(event);
+      }
     }
   }
 

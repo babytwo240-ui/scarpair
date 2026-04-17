@@ -56,7 +56,8 @@ const RequestCollectionPage = () => {
     setError('');
     try {
       const response = await wastePostService.getWastePostById(postId);
-      setPost(response);
+      // Extract the post data from the response object { message, data }
+      setPost(response.data || response);
     } catch (err) {
       setError(err.message || 'Failed to load waste post.');
     } finally {

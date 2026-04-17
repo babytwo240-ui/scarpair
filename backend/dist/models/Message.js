@@ -36,7 +36,7 @@ module.exports = (sequelize) => {
             type: sequelize_1.DataTypes.TEXT,
             allowNull: false,
             validate: {
-                len: [1, 5000]
+                len: [0, 5000]
             }
         },
         imageUrl: {

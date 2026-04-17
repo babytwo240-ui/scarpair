@@ -1,13 +1,37 @@
-﻿import apiClient from './api';
+import apiClient from './api';
+
+const normalizeUploadPayload = (fileOrFormData) => {
+  if (fileOrFormData instanceof FormData) {
+    if (fileOrFormData.has('file')) {
+      return fileOrFormData;
+    }
+
+    const normalized = new FormData();
+    const image = fileOrFormData.get('image');
+
+    if (image) {
+      normalized.append('file', image);
+    }
+
+    return normalized;
+  }
+
+  const formData = new FormData();
+
+  if (fileOrFormData) {
+    formData.append('file', fileOrFormData);
+  }
+
+  return formData;
+};
 
 const messageService = {
-  // Cache management
   _cache: {
     conversations: null,
     conversationTimestamp: 0,
   },
-  
-  CACHE_DURATION: 5 * 60 * 1000, // 5 minutes
+
+  CACHE_DURATION: 5 * 60 * 1000,
 
   clearConversationsCache() {
     this._cache.conversations = null;
@@ -16,52 +40,48 @@ const messageService = {
 
   isCacheValid() {
     return (
-      this._cache.conversations &&
+      Array.isArray(this._cache.conversations) &&
       Date.now() - this._cache.conversationTimestamp < this.CACHE_DURATION
     );
   },
 
-  // Start conversation
   startConversation: async (participantUserId, wastePostId) => {
     const response = await apiClient.post('/conversations', {
-      participantUserId,
+      participant2Id: participantUserId,
       wastePostId,
     });
-    // Clear cache after creating conversation
+
     messageService.clearConversationsCache();
-    return response.data;
+    return response.data.data;
   },
 
-  // Get all conversations (with caching)
   getConversations: async (ignoreCache = false) => {
-    // Return cached data if valid and not ignoring cache
     if (!ignoreCache && messageService.isCacheValid()) {
       return messageService._cache.conversations;
     }
+
     const response = await apiClient.get('/conversations');
-    
-    // Update cache
-    messageService._cache.conversations = response.data;
+    const conversations = Array.isArray(response.data.data) ? response.data.data : [];
+
+    messageService._cache.conversations = conversations;
     messageService._cache.conversationTimestamp = Date.now();
-    
-    return response.data;
+
+    return conversations;
   },
 
-  // Get conversation by ID
   getConversation: async (id) => {
     const response = await apiClient.get(`/conversations/${id}`);
-    return response.data;
+    return response.data.data;
   },
 
-  // Get conversation messages
   getConversationMessages: async (conversationId, page = 1, limit = 20) => {
     const response = await apiClient.get(`/messages/${conversationId}`, {
       params: { page, limit },
     });
-    return response.data;
+
+    return Array.isArray(response.data.data) ? response.data.data : [];
   },
 
-  // Send message
   sendMessage: async (conversationId, recipientId, content, imageUrl = null) => {
     const response = await apiClient.post('/messages', {
       conversationId,
@@ -69,22 +89,33 @@ const messageService = {
       content,
       imageUrl,
     });
-    return response.data;
+
+    messageService.clearConversationsCache();
+    return response.data.data || response.data;
   },
 
-  // Edit message
+  uploadMessageImage: async (fileOrFormData) => {
+    const response = await apiClient.post('/images/upload', normalizeUploadPayload(fileOrFormData), {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+
+    return response.data.data || response.data;
+  },
+
   editMessage: async (messageId, content) => {
     const response = await apiClient.put(`/messages/${messageId}`, { content });
-    return response.data;
+    return response.data.data || response.data;
   },
 
-  // Delete message
   deleteMessage: async (messageId) => {
     const response = await apiClient.delete(`/messages/${messageId}`);
+
+    messageService.clearConversationsCache();
     return response.data;
   },
 
-  // Get all notifications
   getNotifications: async (page = 1, limit = 20) => {
     const response = await apiClient.get('/notifications', {
       params: { page, limit },
@@ -92,31 +123,26 @@ const messageService = {
     return response.data;
   },
 
-  // Mark notification as read
   markNotificationRead: async (id) => {
     const response = await apiClient.put(`/notifications/${id}/read`, {});
     return response.data;
   },
 
-  // Mark all notifications as read
   markAllNotificationsRead: async () => {
     const response = await apiClient.put('/notifications/read-all', {});
     return response.data;
   },
 
-  // Delete all notifications
   deleteAllNotifications: async () => {
     const response = await apiClient.delete('/notifications/delete-all');
     return response.data;
   },
 
-  // Get unread count
   getUnreadCount: async () => {
     const response = await apiClient.get('/notifications/unread-count');
     return response.data;
   },
 
-  // Delete notification
   deleteNotification: async (id) => {
     const response = await apiClient.delete(`/notifications/${id}`);
     return response.data;
@@ -124,4 +150,3 @@ const messageService = {
 };
 
 export default messageService;
-

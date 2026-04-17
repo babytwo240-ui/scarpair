@@ -7,7 +7,9 @@ router.use(authenticateUser);
 
 router.get('/', notificationController.getUserNotifications);
 router.get('/unread-count', notificationController.getUnreadCount);
+router.put('/read-all', notificationController.markAllAsRead);
 router.put('/:notificationId/read', notificationController.markAsRead);
+router.delete('/delete-all', notificationController.deleteAllNotifications);
 router.delete('/:notificationId', notificationController.deleteNotification);
 
 export default router;

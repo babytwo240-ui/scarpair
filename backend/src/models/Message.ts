@@ -53,7 +53,7 @@ module.exports = (sequelize: Sequelize): ModelStatic<MessageInstance> => {
         type: DataTypes.TEXT,
         allowNull: false,
         validate: {
-          len: [1, 5000]
+          len: [0, 5000]
         }
       },
       imageUrl: {

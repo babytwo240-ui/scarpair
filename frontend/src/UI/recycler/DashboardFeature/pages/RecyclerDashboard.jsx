@@ -48,7 +48,9 @@ const RecyclerDashboard = () => {
         city: filters.city,
         searchQuery: filters.searchQuery,
       });
-      setMaterials(response.data || []);
+      // Backend returns { message, pagination, data: [...materials] }
+      const materialsArray = Array.isArray(response.data) ? response.data : response.data?.data || [];
+      setMaterials(materialsArray);
     } catch (err) {
       setError(err.message || 'Failed to load materials');
       setMaterials([]);
@@ -57,9 +59,11 @@ const RecyclerDashboard = () => {
     }
   }, [filters]);
 
+  // Initial fetch on component mount only. Filters must not auto-apply via useEffect.
+  // User must click "Apply Filters" button to trigger new searches.
   useEffect(() => {
     fetchMaterials();
-  }, [fetchMaterials]);
+  }, []); // Empty dependency array - only runs once on mount
 
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
@@ -241,9 +245,9 @@ const RecyclerDashboard = () => {
                               }}
                             >
                               {/* Image */}
-                              {material.imageUrl && (
+                              {material.images && material.images.length > 0 && (
                                 <img
-                                  src={material.imageUrl}
+                                  src={material.images[0]}
                                   alt={material.title}
                                   style={{
                                     width: '100%',
@@ -349,9 +353,9 @@ const RecyclerDashboard = () => {
                                 transition: 'all 0.3s',
                               }}
                             >
-                              {material.imageUrl && (
+                              {material.images && material.images.length > 0 && (
                                 <img
-                                  src={material.imageUrl}
+                                  src={material.images[0]}
                                   alt={material.title}
                                   style={{
                                     width: '100%',

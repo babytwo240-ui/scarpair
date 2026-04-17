@@ -44,7 +44,10 @@ const MarketplacePage = () => {
     setError('');
     try {
       const response = await wastePostService.getMarketplace();
-      setPosts(response.data || []);
+      // Backend returns { message, pagination, data: [...posts] }
+      // Extract the actual posts array from the response
+      const postsArray = Array.isArray(response.data) ? response.data : response.data?.data || [];
+      setPosts(postsArray);
     } catch (err) {
       setError(err.message || 'Failed to load marketplace posts.');
     } finally {

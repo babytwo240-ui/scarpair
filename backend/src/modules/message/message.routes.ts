@@ -7,6 +7,7 @@ router.use(authenticateUser);
 
 router.get('/:conversationId', messageController.getMessages);
 router.post('/', messageController.sendMessage);
+router.put('/:messageId', messageController.updateMessage);
 router.put('/:messageId/read', messageController.markMessageAsRead);
 router.delete('/:messageId', messageController.deleteMessage);
 

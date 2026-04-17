@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../../shared/context/AuthContext';
 import messageService from '../../../../services/messageService';
@@ -46,69 +46,121 @@ const FloatingChatWidget = ({
   const otherParticipant = selectedConv
     ? (selectedConv.participant1?.id === user.id ? selectedConv.participant2 : selectedConv.participant1)
     : null;
-  const wastePost = selectedConv?.wastePost;
+  const wastePost = selectedConv?.wastePost
+    ? {
+        ...selectedConv.wastePost,
+        imageUrls: selectedConv.wastePost.imageUrls || selectedConv.wastePost.images || [],
+        pricePerUnit: selectedConv.wastePost.pricePerUnit ?? selectedConv.wastePost.price
+      }
+    : null;
+  const selectedConvId = selectedConv?.id ? Number(selectedConv.id) : null;
 
-  useEffect(() => {
-    if (!selectedConv) return;
-    loadMessages();
-    initializeSocket();
-  }, [selectedConv?.id]);
+  const scrollToBottom = useCallback(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, []);
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+  }, [messages, scrollToBottom]);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-
-  const initializeSocket = () => {
+  const initializeSocket = useCallback(() => {
     try {
-      socketService.emit('conversation:join', parseInt(selectedConv.id));
+      const socket = socketService.connect(token);
+      const activeConversationId = selectedConvId;
 
-      socketService.on('message:received', (data) => {
-        if (data.conversationId === parseInt(selectedConv.id)) {
-          setMessages((prev) => {
-            if (prev.find(m => m.id === data.id)) return prev;
-            return [...prev, data];
-          });
+      if (!socket || !activeConversationId || Number.isNaN(activeConversationId)) {
+        return undefined;
+      }
+
+      socketService.emit('conversation:join', activeConversationId);
+
+      const handleMessageReceived = (data) => {
+        if (data.conversationId !== activeConversationId) {
+          return;
         }
-      });
 
-      socketService.on('user:typing', (data) => {
-        if (data.conversationId === parseInt(selectedConv.id) && data.userId !== user.id) {
+        const incomingSenderId = data.senderId ?? data.sender?.id;
+
+        setMessages((prev) => {
+          const filtered = prev.filter(
+            (message) =>
+              !(
+                message._optimistic &&
+                message.senderId === incomingSenderId &&
+                message.content === data.content &&
+                (message.imageUrl || null) === (data.imageUrl || null)
+              )
+          );
+
+          if (filtered.find((message) => message.id === data.id)) {
+            return filtered;
+          }
+
+          return [...filtered, { ...data, senderId: incomingSenderId }];
+        });
+      };
+
+      const handleUserTyping = (data) => {
+        if (data.conversationId === activeConversationId && data.userId !== user.id) {
           setOtherUserTyping(true);
         }
-      });
+      };
 
-      socketService.on('user:stop-typing', (data) => {
-        if (data.conversationId === parseInt(selectedConv.id)) {
+      const handleUserStopTyping = (data) => {
+        if (data.conversationId === activeConversationId) {
           setOtherUserTyping(false);
         }
-      });
+      };
+
+      socketService.on('message:received', handleMessageReceived);
+      socketService.on('user:typing', handleUserTyping);
+      socketService.on('user:stop-typing', handleUserStopTyping);
+
+      return () => {
+        socketService.emit('conversation:leave', activeConversationId);
+        socketService.off('message:received', handleMessageReceived);
+        socketService.off('user:typing', handleUserTyping);
+        socketService.off('user:stop-typing', handleUserStopTyping);
+      };
     } catch (err) {
       console.error('Socket error:', err);
+      return undefined;
+    }
+  }, [selectedConvId, token, user?.id]);
+
+  const loadMessages = useCallback(async () => {
+    if (!selectedConvId) {
+      setMessages([]);
+      setLoading(false);
+      return;
     }
 
-    return () => {
-      if (selectedConv) {
-        socketService.emit('conversation:leave', parseInt(selectedConv.id));
-      }
-    };
-  };
-
-  const loadMessages = async () => {
     setLoading(true);
     try {
-      const response = await messageService.getConversationMessages(selectedConv.id, 1, 100);
-      setMessages(response.data || []);
+      const response = await messageService.getConversationMessages(selectedConvId, 1, 100);
+      setMessages(Array.isArray(response) ? response : []);
     } catch (err) {
       console.error('Failed to load messages:', err);
       setError('Failed to load messages');
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedConvId]);
+
+  useEffect(() => {
+    if (!selectedConvId || !token) {
+      return undefined;
+    }
+
+    loadMessages();
+    const cleanupSocket = initializeSocket();
+
+    return () => {
+      if (cleanupSocket) {
+        cleanupSocket();
+      }
+    };
+  }, [selectedConvId, token, loadMessages, initializeSocket]);
 
   const handleImageChange = (e) => {
     const file = e.target.files?.[0];
@@ -126,10 +178,8 @@ const FloatingChatWidget = ({
     if (!imageFile) return '';
     setImageUploading(true);
     try {
-      const formData = new FormData();
-      formData.append('image', imageFile);
-      const response = await messageService.uploadMessageImage(formData);
-      return response.data?.imageUrl || '';
+      const response = await messageService.uploadMessageImage(imageFile);
+      return response.url || '';
     } catch (err) {
       setError('Failed to upload image');
       return '';
@@ -184,7 +234,8 @@ const FloatingChatWidget = ({
         },
         content: messageContent,
         imageUrl: imageUrl || null,
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
+        _optimistic: true  // Mark as optimistic for deduplication
       };
 
       setMessages((prev) => [...prev, optimisticMessage]);
@@ -286,7 +337,7 @@ const FloatingChatWidget = ({
           </div>
         ) : (
           messages.map((msg, idx) => (
-            <div key={idx} style={{ display: 'flex', justifyContent: msg.senderId === user.id ? 'flex-end' : 'flex-start' }}>
+            <div key={msg.id || idx} style={{ display: 'flex', justifyContent: msg.senderId === user.id ? 'flex-end' : 'flex-start' }}>
               <div style={{
                 maxWidth: '75%',
                 backgroundColor: msg.senderId === user.id ? C.bright : C.darker,
@@ -466,6 +517,25 @@ const MessagesPage = () => {
   const [isMinimized, setIsMinimized] = useState(false);
   const [minimizedLabel, setMinimizedLabel] = useState('');
 
+  const loadConversations = useCallback(async (ignoreCache = false) => {
+    if (messageService.isCacheValid() && !ignoreCache) {
+      setLoading(false);
+    } else {
+      setLoading(true);
+    }
+    
+    setError('');
+    try {
+      const conversationsArray = await messageService.getConversations(ignoreCache);
+      setConversations(conversationsArray);
+      setUnreadCounts({});
+    } catch (err) {
+      setError(err.message || 'Failed to load conversations.');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   // Handle Page Visibility API
   useEffect(() => {
     const handleVisibilityChange = () => setIsPageVisible(!document.hidden);
@@ -496,51 +566,31 @@ const MessagesPage = () => {
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
-  }, [isPageVisible]);
+  }, [isPageVisible, loadConversations]);
 
   // WebSocket listener
   useEffect(() => {
-    const socket = socketService.getSocket();
-    if (!socket) return;
+    if (!token) {
+      return undefined;
+    }
+
+    const socket = socketService.connect(token);
+
+    if (!socket) {
+      return undefined;
+    }
 
     const handleConversationUpdate = () => {
       messageService.clearConversationsCache();
-      loadConversations();
+      loadConversations(true);
     };
 
     socketService.onConversationUpdate(handleConversationUpdate);
+
     return () => {
-      socketService.off('conversation:updated');
+      socketService.off('conversation:updated', handleConversationUpdate);
     };
-  }, []);
-
-  const loadConversations = async (ignoreCache = false) => {
-    if (messageService.isCacheValid() && !ignoreCache) {
-      setLoading(false);
-    } else {
-      setLoading(true);
-    }
-    
-    setError('');
-    try {
-      const response = await messageService.getConversations(ignoreCache);
-      const conversationsArray = Array.isArray(response.data) ? response.data : [];
-      setConversations(conversationsArray);
-
-      const counts = {};
-      for (const conv of conversationsArray) {
-        try {
-          const countResponse = await messageService.getUnreadCount();
-          counts[conv.id] = countResponse.data?.unreadCount || 0;
-        } catch (err) {}
-      }
-      setUnreadCounts(counts);
-    } catch (err) {
-      setError(err.message || 'Failed to load conversations.');
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [token, loadConversations]);
 
   const handleOpenChat = (conversationId, businessName) => {
     setSelectedConversationId(conversationId);

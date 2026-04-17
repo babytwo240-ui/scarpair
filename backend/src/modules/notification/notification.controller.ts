@@ -55,6 +55,34 @@ export const markAsRead = async (req: Request, res: Response): Promise<any> => {
   }
 };
 
+export const markAllAsRead = async (req: Request, res: Response): Promise<any> => {
+  try {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+
+    const Notification = (sequelize as any).models.Notification;
+
+    await Notification.update(
+      { read: true },
+      {
+        where: {
+          userId,
+          read: false
+        }
+      }
+    );
+
+    res.status(200).json({
+      message: 'All notifications marked as read'
+    });
+  } catch (error: any) {
+    res.status(500).json({ error: 'Failed to mark notifications as read' });
+  }
+};
+
 export const getUnreadCount = async (req: Request, res: Response): Promise<any> => {
   try {
     const userId = req.user?.id;
@@ -92,5 +120,27 @@ export const deleteNotification = async (req: Request, res: Response): Promise<a
     });
   } catch (error: any) {
     res.status(500).json({ error: 'Failed to delete notification' });
+  }
+};
+
+export const deleteAllNotifications = async (req: Request, res: Response): Promise<any> => {
+  try {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+
+    const Notification = (sequelize as any).models.Notification;
+
+    await Notification.destroy({
+      where: { userId }
+    });
+
+    res.status(200).json({
+      message: 'All notifications deleted successfully'
+    });
+  } catch (error: any) {
+    res.status(500).json({ error: 'Failed to delete notifications' });
   }
 };

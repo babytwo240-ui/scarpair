@@ -10,53 +10,122 @@ interface CustomSocket extends Socket {
   userName?: string;
 }
 
+let globalIo: SocketIOServer | null = null;
+
+const emitSocketError = (socket: CustomSocket, message: string) => {
+  socket.emit('socket:error', { message });
+};
+
+const getDisplayName = (user: any) =>
+  user?.businessName || user?.companyName || user?.email || 'User';
+
+const buildMessagePayload = (message: any, sender: any) => ({
+  id: message.id,
+  conversationId: message.conversationId,
+  senderId: message.senderId,
+  recipientId: message.recipientId,
+  sender: sender
+    ? {
+        id: sender.id,
+        email: sender.email,
+        businessName: sender.businessName,
+        companyName: sender.companyName,
+        type: sender.type,
+        name: getDisplayName(sender)
+      }
+    : undefined,
+  content: message.content,
+  imageUrl: message.imageUrl,
+  createdAt: message.createdAt,
+  updatedAt: message.updatedAt
+});
+
+const getMessagePreview = (content: string, imageUrl?: string | null) => {
+  if (content) {
+    return content.substring(0, 100);
+  }
+
+  if (imageUrl) {
+    return 'Sent an image';
+  }
+
+  return 'New message';
+};
+
+const emitConversationUpdate = (io: SocketIOServer, conversation: any, lastMessage: string | null) => {
+  const payload = {
+    conversationId: conversation.id,
+    lastMessageAt: conversation.lastMessageAt,
+    lastMessage
+  };
+
+  io.to(`user:${conversation.participant1Id}`).emit('conversation:updated', payload);
+  io.to(`user:${conversation.participant2Id}`).emit('conversation:updated', payload);
+  io.to(`conversation:${conversation.id}`).emit('conversation:updated', payload);
+};
+
+export function getSocketIO(): SocketIOServer | null {
+  return globalIo;
+}
+
 export function initializeSocket(io: SocketIOServer) {
-  // Middleware to authenticate socket connections
-  // Important: In polling mode, token may not be available immediately
-  // so we allow connection without token and authenticate on first event
+  globalIo = io;
+
   io.use(async (socket: CustomSocket, next) => {
     try {
       const token = socket.handshake.auth?.token;
-      
-      // If no token provided, allow connection
-      // Authentication will happen on first real event (conversation:join, etc)
-      // This is necessary for polling mode on Render
+
       if (!token) {
-        // Mark as unauthenticated but allow connection
         socket.userId = undefined;
         next();
         return;
       }
 
       const decoded = verifyUserToken(token);
+
       if (!decoded) {
         return next(new Error('Invalid or expired token'));
       }
 
       socket.userId = decoded.id;
       socket.userType = decoded.type;
-      socket.userName = decoded.businessName || decoded.email;
+      socket.userName = decoded.businessName || decoded.companyName || decoded.email;
 
       next();
     } catch (error: any) {
-      // Allow connection to proceed, real auth happens per-event
       next();
     }
   });
 
   io.on('connection', async (socket: CustomSocket) => {
-    // Require authentication for actual operations
-    const requireAuth = (cb?: Function) => {
+    const requireAuth = () => {
       if (!socket.userId) {
-        socket.emit('error', 'Not authenticated. Please login first.');
-        if (cb) cb(false);
+        emitSocketError(socket, 'Not authenticated. Please login first.');
         return false;
       }
-      if (cb) cb(true);
+
       return true;
     };
 
-    // Only setup online presence if authenticated
+    const getAuthorizedConversation = async (conversationId: number) => {
+      const conversation = await Conversation.findByPk(conversationId);
+
+      if (!conversation) {
+        emitSocketError(socket, 'Conversation not found');
+        return null;
+      }
+
+      const isParticipant =
+        conversation.participant1Id === socket.userId || conversation.participant2Id === socket.userId;
+
+      if (!isParticipant) {
+        emitSocketError(socket, 'Not authorized to access conversation');
+        return null;
+      }
+
+      return conversation;
+    };
+
     if (socket.userId) {
       try {
         await redisClient.hset(`user:${socket.userId}:sockets`, socket.id, new Date().toISOString());
@@ -68,15 +137,16 @@ export function initializeSocket(io: SocketIOServer) {
 
       try {
         io.emit('user:online', {
-          userId: socket.userId!,
+          userId: socket.userId,
           timestamp: new Date()
         });
       } catch (broadcastError) {
       }
+
       try {
         await redisClient.setex(
           `user:online:${socket.userId}`,
-          300, 
+          300,
           JSON.stringify({
             socketId: socket.id,
             lastSeen: new Date().getTime()
@@ -86,38 +156,56 @@ export function initializeSocket(io: SocketIOServer) {
       }
     }
 
-    socket.on('error', (error: any) => {
-    });
-
     socket.on('conversation:join', async (conversationId: number) => {
       try {
-        const conversation = await Conversation.findByPk(conversationId);
+        if (!requireAuth()) {
+          return;
+        }
+
+        const normalizedConversationId = Number(conversationId);
+
+        if (Number.isNaN(normalizedConversationId)) {
+          emitSocketError(socket, 'Conversation not found');
+          return;
+        }
+
+        const conversation = await getAuthorizedConversation(normalizedConversationId);
+
         if (!conversation) {
-          socket.emit('error', 'Conversation not found');
           return;
         }
 
-        const isParticipant =
-          conversation.participant1Id === socket.userId ||
-          conversation.participant2Id === socket.userId;
-
-        if (!isParticipant) {
-          socket.emit('error', 'Not authorized to join conversation');
-          return;
-        }
-
-        socket.join(`conversation:${conversationId}`);
-
-        io.to(`conversation:${conversationId}`).emit('user:joined', {
-          userId: socket.userId,
-          conversationId
-        });
+        socket.join(`conversation:${normalizedConversationId}`);
       } catch (error) {
-        socket.emit('error', 'Failed to join conversation');
+        emitSocketError(socket, 'Failed to join conversation');
       }
     });
+
+    socket.on('conversation:leave', (conversationId: number) => {
+      if (!requireAuth()) {
+        return;
+      }
+
+      const normalizedConversationId = Number(conversationId);
+
+      if (!Number.isNaN(normalizedConversationId)) {
+        socket.leave(`conversation:${normalizedConversationId}`);
+      }
+    });
+
     socket.on('message:typing', async (conversationId: number) => {
       try {
+        if (!requireAuth()) {
+          return;
+        }
+
+        const normalizedConversationId = Number(conversationId);
+        const conversation = await getAuthorizedConversation(normalizedConversationId);
+
+        if (!conversation) {
+          return;
+        }
+
         const allowed = await RateLimiter.checkLimit(
           socket.userId!.toString(),
           socket.handshake.address || 'unknown',
@@ -125,30 +213,42 @@ export function initializeSocket(io: SocketIOServer) {
         );
 
         if (!allowed) {
-          socket.emit('error', 'Typing rate limit exceeded');
+          emitSocketError(socket, 'Typing rate limit exceeded');
           return;
         }
 
-        const typingKey = `typing:${conversationId}`;
+        const typingKey = `typing:${normalizedConversationId}`;
         await redisClient.hset(typingKey, socket.userId!.toString(), Date.now().toString());
         await redisClient.expire(typingKey, 3);
 
-        socket.to(`conversation:${conversationId}`).emit('user:typing', {
+        socket.to(`conversation:${normalizedConversationId}`).emit('user:typing', {
           userId: socket.userId,
           userName: socket.userName,
-          conversationId
+          conversationId: normalizedConversationId
         });
       } catch (error) {
       }
     });
+
     socket.on('message:stop-typing', async (conversationId: number) => {
       try {
-        const typingKey = `typing:${conversationId}`;
+        if (!requireAuth()) {
+          return;
+        }
+
+        const normalizedConversationId = Number(conversationId);
+        const conversation = await getAuthorizedConversation(normalizedConversationId);
+
+        if (!conversation) {
+          return;
+        }
+
+        const typingKey = `typing:${normalizedConversationId}`;
         await redisClient.hdel(typingKey, socket.userId!.toString());
 
-        socket.to(`conversation:${conversationId}`).emit('user:stop-typing', {
+        socket.to(`conversation:${normalizedConversationId}`).emit('user:stop-typing', {
           userId: socket.userId,
-          conversationId
+          conversationId: normalizedConversationId
         });
       } catch (error) {
       }
@@ -156,15 +256,36 @@ export function initializeSocket(io: SocketIOServer) {
 
     socket.on('message:send', async (data: any) => {
       try {
-        const { conversationId, recipientId, content, imageUrl } = data;
+        if (!requireAuth()) {
+          return;
+        }
 
-        if (!conversationId || !content) {
-          socket.emit('error', 'Missing required fields');
+        const conversationId = Number(data?.conversationId);
+        const requestedRecipientId = data?.recipientId ? Number(data.recipientId) : null;
+        const content = typeof data?.content === 'string' ? data.content.trim() : '';
+        const imageUrl = data?.imageUrl || null;
+
+        if (!conversationId || (!content && !imageUrl)) {
+          emitSocketError(socket, 'Missing required fields');
           return;
         }
 
         if (content.length > 5000) {
-          socket.emit('error', 'Message exceeds maximum length');
+          emitSocketError(socket, 'Message exceeds maximum length');
+          return;
+        }
+
+        const conversation = await getAuthorizedConversation(conversationId);
+
+        if (!conversation) {
+          return;
+        }
+
+        const recipientId =
+          conversation.participant1Id === socket.userId ? conversation.participant2Id : conversation.participant1Id;
+
+        if (requestedRecipientId && requestedRecipientId !== recipientId) {
+          emitSocketError(socket, 'Recipient does not match this conversation');
           return;
         }
 
@@ -175,67 +296,71 @@ export function initializeSocket(io: SocketIOServer) {
         );
 
         if (!allowed) {
-          socket.emit('error', 'Message rate limit exceeded');
+          emitSocketError(socket, 'Message rate limit exceeded');
           return;
         }
+
+        const sender = await User.findByPk(socket.userId!, {
+          attributes: ['id', 'email', 'businessName', 'companyName', 'type']
+        });
+        const senderName = getDisplayName(sender);
 
         const message = await Message.create({
           conversationId,
           senderId: socket.userId!,
           recipientId,
           content,
-          imageUrl: imageUrl || null
+          imageUrl
         });
 
-        await Conversation.update(
-          { lastMessageAt: new Date() },
-          { where: { id: conversationId } }
-        );
+        await conversation.update({ lastMessageAt: message.createdAt });
 
         const cacheKey = `conversation:${conversationId}:messages`;
         await redisClient.zadd(cacheKey, Date.now(), JSON.stringify(message.toJSON()));
         await redisClient.expire(cacheKey, 24 * 60 * 60);
 
+        const preview = getMessagePreview(content, imageUrl);
+
         await Notification.create({
           userId: recipientId,
           type: 'MESSAGE',
-          title: `Message from ${socket.userName}`,
-          message: content.substring(0, 100),
-          relatedId: message.id
+          title: `Message from ${senderName}`,
+          message: preview,
+          relatedId: message.id,
+          read: false
         });
 
-        io.to(`conversation:${conversationId}`).emit('message:received', {
-          id: message.id,
-          conversationId,
-          sender: {
-            id: socket.userId!,
-            name: socket.userName
-          },
-          content,
-          imageUrl: imageUrl || null,
-          createdAt: message.createdAt
-        });
+        const payload = buildMessagePayload(message, sender);
+
+        io.to(`conversation:${conversationId}`).emit('message:received', payload);
+        emitConversationUpdate(io, conversation, preview);
 
         io.to(`user:${recipientId}`).emit('notification:new', {
           type: 'MESSAGE',
-          title: `Message from ${socket.userName}`,
-          message: content.substring(0, 100),
-          relatedId: message.id
+          title: `Message from ${senderName}`,
+          message: preview,
+          relatedId: message.id,
+          conversationId
         });
 
         await redisClient.hdel(`typing:${conversationId}`, socket.userId!.toString());
 
-        socket.emit('message:sent', { id: message.id });
+        socket.emit('message:sent', { id: message.id, conversationId });
       } catch (error) {
-        socket.emit('error', 'Failed to send message');
+        emitSocketError(socket, 'Failed to send message');
       }
     });
 
-    socket.on('disconnect', async (reason) => {
+    socket.on('disconnect', async () => {
       try {
+        if (!socket.userId) {
+          return;
+        }
+
         await redisClient.hdel(`user:${socket.userId}:sockets`, socket.id);
 
         const remainingSockets = await redisClient.hlen(`user:${socket.userId}:sockets`);
+
         if (remainingSockets === 0) {
           await redisClient.del(`user:online:${socket.userId}`);
           io.emit('user:offline', {
@@ -244,7 +369,6 @@ export function initializeSocket(io: SocketIOServer) {
           });
         }
       } catch (error) {
-        // Error handling
       }
     });
   });
