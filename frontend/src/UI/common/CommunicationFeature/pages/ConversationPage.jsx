@@ -170,8 +170,9 @@ const ConversationPage = () => {
       const response = await messageService.uploadMessageImage(imageFile);
       return response.url || '';
     } catch (err) {
-      setError('Failed to upload image');
-      return '';
+      const message = err.message || err.data?.error || 'Failed to upload image';
+      setError(message);
+      throw err;
     } finally {
       setImageUploading(false);
     }
@@ -209,6 +210,9 @@ const ConversationPage = () => {
       let imageUrl = '';
       if (imageFile) {
         imageUrl = await uploadMessageImage();
+        if (!imageUrl) {
+          throw new Error('Image upload did not return a valid URL');
+        }
       }
 
       const otherParticipant =

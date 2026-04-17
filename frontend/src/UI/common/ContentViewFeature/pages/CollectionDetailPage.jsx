@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import React, { useCallback, useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../../../../shared/context/AuthContext';
 import collectionService from '../../../../services/collectionService';
 import messageService from '../../../../services/messageService';
@@ -7,20 +7,52 @@ import FeedbackForm from '../../../../components/FeedbackForm';
 import RatingDisplay from '../../../../components/RatingDisplay';
 import { formatManila, formatManilaInput } from '../../../../utils/manilaTimeFormatter';
 
-// Helper function to display datetime in Manila timezone (for server timestamps)
-const formatLocalDateTime = (isoString) => {
-  return formatManila(isoString);
+const formatTimestamp = (value) => {
+  if (!value) {
+    return 'Not set';
+  }
+
+  return formatManila(value);
 };
 
-// Helper function to display user-input datetime (scheduledDate, etc)
-const formatScheduledDateTime = (isoString) => {
-  return formatManilaInput(isoString);
+const formatScheduled = (value) => {
+  if (!value) {
+    return 'Not set';
+  }
+
+  return formatManilaInput(value);
+};
+
+const getStatusColors = (status) => {
+  switch (status) {
+    case 'pending':
+      return { background: '#fff3cd', color: '#856404' };
+    case 'approved':
+      return { background: '#d1ecf1', color: '#0c5460' };
+    case 'scheduled':
+      return { background: '#cfe2ff', color: '#084298' };
+    case 'completed':
+    case 'confirmed':
+      return { background: '#d4edda', color: '#155724' };
+    case 'cancelled':
+    case 'rejected':
+      return { background: '#f8d7da', color: '#721c24' };
+    default:
+      return { background: '#f5f5f5', color: '#333' };
+  }
+};
+
+const sectionStyle = {
+  backgroundColor: '#f5f5f5',
+  padding: '15px',
+  borderRadius: '4px',
+  marginBottom: '20px',
 };
 
 const CollectionDetailPage = () => {
   const { collectionId } = useParams();
-  const { user } = useAuth();
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   const [collection, setCollection] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -28,36 +60,34 @@ const CollectionDetailPage = () => {
   const [success, setSuccess] = useState('');
   const [actionLoading, setActionLoading] = useState(false);
 
-  useEffect(() => {
-    loadCollectionDetails();
-  }, [collectionId]);
-
-  const loadCollectionDetails = async () => {
+  const loadCollectionDetails = useCallback(async () => {
     try {
       setLoading(true);
       setError('');
-      const response = await collectionService.getCollectionDetails(collectionId);
-      const collectionData = response.data || response;
-      setCollection(collectionData);
+      const data = await collectionService.getCollectionDetails(collectionId);
+      setCollection(data);
     } catch (err) {
       setError(err.message || 'Failed to load collection details.');
     } finally {
       setLoading(false);
     }
-  };
+  }, [collectionId]);
+
+  useEffect(() => {
+    loadCollectionDetails();
+  }, [loadCollectionDetails]);
 
   const handleApprove = async () => {
-    if (!window.confirm('Are you sure you want to approve this collection request?')) {
+    if (!window.confirm('Approve this collection request?')) {
       return;
     }
 
     try {
       setActionLoading(true);
+      setError('');
       await collectionService.approveCollection(collectionId);
-      setSuccess('✅ Collection approved!');
-      setTimeout(() => {
-        loadCollectionDetails();
-      }, 1000);
+      setSuccess('Collection approved.');
+      await loadCollectionDetails();
     } catch (err) {
       setError(err.message || 'Failed to approve collection.');
     } finally {
@@ -69,37 +99,35 @@ const CollectionDetailPage = () => {
     navigate(`/collection/schedule/${collectionId}`);
   };
 
-  const handleConfirm = async () => {
-    if (!window.confirm('Confirm that the collection has been completed?')) {
+  const handleConfirmPickup = async () => {
+    if (!window.confirm('Confirm that pickup has happened?')) {
       return;
     }
 
     try {
       setActionLoading(true);
+      setError('');
       await collectionService.confirmCollection(collectionId);
-      setSuccess('✅ Collection confirmed!');
-      setTimeout(() => {
-        loadCollectionDetails();
-      }, 1000);
+      setSuccess('Pickup confirmed.');
+      await loadCollectionDetails();
     } catch (err) {
-      setError(err.message || 'Failed to confirm collection.');
+      setError(err.message || 'Failed to confirm pickup.');
     } finally {
       setActionLoading(false);
     }
   };
 
   const handleAcceptMaterials = async () => {
-    if (!window.confirm('Accept materials? This will complete the collection.')) {
+    if (!window.confirm('Accept materials for this collection?')) {
       return;
     }
 
     try {
       setActionLoading(true);
+      setError('');
       await collectionService.acceptMaterials(collectionId);
-      setSuccess('✅ Materials accepted! Collection completed.');
-      setTimeout(() => {
-        loadCollectionDetails();
-      }, 1000);
+      setSuccess('Materials accepted.');
+      await loadCollectionDetails();
     } catch (err) {
       setError(err.message || 'Failed to accept materials.');
     } finally {
@@ -109,25 +137,26 @@ const CollectionDetailPage = () => {
 
   const handleMessage = async () => {
     try {
-      if (!collection.post || !collection.business || !collection.recycler) {
-        setError('Cannot start conversation: missing information');
+      if (!user || !collection?.post?.id || !collection.business || !collection.recycler) {
+        setError('Cannot start conversation because collection details are incomplete.');
         return;
       }
 
       const otherUserId = user.type === 'business' ? collection.recycler.id : collection.business.id;
-      const response = await messageService.startConversation(otherUserId, collection.post.id);
-      const conversationId = response.data?.id || response.id;
+      const conversation = await messageService.startConversation(otherUserId, collection.post.id);
 
-      if (conversationId) {
-        navigate(`/messages/${conversationId}`);
+      if (!conversation?.id) {
+        throw new Error('Conversation could not be created.');
       }
+
+      navigate(`/messages/${conversation.id}`);
     } catch (err) {
       setError(err.message || 'Failed to open conversation.');
     }
   };
 
   const handleCancel = async () => {
-    if (!window.confirm('Are you sure you want to cancel this collection?')) {
+    if (!window.confirm('Cancel this collection?')) {
       return;
     }
 
@@ -135,48 +164,12 @@ const CollectionDetailPage = () => {
       setActionLoading(true);
       setError('');
       await collectionService.cancelCollection(collectionId);
-      setSuccess('✅ Collection cancelled successfully.');
-      setTimeout(() => {
-        loadCollectionDetails();
-      }, 1000);
+      setSuccess('Collection cancelled successfully.');
+      await loadCollectionDetails();
     } catch (err) {
       setError(err.message || 'Failed to cancel collection.');
     } finally {
       setActionLoading(false);
-    }
-  };
-
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'pending':
-        return '#fff3cd';
-      case 'approved':
-        return '#d1ecf1';
-      case 'scheduled':
-        return '#cfe2ff';
-      case 'completed':
-        return '#d4edda';
-      case 'confirmed':
-        return '#90EE90';
-      default:
-        return '#f5f5f5';
-    }
-  };
-
-  const getStatusTextColor = (status) => {
-    switch (status) {
-      case 'pending':
-        return '#856404';
-      case 'approved':
-        return '#0c5460';
-      case 'scheduled':
-        return '#084298';
-      case 'completed':
-        return '#155724';
-      case 'confirmed':
-        return '#155724';
-      default:
-        return '#333';
     }
   };
 
@@ -206,10 +199,14 @@ const CollectionDetailPage = () => {
     );
   }
 
+  const statusColors = getStatusColors(collection.status);
+  const recyclerCanCancel = ['pending', 'approved', 'scheduled'].includes(collection.status);
+  const businessCanCancel = ['approved', 'scheduled'].includes(collection.status);
+  const cancellationLocked = (collection.cancellationCount || 0) >= 3;
+
   return (
     <div style={{ padding: '20px', maxWidth: '900px', margin: '0 auto' }}>
-      {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', gap: '12px' }}>
         <button
           onClick={() => navigate(-1)}
           style={{
@@ -221,10 +218,10 @@ const CollectionDetailPage = () => {
             cursor: 'pointer',
           }}
         >
-          ← Back
+          Back
         </button>
-        <h1 style={{ margin: 0 }}>Collection #{collection.id}</h1>
-        <div></div>
+        <h1 style={{ margin: 0, textAlign: 'center', flex: 1 }}>Collection #{collection.id}</h1>
+        <div style={{ width: 72 }} />
       </div>
 
       {error && (
@@ -234,19 +231,17 @@ const CollectionDetailPage = () => {
       )}
 
       {success && (
-        <div style={{ backgroundColor: '#efe', padding: '15px', borderRadius: '4px', color: '#3c3', marginBottom: '20px' }}>
+        <div style={{ backgroundColor: '#efe', padding: '15px', borderRadius: '4px', color: '#2f7d32', marginBottom: '20px' }}>
           {success}
         </div>
       )}
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '30px' }}>
-        {/* Left: Main Information */}
         <div>
-          {/* Status */}
           <div
             style={{
-              backgroundColor: getStatusColor(collection.status),
-              color: getStatusTextColor(collection.status),
+              backgroundColor: statusColors.background,
+              color: statusColors.color,
               padding: '15px',
               borderRadius: '4px',
               marginBottom: '20px',
@@ -259,110 +254,65 @@ const CollectionDetailPage = () => {
             Status: {collection.status}
           </div>
 
-          {/* Material Details */}
           {collection.post && (
-            <div style={{ backgroundColor: '#f5f5f5', padding: '15px', borderRadius: '4px', marginBottom: '20px' }}>
-              <h3 style={{ margin: '0 0 15px 0' }}>📦 Material Details</h3>
-              <p style={{ margin: '8px 0' }}>
-                <strong>Title:</strong> {collection.post.title}
-              </p>
-              <p style={{ margin: '8px 0' }}>
-                <strong>Type:</strong> {collection.post.wasteType}
-              </p>
-              <p style={{ margin: '8px 0' }}>
-                <strong>Quantity:</strong> {collection.post.quantity} {collection.post.unit}
-              </p>
-              <p style={{ margin: '8px 0' }}>
-                <strong>Condition:</strong> {collection.post.condition}
-              </p>
+            <div style={sectionStyle}>
+              <h3 style={{ margin: '0 0 15px 0' }}>Material Details</h3>
+              <p style={{ margin: '8px 0' }}><strong>Title:</strong> {collection.post.title || collection.title || 'N/A'}</p>
+              <p style={{ margin: '8px 0' }}><strong>Type:</strong> {collection.post.wasteType || collection.wasteType || 'N/A'}</p>
+              <p style={{ margin: '8px 0' }}><strong>Quantity:</strong> {collection.post.quantity || collection.quantity || 'N/A'} {collection.post.unit || collection.unit || ''}</p>
+              <p style={{ margin: '8px 0' }}><strong>Condition:</strong> {collection.post.condition || collection.condition || 'N/A'}</p>
+              <p style={{ margin: '8px 0' }}><strong>Location:</strong> {collection.post.address || collection.address || collection.post.city || collection.city || 'N/A'}</p>
+              {collection.post.description || collection.description ? (
+                <p style={{ margin: '8px 0' }}><strong>Description:</strong> {collection.post.description || collection.description}</p>
+              ) : null}
             </div>
           )}
 
-          {/* Timeline */}
-          <div style={{ backgroundColor: '#f5f5f5', padding: '15px', borderRadius: '4px', marginBottom: '20px' }}>
-            <h3 style={{ margin: '0 0 15px 0' }}>📅 Timeline</h3>
-            <p style={{ margin: '8px 0', fontSize: '14px' }}>
-              <strong>Requested:</strong> {formatLocalDateTime(collection.requestDate)}
-            </p>
-            {collection.scheduledDate && (
-              <p style={{ margin: '8px 0', fontSize: '14px', color: '#28a745', fontWeight: 'bold' }}>
-                ⏰ <strong>Proposed Pickup:</strong> {formatScheduledDateTime(collection.scheduledDate)}
-              </p>
-            )}
-            {collection.completeDate && (
-              <p style={{ margin: '8px 0', fontSize: '14px' }}>
-                <strong>Confirmed:</strong> {formatLocalDateTime(collection.completeDate)}
-              </p>
-            )}
-            {collection.createdAt && (
-              <p style={{ margin: '8px 0', fontSize: '12px', color: '#666' }}>
-                <strong>Created:</strong> {formatLocalDateTime(collection.createdAt)}
-              </p>
-            )}
+          <div style={sectionStyle}>
+            <h3 style={{ margin: '0 0 15px 0' }}>Timeline</h3>
+            <p style={{ margin: '8px 0', fontSize: '14px' }}><strong>Requested:</strong> {formatTimestamp(collection.requestDate || collection.createdAt)}</p>
+            <p style={{ margin: '8px 0', fontSize: '14px' }}><strong>Scheduled:</strong> {formatScheduled(collection.scheduledDate)}</p>
+            <p style={{ margin: '8px 0', fontSize: '14px' }}><strong>Completed:</strong> {formatTimestamp(collection.completedAt)}</p>
+            <p style={{ margin: '8px 0', fontSize: '14px' }}><strong>Pickup Deadline:</strong> {formatTimestamp(collection.pickupDeadline)}</p>
           </div>
         </div>
 
-        {/* Right: Party Information */}
         <div>
-          {/* Recycler Info */}
           {collection.recycler && (
-            <div style={{ backgroundColor: '#e3f2fd', padding: '15px', borderRadius: '4px', marginBottom: '20px', border: '1px solid #90caf9' }}>
-              <h3 style={{ margin: '0 0 15px 0' }}>♻️ Recycler Information</h3>
-              <p style={{ margin: '8px 0' }}>
-                <strong>Name:</strong> {collection.recycler.companyName || collection.recycler.businessName}
-              </p>
-              <p style={{ margin: '8px 0' }}>
-                <strong>Email:</strong> {collection.recycler.email}
-              </p>
-              {collection.recycler.phone && (
-                <p style={{ margin: '8px 0' }}>
-                  <strong>Phone:</strong> {collection.recycler.phone}
-                </p>
-              )}
+            <div style={{ ...sectionStyle, backgroundColor: '#e3f2fd', border: '1px solid #90caf9' }}>
+              <h3 style={{ margin: '0 0 15px 0' }}>Recycler Information</h3>
+              <p style={{ margin: '8px 0' }}><strong>Name:</strong> {collection.recycler.companyName || collection.recycler.businessName || 'N/A'}</p>
+              <p style={{ margin: '8px 0' }}><strong>Email:</strong> {collection.recycler.email || 'N/A'}</p>
+              {collection.recycler.phone ? <p style={{ margin: '8px 0' }}><strong>Phone:</strong> {collection.recycler.phone}</p> : null}
             </div>
           )}
 
-          {/* Business Info */}
           {collection.business && (
-            <div style={{ backgroundColor: '#f0f8ff', padding: '15px', borderRadius: '4px', marginBottom: '20px', border: '1px solid #add8e6' }}>
-              <h3 style={{ margin: '0 0 15px 0' }}>🏢 Business Information</h3>
-              <p style={{ margin: '8px 0' }}>
-                <strong>Name:</strong> {collection.business.businessName || collection.business.companyName}
-              </p>
-              <p style={{ margin: '8px 0' }}>
-                <strong>Email:</strong> {collection.business.email}
-              </p>
-              {collection.business.phone && (
-                <p style={{ margin: '8px 0' }}>
-                  <strong>Phone:</strong> {collection.business.phone}
-                </p>
-              )}
+            <div style={{ ...sectionStyle, backgroundColor: '#f0f8ff', border: '1px solid #add8e6' }}>
+              <h3 style={{ margin: '0 0 15px 0' }}>Business Information</h3>
+              <p style={{ margin: '8px 0' }}><strong>Name:</strong> {collection.business.businessName || collection.business.companyName || 'N/A'}</p>
+              <p style={{ margin: '8px 0' }}><strong>Email:</strong> {collection.business.email || 'N/A'}</p>
+              {collection.business.phone ? <p style={{ margin: '8px 0' }}><strong>Phone:</strong> {collection.business.phone}</p> : null}
             </div>
           )}
 
-          {/* Collection Deadline */}
-          {collection.pickupDeadline && (
-            <div style={{ backgroundColor: '#fff3cd', padding: '15px', borderRadius: '4px', marginBottom: '20px', border: '1px solid #ffc107' }}>
-              <h3 style={{ margin: '0 0 10px 0', color: '#856404' }}>⏱️ Pickup Deadline</h3>
-              <p style={{ margin: 0, fontSize: '16px', fontWeight: 'bold', color: '#856404' }}>
-                {formatLocalDateTime(collection.pickupDeadline)}
-              </p>
+          {collection.cancellationReason && (
+            <div style={{ backgroundColor: '#fff0f0', padding: '15px', borderRadius: '4px', marginBottom: '20px', border: '1px solid #f5c6cb' }}>
+              <h3 style={{ margin: '0 0 10px 0', color: '#721c24' }}>Cancellation Reason</h3>
+              <p style={{ margin: 0, color: '#721c24' }}>{String(collection.cancellationReason).replace(/_/g, ' ')}</p>
+            </div>
+          )}
+
+          {collection.transactionCode && (
+            <div style={sectionStyle}>
+              <h3 style={{ margin: '0 0 10px 0' }}>Transaction</h3>
+              <p style={{ margin: 0 }}><strong>Code:</strong> {collection.transactionCode}</p>
             </div>
           )}
         </div>
       </div>
 
-      {/* Notes Section */}
-      {collection.notes && (
-        <div style={{ backgroundColor: '#f9f9f9', padding: '15px', borderRadius: '4px', marginBottom: '30px' }}>
-          <h3>📝 Notes</h3>
-          <p style={{ color: '#333' }}>{collection.notes}</p>
-        </div>
-      )}
-
-      {/* Action Buttons */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '10px', marginBottom: '30px' }}>
-        {/* Message Button - Always Available */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '10px', marginBottom: '30px' }}>
         <button
           onClick={handleMessage}
           disabled={actionLoading}
@@ -377,51 +327,50 @@ const CollectionDetailPage = () => {
             opacity: actionLoading ? 0.7 : 1,
           }}
         >
-          💬 Message
+          Message
         </button>
 
-        {/* Business Actions */}
-        {user.type === 'business' && collection.status === 'pending' && (
-          <>
-            <button
-              onClick={handleApprove}
-              disabled={actionLoading}
-              style={{
-                padding: '12px',
-                backgroundColor: '#28a745',
-                color: 'white',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: actionLoading ? 'not-allowed' : 'pointer',
-                fontWeight: 'bold',
-                opacity: actionLoading ? 0.7 : 1,
-              }}
-            >
-              ✅ Approve
-            </button>
-            <button
-              onClick={handleSchedule}
-              disabled={actionLoading}
-              style={{
-                padding: '12px',
-                backgroundColor: '#007bff',
-                color: 'white',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: actionLoading ? 'not-allowed' : 'pointer',
-                fontWeight: 'bold',
-                opacity: actionLoading ? 0.7 : 1,
-              }}
-            >
-              📅 Schedule
-            </button>
-          </>
+        {user?.type === 'business' && collection.status === 'pending' && (
+          <button
+            onClick={handleApprove}
+            disabled={actionLoading}
+            style={{
+              padding: '12px',
+              backgroundColor: '#28a745',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: actionLoading ? 'not-allowed' : 'pointer',
+              fontWeight: 'bold',
+              opacity: actionLoading ? 0.7 : 1,
+            }}
+          >
+            Approve
+          </button>
         )}
 
-        {/* Scheduled Status - Confirm Button */}
-        {collection.status === 'scheduled' && (
+        {user?.type === 'business' && collection.status === 'approved' && (
           <button
-            onClick={handleConfirm}
+            onClick={handleSchedule}
+            disabled={actionLoading}
+            style={{
+              padding: '12px',
+              backgroundColor: '#007bff',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: actionLoading ? 'not-allowed' : 'pointer',
+              fontWeight: 'bold',
+              opacity: actionLoading ? 0.7 : 1,
+            }}
+          >
+            Schedule
+          </button>
+        )}
+
+        {user?.type === 'recycler' && ['approved', 'scheduled'].includes(collection.status) && (
+          <button
+            onClick={handleConfirmPickup}
             disabled={actionLoading}
             style={{
               padding: '12px',
@@ -434,12 +383,11 @@ const CollectionDetailPage = () => {
               opacity: actionLoading ? 0.7 : 1,
             }}
           >
-            ✓ Confirm Completion
+            Confirm Pickup
           </button>
         )}
 
-        {/* Completed Status - Accept Materials (Recycler Only) */}
-        {collection.status === 'completed' && user.type === 'recycler' && (
+        {user?.type === 'recycler' && collection.status === 'completed' && (
           <button
             onClick={handleAcceptMaterials}
             disabled={actionLoading}
@@ -454,43 +402,59 @@ const CollectionDetailPage = () => {
               opacity: actionLoading ? 0.7 : 1,
             }}
           >
-            🎯 Accept Materials
+            Accept Materials
           </button>
         )}
 
-        {/* Cancel Button - Recycler can cancel pending/approved/scheduled collections */}
-        {user.type === 'recycler' && (collection.status === 'pending' || collection.status === 'approved' || collection.status === 'scheduled') && (
+        {user?.type === 'recycler' && recyclerCanCancel && (
           <button
             onClick={handleCancel}
-            disabled={actionLoading || (collection.cancellationCount >= 3)}
-            title={collection.cancellationCount >= 3 ? 'You have used your 3 allowed cancellations for this post.' : ''}
+            disabled={actionLoading || cancellationLocked}
+            title={cancellationLocked ? 'You have used your 3 allowed cancellations for this post.' : ''}
             style={{
               padding: '12px',
-              backgroundColor: collection.cancellationCount >= 3 ? '#ccc' : '#dc3545',
-              color: collection.cancellationCount >= 3 ? '#999' : 'white',
+              backgroundColor: cancellationLocked ? '#ccc' : '#dc3545',
+              color: cancellationLocked ? '#999' : 'white',
               border: 'none',
               borderRadius: '4px',
-              cursor: (actionLoading || collection.cancellationCount >= 3) ? 'not-allowed' : 'pointer',
+              cursor: (actionLoading || cancellationLocked) ? 'not-allowed' : 'pointer',
               fontWeight: 'bold',
               opacity: actionLoading ? 0.7 : 1,
             }}
           >
-            {collection.cancellationCount >= 3 ? '🔒 Cancel Locked' : '❌ Cancel Collection'}
+            {cancellationLocked ? 'Cancel Locked' : 'Cancel Collection'}
+          </button>
+        )}
+
+        {user?.type === 'business' && businessCanCancel && (
+          <button
+            onClick={handleCancel}
+            disabled={actionLoading}
+            style={{
+              padding: '12px',
+              backgroundColor: '#dc3545',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: actionLoading ? 'not-allowed' : 'pointer',
+              fontWeight: 'bold',
+              opacity: actionLoading ? 0.7 : 1,
+            }}
+          >
+            Cancel Collection
           </button>
         )}
       </div>
 
-      {/* Info Box */}
       <div style={{ backgroundColor: '#e7f3ff', padding: '15px', borderRadius: '4px', border: '1px solid #b3d9ff' }}>
         <p style={{ margin: 0, fontSize: '14px', color: '#004085' }}>
-          💡 <strong>Tip:</strong> Use the Message button to communicate with the other party about pickup details, questions, or issues.
+          <strong>Tip:</strong> Use the message button to coordinate pickup timing and any material questions with the other party.
         </p>
       </div>
 
-      {/* Rating Display */}
       {collection && (
         <div style={{ marginTop: '30px' }}>
-          <h3>Ratings & Feedback</h3>
+          <h3>Ratings and Feedback</h3>
           {collection.business && (
             <div style={{ marginBottom: '20px' }}>
               <h4>Business Rating</h4>
@@ -506,11 +470,10 @@ const CollectionDetailPage = () => {
         </div>
       )}
 
-      {/* Feedback Form */}
-      {collection && collection.status === 'confirmed' && (
+      {collection.status === 'confirmed' && (
         <div style={{ marginTop: '30px' }}>
           <h3>Submit Feedback</h3>
-          <FeedbackForm 
+          <FeedbackForm
             collectionId={collection.id}
             business={collection.business}
             recycler={collection.recycler}
@@ -523,4 +486,3 @@ const CollectionDetailPage = () => {
 };
 
 export default CollectionDetailPage;
-

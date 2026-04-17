@@ -1,4 +1,8 @@
 import apiClient from './api';
+import {
+  normalizeConversation,
+  normalizeConversations,
+} from '../shared/utils/wastePostNormalizer';
 
 const normalizeUploadPayload = (fileOrFormData) => {
   if (fileOrFormData instanceof FormData) {
@@ -52,7 +56,7 @@ const messageService = {
     });
 
     messageService.clearConversationsCache();
-    return response.data.data;
+    return normalizeConversation(response.data.data);
   },
 
   getConversations: async (ignoreCache = false) => {
@@ -61,7 +65,9 @@ const messageService = {
     }
 
     const response = await apiClient.get('/conversations');
-    const conversations = Array.isArray(response.data.data) ? response.data.data : [];
+    const conversations = normalizeConversations(
+      Array.isArray(response.data.data) ? response.data.data : []
+    );
 
     messageService._cache.conversations = conversations;
     messageService._cache.conversationTimestamp = Date.now();
@@ -71,7 +77,7 @@ const messageService = {
 
   getConversation: async (id) => {
     const response = await apiClient.get(`/conversations/${id}`);
-    return response.data.data;
+    return normalizeConversation(response.data.data);
   },
 
   getConversationMessages: async (conversationId, page = 1, limit = 20) => {
@@ -95,11 +101,7 @@ const messageService = {
   },
 
   uploadMessageImage: async (fileOrFormData) => {
-    const response = await apiClient.post('/images/upload', normalizeUploadPayload(fileOrFormData), {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
+    const response = await apiClient.post('/images/upload', normalizeUploadPayload(fileOrFormData));
 
     return response.data.data || response.data;
   },

@@ -29,7 +29,7 @@ const userService = {
   },
 
   uploadProfileImage: async (userId, formData) => {
-    const res = await axios.post(`${API_BASE}/users/${userId}/upload-image`, formData, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}`, 'Content-Type': 'multipart/form-data' } });
+    const res = await axios.post(`${API_BASE}/users/${userId}/upload-image`, formData, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } });
     return res.data;
   },
 };

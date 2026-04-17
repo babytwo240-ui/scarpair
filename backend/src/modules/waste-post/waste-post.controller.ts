@@ -2,6 +2,11 @@
 import { Request, Response } from 'express';
 import { WastePost, User, Review } from '../../models';
 import { sequelize } from '../../models';
+import {
+  getRequestBaseUrl,
+  normalizeWastePostList,
+  normalizeWastePostPayload
+} from '../../utils/wastePostNormalization';
 
 export const getWasteCategories = async (req: Request, res: Response): Promise<any> => {
   try {
@@ -68,9 +73,11 @@ export const createWastePost = async (req: Request, res: Response): Promise<any>
       visibility: 'public'
     });
 
+    const baseUrl = getRequestBaseUrl(req);
+
     res.status(201).json({
       message: 'Waste post created successfully',
-      data: wastePost
+      data: normalizeWastePostPayload(wastePost, baseUrl)
     });
   } catch (error: any) {
     console.error('Error creating waste post:', error);
@@ -94,10 +101,12 @@ export const getUserWastePosts = async (req: Request, res: Response): Promise<an
       order: [['createdAt', 'DESC']]
     });
 
+    const baseUrl = getRequestBaseUrl(req);
+
     res.status(200).json({
       message: 'User waste posts retrieved',
       pagination: { page: pageNum, limit: limitNum, total: count, pages: Math.ceil(count / limitNum) },
-      data: rows
+      data: normalizeWastePostList(rows, baseUrl)
     });
   } catch (error: any) {
     console.error('Error fetching user waste posts:', error);
@@ -125,10 +134,12 @@ export const getWastePosts = async (req: Request, res: Response): Promise<any> =
       order: [['createdAt', 'DESC']]
     });
 
+    const baseUrl = getRequestBaseUrl(req);
+
     res.status(200).json({
       message: 'Waste posts retrieved',
       pagination: { page: pageNum, limit: limitNum, total: count, pages: Math.ceil(count / limitNum) },
-      data: rows
+      data: normalizeWastePostList(rows, baseUrl)
     });
   } catch (error: any) {
     console.error('Error fetching waste posts:', error);
@@ -148,9 +159,11 @@ export const getWastePostById = async (req: Request, res: Response): Promise<any
       return res.status(404).json({ error: 'Waste post not found' });
     }
 
+    const baseUrl = getRequestBaseUrl(req);
+
     res.status(200).json({
       message: 'Waste post retrieved',
-      data: post
+      data: normalizeWastePostPayload(post, baseUrl)
     });
   } catch (error: any) {
     console.error('Error fetching waste post:', error);
@@ -174,10 +187,11 @@ export const updateWastePost = async (req: Request, res: Response): Promise<any>
     }
 
     await post.update(updates);
+    const baseUrl = getRequestBaseUrl(req);
 
     res.status(200).json({
       message: 'Waste post updated successfully',
-      data: post
+      data: normalizeWastePostPayload(post, baseUrl)
     });
   } catch (error: any) {
     console.error('Error updating waste post:', error);
@@ -226,10 +240,12 @@ export const getMyApprovedCollections = async (req: Request, res: Response): Pro
       order: [['updatedAt', 'DESC']]
     });
 
+    const baseUrl = getRequestBaseUrl(req);
+
     res.status(200).json({
       message: 'Approved collections retrieved',
       pagination: { page: pageNum, limit: limitNum, total: count, pages: Math.ceil(count / limitNum) },
-      data: rows
+      data: normalizeWastePostList(rows, baseUrl)
     });
   } catch (error: any) {
     console.error('Error fetching approved collections:', error);

@@ -2,6 +2,10 @@ import { Request, Response } from 'express';
 import { Op } from 'sequelize';
 import { sequelize } from '../../models';
 import { getSocketIO } from '../../services/socketService';
+import {
+  getRequestBaseUrl,
+  normalizeWastePostPayload
+} from '../../utils/wastePostNormalization';
 
 const getConversationIncludes = (User: any, WastePost: any) => [
   { model: User, as: 'participant1', attributes: ['id', 'email', 'businessName', 'companyName', 'type'] },
@@ -17,7 +21,7 @@ const getConversationIncludes = (User: any, WastePost: any) => [
 const getDisplayName = (user: any) =>
   user?.businessName || user?.companyName || user?.email || 'User';
 
-const enrichConversation = async (conversation: any, Message: any) => {
+const enrichConversation = async (conversation: any, Message: any, baseUrl: string) => {
   if (!conversation) {
     return null;
   }
@@ -29,16 +33,20 @@ const enrichConversation = async (conversation: any, Message: any) => {
   });
 
   const plainConversation = conversation.get({ plain: true });
+  const wastePost = plainConversation.wastePost
+    ? normalizeWastePostPayload(plainConversation.wastePost, baseUrl)
+    : null;
 
   return {
     ...plainConversation,
+    wastePost,
     lastMessage: latestMessage?.content || null,
     lastMessageData: latestMessage ? latestMessage.get({ plain: true }) : null
   };
 };
 
-const enrichConversations = async (conversations: any[], Message: any) =>
-  Promise.all(conversations.map((conversation) => enrichConversation(conversation, Message)));
+const enrichConversations = async (conversations: any[], Message: any, baseUrl: string) =>
+  Promise.all(conversations.map((conversation) => enrichConversation(conversation, Message, baseUrl)));
 
 export const getConversations = async (req: Request, res: Response): Promise<any> => {
   try {
@@ -57,6 +65,7 @@ export const getConversations = async (req: Request, res: Response): Promise<any
     const User = (sequelize as any).models.User;
     const WastePost = (sequelize as any).models.WastePost;
     const Message = (sequelize as any).models.Message;
+    const baseUrl = getRequestBaseUrl(req);
 
     const { count, rows } = await Conversation.findAndCountAll({
       where: { [Op.or]: [{ participant1Id: userId }, { participant2Id: userId }] },
@@ -66,7 +75,7 @@ export const getConversations = async (req: Request, res: Response): Promise<any
       order: [['lastMessageAt', 'DESC'], ['updatedAt', 'DESC'], ['id', 'DESC']]
     });
 
-    const data = await enrichConversations(rows, Message);
+    const data = await enrichConversations(rows, Message, baseUrl);
 
     res.status(200).json({
       message: 'Conversations retrieved',
@@ -101,6 +110,7 @@ export const createConversation = async (req: Request, res: Response): Promise<a
     const WastePost = (sequelize as any).models.WastePost;
     const Message = (sequelize as any).models.Message;
     const Notification = (sequelize as any).models.Notification;
+    const baseUrl = getRequestBaseUrl(req);
 
     const participant2 = await User.findByPk(participant2Id, {
       attributes: ['id', 'email', 'businessName', 'companyName', 'type']
@@ -134,7 +144,7 @@ export const createConversation = async (req: Request, res: Response): Promise<a
     const hydratedConversation = await Conversation.findByPk(conversation.id, {
       include: getConversationIncludes(User, WastePost)
     });
-    const data = await enrichConversation(hydratedConversation, Message);
+    const data = await enrichConversation(hydratedConversation, Message, baseUrl);
 
     if (isNewConversation) {
       const initiator = await User.findByPk(participant1Id, {
@@ -194,6 +204,7 @@ export const getConversationById = async (req: Request, res: Response): Promise<
     const User = (sequelize as any).models.User;
     const WastePost = (sequelize as any).models.WastePost;
     const Message = (sequelize as any).models.Message;
+    const baseUrl = getRequestBaseUrl(req);
 
     const conversation = await Conversation.findByPk(conversationId, {
       include: getConversationIncludes(User, WastePost)
@@ -207,7 +218,7 @@ export const getConversationById = async (req: Request, res: Response): Promise<
       return res.status(403).json({ error: 'Not authorized to view this conversation' });
     }
 
-    const data = await enrichConversation(conversation, Message);
+    const data = await enrichConversation(conversation, Message, baseUrl);
 
     res.status(200).json({
       message: 'Conversation retrieved',

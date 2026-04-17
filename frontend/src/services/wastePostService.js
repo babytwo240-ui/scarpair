@@ -1,10 +1,24 @@
 import apiClient from './api';
+import {
+  normalizeWastePost,
+  normalizeWastePosts,
+} from '../shared/utils/wastePostNormalizer';
+
+const withNormalizedPost = (payload) => ({
+  ...payload,
+  data: normalizeWastePost(payload?.data),
+});
+
+const withNormalizedPosts = (payload) => ({
+  ...payload,
+  data: normalizeWastePosts(payload?.data),
+});
 
 const wastePostService = {
   // Create waste post
   createWastePost: async (data) => {
     const response = await apiClient.post('/waste-posts', data);
-    return response.data;
+    return withNormalizedPost(response.data);
   },
 
   // Get user's own waste posts
@@ -12,13 +26,13 @@ const wastePostService = {
     const params = { page, limit };
     if (status) params.status = status;
     const response = await apiClient.get('/waste-posts/user/mine', { params });
-    return response.data;
+    return withNormalizedPosts(response.data);
   },
 
   // Update waste post
   updateWastePost: async (id, data) => {
     const response = await apiClient.put(`/waste-posts/${id}`, data);
-    return response.data;
+    return withNormalizedPost(response.data);
   },
 
   // Delete waste post
@@ -30,13 +44,13 @@ const wastePostService = {
   // Get waste post by ID
   getWastePostById: async (id) => {
     const response = await apiClient.get(`/waste-posts/${id}`);
-    return response.data;
+    return withNormalizedPost(response.data);
   },
 
   // Get marketplace (all public posts)
   getMarketplace: async (filters = {}) => {
     const response = await apiClient.get('/waste-posts', { params: filters });
-    return response.data;
+    return withNormalizedPosts(response.data);
   },
 
   // Get nearby materials
@@ -44,7 +58,7 @@ const wastePostService = {
     const response = await apiClient.get('/waste-posts/nearby', {
       params: { latitude, longitude, radius },
     });
-    return response.data;
+    return withNormalizedPosts(response.data);
   },
 
   // Get post status
@@ -58,7 +72,7 @@ const wastePostService = {
     const response = await apiClient.get('/waste-posts/search', {
       params: { q: query },
     });
-    return response.data;
+    return withNormalizedPosts(response.data);
   },
 
   // Filter materials by criteria
@@ -66,7 +80,7 @@ const wastePostService = {
     const response = await apiClient.get('/waste-posts/filter', {
       params: filters,
     });
-    return response.data;
+    return withNormalizedPosts(response.data);
   },
 
   // Get business profile with materials
@@ -83,7 +97,7 @@ const wastePostService = {
     const response = await apiClient.get(`/waste-posts/business/${businessId}/materials`, {
       params: { page, limit },
     });
-    return response.data;
+    return withNormalizedPosts(response.data);
   },
 
   // ===== COLLECTION WORKFLOW =====
@@ -113,7 +127,7 @@ const wastePostService = {
     const response = await apiClient.get('/waste-posts/my-approved', {
       params: { page, limit },
     });
-    return response.data;
+    return withNormalizedPosts(response.data);
   },
 };
 

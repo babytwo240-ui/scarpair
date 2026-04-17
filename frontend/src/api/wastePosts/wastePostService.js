@@ -7,7 +7,7 @@ const wastePostService = {
     const formData = new FormData();
     Object.keys(postData).forEach(key => formData.append(key, postData[key]));
     if (imageFile) formData.append('image', imageFile);
-    const res = await axios.post(`${API_BASE}/waste-posts`, formData, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}`, 'Content-Type': 'multipart/form-data' } });
+    const res = await axios.post(`${API_BASE}/waste-posts`, formData, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } });
     return res.data;
   },
 
@@ -31,7 +31,7 @@ const wastePostService = {
     const formData = new FormData();
     Object.keys(updates).forEach(key => formData.append(key, updates[key]));
     if (imageFile) formData.append('image', imageFile);
-    const res = await axios.put(`${API_BASE}/waste-posts/${postId}`, formData, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}`, 'Content-Type': 'multipart/form-data' } });
+    const res = await axios.put(`${API_BASE}/waste-posts/${postId}`, formData, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } });
     return res.data;
   },
 

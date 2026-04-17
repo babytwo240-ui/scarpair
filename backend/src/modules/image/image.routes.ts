@@ -42,8 +42,8 @@ router.post(
           uploadedAt: new Date().toISOString()
         }
       });
-    } catch (error) {
-      res.status(500).json({ error: 'Failed to upload image' });
+    } catch (error: any) {
+      res.status(500).json({ error: error?.message || 'Failed to upload image' });
     }
   }
 );
@@ -65,8 +65,8 @@ router.delete(
       res.status(200).json({
         message: 'Image deleted successfully'
       });
-    } catch (error) {
-      res.status(500).json({ error: 'Failed to delete image' });
+    } catch (error: any) {
+      res.status(500).json({ error: error?.message || 'Failed to delete image' });
     }
   }
 );
