@@ -1,4 +1,4 @@
-﻿import { Request, Response } from 'express';
+import { Request, Response } from 'express';
 import { Message, Conversation, User, Notification } from '../models';
 import redisClient from '../config/redis';
 import { Op } from 'sequelize';

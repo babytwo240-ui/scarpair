@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Box,
@@ -25,18 +25,36 @@ import SearchIcon from '@mui/icons-material/Search';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import DeleteIcon from '@mui/icons-material/Delete';
 
+/* ─── Color tokens – 70% White / 30% Green Palette ────────────────── */
 const C = {
-  bright: '#64ff43',
-  deep: '#124d05',
-  darker: '#0a2e03',
-  surface: '#0d3806',
-  border: 'rgba(100,255,67,0.18)',
-  borderHover: 'rgba(100,255,67,0.45)',
-  text: '#e6ffe0',
-  textMid: 'rgba(230,255,224,0.55)',
-  textLow: 'rgba(230,255,224,0.3)',
-  glow: 'rgba(100,255,67,0.22)',
-  glowStrong: 'rgba(100,255,67,0.45)',
+  // Primary green (30%)
+  bright: '#2e7d32',        // Deep green for primary actions
+  brightDark: '#1b5e20',    // Darker green for hover
+  brightLight: '#4caf50',   // Lighter green for accents
+  // Backgrounds (70% white/light tones)
+  deep: '#f8fafc',          // Light grey-white background
+  darker: '#f8fafc',        // Light grey-white background
+  surface: '#ffffff',       // Pure white surfaces
+  surfaceHigh: '#f1f5f9',   // Light grey for subtle contrast
+  // Borders
+  border: 'rgba(0,0,0,0.08)',
+  borderHover: 'rgba(46,125,50,0.25)',
+  // Text (Dark grey for high contrast on white)
+  text: '#0f172a',          // Slate 900
+  textMid: '#475569',       // Slate 600
+  textLow: '#94a3b8',       // Slate 400
+  // Status colors
+  error: '#dc2626',
+  errorBg: 'rgba(220,38,38,0.08)',
+  warning: '#d97706',
+  warningBg: 'rgba(217,119,6,0.08)',
+  info: '#2563eb',
+  infoBg: 'rgba(37,99,235,0.08)',
+  success: '#2e7d32',
+  successBg: 'rgba(46,125,50,0.08)',
+  // Glows
+  glow: 'rgba(46,125,50,0.04)',
+  glowStrong: 'rgba(46,125,50,0.12)',
 };
 
 const AdminSystemLogsPage = () => {
@@ -101,21 +119,21 @@ const AdminSystemLogsPage = () => {
 
   const getTypeColor = (type) => {
     switch (type?.toLowerCase()) {
-      case 'error': return '#ff9b9b';
-      case 'warning': return '#ffc857';
-      case 'info':
-      case 'success':
+      case 'error': return C.error;
+      case 'warning': return C.warning;
+      case 'info': return C.info;
+      case 'success': return C.success;
       default: return C.bright;
     }
   };
 
   const getTypeBackground = (type) => {
     switch (type?.toLowerCase()) {
-      case 'error': return 'rgba(255,107,107,0.2)';
-      case 'warning': return 'rgba(255,200,87,0.2)';
-      case 'success': return 'rgba(100,255,67,0.2)';
-      case 'info':
-      default: return 'rgba(100,255,67,0.15)';
+      case 'error': return C.errorBg;
+      case 'warning': return C.warningBg;
+      case 'info': return C.infoBg;
+      case 'success': return C.successBg;
+      default: return C.glow;
     }
   };
 
@@ -128,21 +146,81 @@ const AdminSystemLogsPage = () => {
   if (loading) {
     return (
       <Box sx={{ minHeight: '100vh', background: C.darker, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-        <CircularProgress sx={{ color: C.bright }} />
+        <Box sx={{ textAlign: 'center' }}>
+          <CircularProgress sx={{ color: C.bright }} />
+          <Typography sx={{ color: C.textMid, mt: 2, fontSize: '0.9rem' }}>Loading logs...</Typography>
+        </Box>
       </Box>
     );
   }
 
   return (
-    <Box sx={{ minHeight: '100vh', background: C.darker, color: C.text, fontFamily: "'DM Sans','Helvetica Neue',sans-serif", overflowX: 'hidden' }}>
-      {/* Grain overlay */}
-      <Box sx={{ position: 'fixed', inset: 0, backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.015'/%3E%3C/svg%3E")`, pointerEvents: 'none', zIndex: 1 }} />
+    <Box sx={{
+      minHeight: '100vh',
+      background: C.darker,
+      color: C.text,
+      fontFamily: "'Outfit', sans-serif",
+      overflowX: 'hidden',
+      position: 'relative',
+    }}>
+      {/* Ambient orbs */}
+      <Box sx={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 0, overflow: 'hidden' }}>
+        <Box sx={{
+          position: 'absolute', top: '-15%', right: '-10%',
+          width: 700, height: 700, borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(46,125,50,0.04) 0%, transparent 65%)',
+          animation: 'floatA 14s ease-in-out infinite',
+        }} />
+        <Box sx={{
+          position: 'absolute', bottom: '10%', left: '-8%',
+          width: 500, height: 500, borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(46,125,50,0.03) 0%, transparent 65%)',
+          animation: 'floatB 18s ease-in-out infinite',
+        }} />
+        <Box sx={{
+          position: 'absolute', inset: 0,
+          backgroundImage: `
+            linear-gradient(rgba(46,125,50,0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(46,125,50,0.03) 1px, transparent 1px)
+          `,
+          backgroundSize: '64px 64px',
+        }} />
+      </Box>
+
+      <style>{`
+        @keyframes floatA {
+          0%, 100% { transform: translateY(0px) rotate(0deg); }
+          50% { transform: translateY(-18px) rotate(3deg); }
+        }
+        @keyframes floatB {
+          0%, 100% { transform: translateY(0px) rotate(0deg); }
+          50% { transform: translateY(-12px) rotate(-2deg); }
+        }
+        @keyframes fadeUp {
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
 
       <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 10, py: 6 }}>
         {/* Header */}
-        <Box sx={{ mb: 5 }}>
-          <Typography sx={{ fontSize: '3rem', fontWeight: 900, color: C.bright, mb: 1 }}>
-            ◈ System Logs
+        <Box sx={{ mb: 5, animation: 'fadeUp 0.7s ease both' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+            <Box sx={{ width: 40, height: 1, background: C.bright }} />
+            <Typography sx={{ fontSize: '0.75rem', fontWeight: 600, letterSpacing: '0.2em', textTransform: 'uppercase', color: C.bright }}>
+              Monitoring
+            </Typography>
+            <Box sx={{ width: 40, height: 1, background: C.bright }} />
+          </Box>
+          <Typography sx={{
+            fontSize: '3rem',
+            fontWeight: 600,
+            fontFamily: "'Cormorant Garamond', serif",
+            color: C.text,
+            mb: 1,
+            letterSpacing: '-1px',
+          }}>
+            System Logs
           </Typography>
           <Typography sx={{ fontSize: '0.95rem', color: C.textMid }}>
             View all system activity and events
@@ -150,7 +228,7 @@ const AdminSystemLogsPage = () => {
         </Box>
 
         {/* Controls */}
-        <Box sx={{ display: 'flex', gap: 2, mb: 3, justifyContent: 'space-between', alignItems: 'center' }}>
+        <Box sx={{ display: 'flex', gap: 2, mb: 3, justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap' }}>
           <TextField
             placeholder="Search logs..."
             value={search}
@@ -161,7 +239,7 @@ const AdminSystemLogsPage = () => {
               maxWidth: '400px',
               '& .MuiOutlinedInput-root': {
                 color: C.text,
-                backgroundColor: `${C.darker}ee`,
+                backgroundColor: C.surfaceHigh,
                 '& fieldset': { borderColor: C.border },
                 '&:hover fieldset': { borderColor: C.borderHover },
                 '&.Mui-focused fieldset': { borderColor: C.bright }
@@ -171,7 +249,7 @@ const AdminSystemLogsPage = () => {
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
-                  <SearchIcon sx={{ color: C.textMid, mr: 1 }} />
+                  <SearchIcon sx={{ color: C.textMid, mr: 1, fontSize: '1.1rem' }} />
                 </InputAdornment>
               )
             }}
@@ -182,15 +260,17 @@ const AdminSystemLogsPage = () => {
               startIcon={<RefreshIcon />}
               onClick={fetchLogs}
               sx={{
-                background: `linear-gradient(135deg, ${C.bright}22, ${C.bright}00)`,
+                background: C.glow,
                 color: C.bright,
                 border: `1px solid ${C.border}`,
                 textTransform: 'none',
                 px: 3,
+                py: 0.8,
                 borderRadius: '8px',
+                transition: 'all 0.2s',
                 '&:hover': {
-                  background: `linear-gradient(135deg, ${C.bright}33, ${C.bright}11)`,
-                  borderColor: C.borderHover,
+                  background: C.surfaceHigh,
+                  borderColor: C.bright,
                   boxShadow: `0 0 20px ${C.glow}`
                 }
               }}
@@ -203,15 +283,17 @@ const AdminSystemLogsPage = () => {
               onClick={() => setClearDialogOpen(true)}
               disabled={logs.length === 0 || clearing}
               sx={{
-                background: 'rgba(255,67,67,0.12)',
-                color: '#ff9b9b',
-                border: '1px solid rgba(255,67,67,0.35)',
+                background: C.errorBg,
+                color: C.error,
+                border: `1px solid ${C.error}33`,
                 textTransform: 'none',
                 px: 3,
+                py: 0.8,
                 borderRadius: '8px',
+                transition: 'all 0.2s',
                 '&:hover': {
-                  background: 'rgba(255,67,67,0.22)',
-                  borderColor: 'rgba(255,67,67,0.6)',
+                  background: C.errorBg,
+                  borderColor: C.error,
                 },
                 '&:disabled': { opacity: 0.4 }
               }}
@@ -222,27 +304,53 @@ const AdminSystemLogsPage = () => {
         </Box>
 
         {error && (
-          <Box sx={{ p: 2.5, background: 'rgba(255,67,67,0.12)', border: '1px solid rgba(255,67,67,0.35)', borderRadius: '12px', mb: 3, color: '#ff9b9b' }}>
+          <Box sx={{
+            p: 2.5,
+            background: C.errorBg,
+            border: `1px solid ${C.error}33`,
+            borderRadius: '12px',
+            mb: 3,
+            color: C.error,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1.5,
+          }}>
+            <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
+              <circle cx="10" cy="10" r="9" stroke={C.error} strokeWidth="2" />
+              <path d="M10 6v4M10 14h.01" stroke={C.error} strokeWidth="2" strokeLinecap="round" />
+            </svg>
             <Typography sx={{ fontSize: '0.9rem' }}>{error}</Typography>
           </Box>
         )}
 
-        <Typography sx={{ fontSize: '0.9rem', color: C.textMid, mb: 3 }}>
+        <Typography sx={{ fontSize: '0.85rem', color: C.textMid, mb: 3 }}>
           Found {filteredLogs.length} of {logs.length} logs
         </Typography>
 
         {/* Logs Table */}
         {filteredLogs.length > 0 ? (
-          <Box sx={{ backgroundColor: C.surface, borderRadius: '12px', border: `1px solid ${C.border}`, overflow: 'hidden' }}>
+          <Box sx={{
+            backgroundColor: C.surface,
+            borderRadius: '16px',
+            border: `1px solid ${C.border}`,
+            overflow: 'hidden',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+          }}>
             <TableContainer>
               <Table>
                 <TableHead>
-                  <TableRow sx={{ backgroundColor: 'rgba(100,255,67,0.08)', borderBottom: `2px solid ${C.border}` }}>
-                    <TableCell sx={{ color: C.bright, fontWeight: 600, fontSize: '0.9rem' }}>Type</TableCell>
-                    <TableCell sx={{ color: C.bright, fontWeight: 600, fontSize: '0.9rem' }}>Action</TableCell>
-                    <TableCell sx={{ color: C.bright, fontWeight: 600, fontSize: '0.9rem' }}>User ID</TableCell>
-                    <TableCell sx={{ color: C.bright, fontWeight: 600, fontSize: '0.9rem' }}>Details</TableCell>
-                    <TableCell sx={{ color: C.bright, fontWeight: 600, fontSize: '0.9rem' }}>Timestamp</TableCell>
+                  <TableRow sx={{ backgroundColor: C.surfaceHigh, borderBottom: `1px solid ${C.border}` }}>
+                    {['Type', 'Action', 'User ID', 'Details', 'Timestamp'].map((h) => (
+                      <TableCell key={h} sx={{
+                        color: C.bright,
+                        fontWeight: 700,
+                        fontSize: '0.75rem',
+                        letterSpacing: '0.08em',
+                        textTransform: 'uppercase',
+                      }}>
+                        {h}
+                      </TableCell>
+                    ))}
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -251,26 +359,40 @@ const AdminSystemLogsPage = () => {
                       key={log.id || idx}
                       sx={{
                         borderBottom: `1px solid ${C.border}`,
-                        '&:hover': { backgroundColor: C.glow, borderBottomColor: C.borderHover }
+                        transition: 'all 0.2s ease',
+                        animation: `fadeUp 0.3s ease ${idx * 0.02}s both`,
+                        '&:hover': { backgroundColor: C.glow }
                       }}
                     >
                       <TableCell>
                         <Chip
                           label={log.type || 'Info'}
                           size="small"
-                          sx={{ background: getTypeBackground(log.type), color: getTypeColor(log.type), fontWeight: 500, fontSize: '0.8rem' }}
+                          sx={{
+                            background: getTypeBackground(log.type),
+                            color: getTypeColor(log.type),
+                            fontWeight: 600,
+                            fontSize: '0.7rem',
+                            borderRadius: '100px',
+                          }}
                         />
                       </TableCell>
-                      <TableCell sx={{ color: C.text, fontSize: '0.9rem', fontWeight: 500 }}>
+                      <TableCell sx={{ color: C.text, fontSize: '0.85rem', fontWeight: 500 }}>
                         {log.action || 'N/A'}
                       </TableCell>
-                      <TableCell sx={{ color: C.textMid, fontSize: '0.9rem' }}>
+                      <TableCell sx={{ color: C.textMid, fontSize: '0.85rem' }}>
                         {log.userId ? `#${log.userId}` : 'System'}
                       </TableCell>
-                      <TableCell sx={{ color: C.textMid, fontSize: '0.85rem', maxWidth: '250px', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      <TableCell sx={{
+                        color: C.textMid,
+                        fontSize: '0.8rem',
+                        maxWidth: '250px',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis'
+                      }}>
                         {log.details || '—'}
                       </TableCell>
-                      <TableCell sx={{ color: C.textMid, fontSize: '0.85rem', whiteSpace: 'nowrap' }}>
+                      <TableCell sx={{ color: C.textMid, fontSize: '0.8rem', whiteSpace: 'nowrap' }}>
                         {log.createdAt ? format(new Date(log.createdAt), 'MMM d, HH:mm') : 'N/A'}
                       </TableCell>
                     </TableRow>
@@ -280,7 +402,15 @@ const AdminSystemLogsPage = () => {
             </TableContainer>
           </Box>
         ) : (
-          <Box sx={{ textAlign: 'center', py: 6, backgroundColor: C.surface, borderRadius: '12px', border: `1px solid ${C.border}` }}>
+          <Box sx={{
+            textAlign: 'center',
+            py: 6,
+            backgroundColor: C.surface,
+            borderRadius: '16px',
+            border: `1px solid ${C.border}`,
+            boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+          }}>
+            <Box sx={{ fontSize: 48, mb: 2 }}>📋</Box>
             <Typography sx={{ color: C.textMid, fontSize: '1rem' }}>
               {search ? 'No logs found matching your search' : 'No logs available'}
             </Typography>
@@ -295,10 +425,23 @@ const AdminSystemLogsPage = () => {
         maxWidth="sm"
         fullWidth
         PaperProps={{
-          sx: { background: C.surface, border: `1px solid ${C.border}`, color: C.text, borderRadius: '16px' }
+          sx: {
+            background: C.surface,
+            border: `1px solid ${C.border}`,
+            color: C.text,
+            borderRadius: '16px',
+            boxShadow: '0 20px 40px -12px rgba(0,0,0,0.15)',
+          }
         }}
       >
-        <DialogTitle sx={{ fontWeight: 800, color: C.bright }}>Clear All Logs?</DialogTitle>
+        <DialogTitle sx={{
+          fontWeight: 700,
+          color: C.error,
+          fontFamily: "'Cormorant Garamond', serif",
+          fontSize: '1.5rem',
+        }}>
+          Clear All Logs?
+        </DialogTitle>
         <DialogContent>
           <Typography sx={{ color: C.textMid, mt: 1 }}>
             Are you sure you want to permanently delete all system logs? This action cannot be undone.
@@ -308,7 +451,13 @@ const AdminSystemLogsPage = () => {
           <Button
             onClick={() => setClearDialogOpen(false)}
             disabled={clearing}
-            sx={{ color: C.textMid, border: `1px solid ${C.border}`, textTransform: 'none', borderRadius: '8px' }}
+            sx={{
+              color: C.textMid,
+              border: `1px solid ${C.border}`,
+              textTransform: 'none',
+              borderRadius: '8px',
+              '&:hover': { borderColor: C.bright, color: C.bright }
+            }}
           >
             Cancel
           </Button>
@@ -316,12 +465,13 @@ const AdminSystemLogsPage = () => {
             onClick={clearLogs}
             disabled={clearing}
             sx={{
-              background: 'rgba(255,67,67,0.2)',
-              color: '#ff9b9b',
-              border: '1px solid rgba(255,67,67,0.4)',
+              background: C.errorBg,
+              color: C.error,
+              border: `1px solid ${C.error}33`,
               textTransform: 'none',
               borderRadius: '8px',
-              '&:hover': { background: 'rgba(255,67,67,0.35)' },
+              px: 3,
+              '&:hover': { background: C.errorBg, borderColor: C.error },
               '&:disabled': { opacity: 0.5 }
             }}
           >

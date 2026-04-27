@@ -1,4 +1,4 @@
-﻿import multer, { Multer } from 'multer';
+import multer, { Multer } from 'multer';
 import sharp from 'sharp';
 import { Request, Response, NextFunction } from 'express';
 import redisClient from '../config/redis';

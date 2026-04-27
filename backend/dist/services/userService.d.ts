@@ -59,6 +59,8 @@ declare const validateResetPassword: (email: string, newPassword: string) => Pro
     valid: boolean;
     error?: string;
 }>;
-export { registerBusiness, registerRecycler, findBusinessByEmail, findRecyclerByEmail, verifyBusinessCredentials, verifyRecyclerCredentials, businessEmailExists, recyclerEmailExists, verifyUserEmail, incrementLoginAttempts, resetLoginAttempts, lockUserAccount, setPasswordResetToken, updateUserPassword, updateUserProfile, deleteUserAccount, validateNewPassword, validateResetPassword };
+declare const countAllUsers: () => Promise<number>;
+declare const getAllUsersSummary: () => Promise<any[]>;
+export { registerBusiness, registerRecycler, findBusinessByEmail, findRecyclerByEmail, verifyBusinessCredentials, verifyRecyclerCredentials, businessEmailExists, recyclerEmailExists, verifyUserEmail, incrementLoginAttempts, resetLoginAttempts, lockUserAccount, setPasswordResetToken, updateUserPassword, updateUserProfile, deleteUserAccount, validateNewPassword, validateResetPassword, countAllUsers, getAllUsersSummary };
 export type { BusinessData, RecyclerData, UserResult };
 //# sourceMappingURL=userService.d.ts.map

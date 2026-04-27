@@ -1,4 +1,4 @@
-﻿import { Request, Response } from 'express';
+import { Request, Response } from 'express';
 import * as userService from '../services/userService';
 import * as emailService from '../services/emailService';
 import { deleteUserWithCascade } from '../services/userDeletionService';

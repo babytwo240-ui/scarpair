@@ -1,4 +1,4 @@
-﻿import { Router, Request, Response } from 'express';
+import { Router, Request, Response } from 'express';
 import { uploadMiddleware, imageRateLimiter } from '../middleware/imageUpload';
 import { authenticateUser } from '../middleware/userAuthMiddleware';
 import ImageService from '../services/imageService';

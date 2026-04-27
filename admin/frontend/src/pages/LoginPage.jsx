@@ -2,20 +2,30 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { adminAPI } from '../services/adminApi.jsx';
 
+/* ─── Color tokens – 70% White / 30% Green Palette ────────────────── */
 const C = {
-  bright: '#64ff43',
-  darker: '#0a2e03',
-  surface: '#0d3806',
-  border: 'rgba(100,255,67,0.18)',
-  borderHover: 'rgba(100,255,67,0.45)',
-  text: '#e6ffe0',
-  textMid: 'rgba(230,255,224,0.55)',
-  textLow: 'rgba(230,255,224,0.3)',
-  glow: 'rgba(100,255,67,0.22)',
-  glowStrong: 'rgba(100,255,67,0.45)',
-  error: '#ff6b6b',
-  errorBg: 'rgba(255,107,107,0.1)',
-  errorBorder: 'rgba(255,107,107,0.3)',
+  // Primary green (30%)
+  bright: '#2e7d32',        // Deep green for primary actions
+  brightDark: '#1b5e20',    // Darker green for hover
+  brightLight: '#4caf50',   // Lighter green for accents
+  // Backgrounds (70% white/light tones)
+  darker: '#f8fafc',        // Light grey-white background
+  surface: '#ffffff',       // Pure white surfaces
+  surfaceHigh: '#f1f5f9',   // Light grey for subtle contrast
+  // Borders
+  border: 'rgba(0,0,0,0.08)',
+  borderHover: 'rgba(46,125,50,0.25)',
+  // Text (Dark grey for high contrast on white)
+  text: '#0f172a',          // Slate 900
+  textMid: '#475569',       // Slate 600
+  textLow: '#94a3b8',       // Slate 400
+  // Status colors
+  error: '#dc2626',
+  errorBg: 'rgba(220,38,38,0.08)',
+  errorBorder: 'rgba(220,38,38,0.25)',
+  // Glows
+  glow: 'rgba(46,125,50,0.04)',
+  glowStrong: 'rgba(46,125,50,0.12)',
 };
 
 const LoginPage = () => {
@@ -65,63 +75,184 @@ const LoginPage = () => {
   };
 
   return (
-    <div style={{ minHeight: '100vh', background: C.darker, fontFamily: "'DM Sans','Helvetica Neue',sans-serif", overflowX: 'hidden', color: C.text }}>
+    <div style={{
+      minHeight: '100vh',
+      background: C.darker,
+      fontFamily: "'Outfit', sans-serif",
+      overflowX: 'hidden',
+      color: C.text,
+      position: 'relative',
+    }}>
+      <style>{`
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes fadeUp {
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes floatA {
+          0%, 100% { transform: translateY(0px) rotate(0deg); }
+          50% { transform: translateY(-18px) rotate(3deg); }
+        }
+        @keyframes floatB {
+          0%, 100% { transform: translateY(0px) rotate(0deg); }
+          50% { transform: translateY(-12px) rotate(-2deg); }
+        }
+      `}</style>
+
+      {/* Ambient orbs */}
+      <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 0, overflow: 'hidden' }}>
+        <div style={{
+          position: 'absolute', top: '-15%', right: '-10%',
+          width: 700, height: 700, borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(46,125,50,0.04) 0%, transparent 65%)',
+          animation: 'floatA 14s ease-in-out infinite',
+        }} />
+        <div style={{
+          position: 'absolute', bottom: '10%', left: '-8%',
+          width: 500, height: 500, borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(46,125,50,0.03) 0%, transparent 65%)',
+          animation: 'floatB 18s ease-in-out infinite',
+        }} />
+        <div style={{
+          position: 'absolute', inset: 0,
+          backgroundImage: `
+            linear-gradient(rgba(46,125,50,0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(46,125,50,0.03) 1px, transparent 1px)
+          `,
+          backgroundSize: '64px 64px',
+        }} />
+        <div style={{
+          position: 'absolute', inset: 0,
+          background: 'radial-gradient(ellipse 80% 70% at 50% 50%, transparent 40%, rgba(241,245,249,0.6) 100%)',
+        }} />
+      </div>
 
       {/* Ambient cursor glow */}
-      <div style={{ position: 'fixed', top: mouse.y - 320, left: mouse.x - 320, width: 640, height: 640, background: 'radial-gradient(circle, rgba(100,255,67,0.055) 0%, transparent 65%)', borderRadius: '50%', pointerEvents: 'none', zIndex: 0, transition: 'top 0.35s ease, left 0.35s ease' }} />
-
-      {/* Grain overlay */}
-      <div style={{ position: 'fixed', inset: 0, backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E")`, pointerEvents: 'none', zIndex: 1 }} />
+      <div style={{
+        position: 'fixed',
+        top: mouse.y - 320,
+        left: mouse.x - 320,
+        width: 640,
+        height: 640,
+        background: `radial-gradient(circle, ${C.glow} 0%, transparent 65%)`,
+        borderRadius: '50%',
+        pointerEvents: 'none',
+        zIndex: 0,
+        transition: 'top 0.35s ease, left 0.35s ease'
+      }} />
 
       {/* ══════════ NAVBAR ══════════ */}
-      <nav style={{ position: 'sticky', top: 0, zIndex: 100, background: scrollY > 60 ? 'rgba(10,46,3,0.93)' : 'transparent', backdropFilter: scrollY > 60 ? 'blur(28px)' : 'none', borderBottom: scrollY > 60 ? `1px solid ${C.border}` : '1px solid transparent', transition: 'all 0.35s ease' }}>
+      <nav style={{
+        position: 'sticky',
+        top: 0,
+        zIndex: 100,
+        background: scrollY > 60 ? 'rgba(255,255,255,0.92)' : 'transparent',
+        backdropFilter: scrollY > 60 ? 'blur(24px) saturate(1.5)' : 'none',
+        borderBottom: scrollY > 60 ? `1px solid ${C.border}` : '1px solid transparent',
+        transition: 'all 0.4s cubic-bezier(0.16,1,0.3,1)'
+      }}>
         <div style={{ maxWidth: 1360, margin: '0 auto', padding: '18px 40px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }} onClick={() => navigate('/')}>
-            <div style={{ width: 38, height: 38, borderRadius: 11, background: 'rgba(100,255,67,0.12)', border: '1px solid rgba(100,255,67,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer' }} onClick={() => navigate('/')}>
+            <div style={{
+              width: 38,
+              height: 38,
+              borderRadius: 11,
+              background: 'rgba(46,125,50,0.08)',
+              border: '1px solid rgba(46,125,50,0.2)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                 <path d="M10 2a8 8 0 1 0 0 16A8 8 0 0 0 10 2zm0 2a6 6 0 0 1 5.917 5H10V4zm-1 0v5H3.083A6 6 0 0 1 9 4zM3.444 11H9v5.472A6.002 6.002 0 0 1 3.444 11zm6.556 5.472V11h5.556A6.002 6.002 0 0 1 10 16.472z" fill={C.bright} />
               </svg>
             </div>
-            <span style={{ fontSize: 21, fontWeight: 800, letterSpacing: '-0.5px', color: C.text }}>ScraPair Admin</span>
+            <div>
+              <span style={{
+                fontSize: 22,
+                fontWeight: 700,
+                letterSpacing: '-0.5px',
+                fontFamily: "'Cormorant Garamond', serif",
+                color: C.text
+              }}>scrapair</span>
+              <div style={{ height: 1.5, background: `linear-gradient(90deg, ${C.bright}, transparent)`, marginTop: 1, width: '100%' }} />
+            </div>
           </div>
-          <button onClick={() => navigate('/')}
-            style={{ padding: '10px 24px', fontSize: 14, fontWeight: 700, borderRadius: 100, border: 'none', background: C.bright, color: '#082800', cursor: 'pointer', transition: 'all 0.2s', boxShadow: '0 0 16px rgba(100,255,67,0.35)' }}
-            onMouseEnter={e => { e.target.style.boxShadow = '0 0 28px rgba(100,255,67,0.6)'; e.target.style.transform = 'translateY(-1px)'; }}
-            onMouseLeave={e => { e.target.style.boxShadow = '0 0 16px rgba(100,255,67,0.35)'; e.target.style.transform = 'translateY(0)'; }}
+          <button
+            onClick={() => navigate('/')}
+            style={{
+              padding: '10px 24px',
+              fontSize: 13,
+              fontWeight: 600,
+              letterSpacing: '0.06em',
+              borderRadius: 6,
+              border: `1px solid ${C.border}`,
+              background: 'transparent',
+              color: C.textLight,
+              cursor: 'pointer',
+              transition: 'all 0.2s ease'
+            }}
+            onMouseEnter={e => { e.target.style.borderColor = C.bright; e.target.style.color = C.bright; e.target.style.background = C.glow; }}
+            onMouseLeave={e => { e.target.style.borderColor = C.border; e.target.style.color = C.textLight; e.target.style.background = 'transparent'; }}
           >← Back</button>
         </div>
       </nav>
 
       {/* ══════════ MAIN CONTENT ══════════ */}
-      <section style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', position: 'relative', zIndex: 2, padding: '60px 40px' }}>
-
-        {/* Decorative background elements */}
-        <div style={{ position: 'fixed', top: '5%', right: '-8%', width: 500, height: 500, border: '1px solid rgba(100,255,67,0.05)', borderRadius: '50%', pointerEvents: 'none' }} />
-        <div style={{ position: 'fixed', bottom: '10%', left: '-10%', width: 400, height: 400, border: '1px solid rgba(100,255,67,0.05)', borderRadius: '50%', pointerEvents: 'none' }} />
+      <section style={{
+        minHeight: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        position: 'relative',
+        zIndex: 2,
+        padding: '60px 40px'
+      }}>
 
         <div style={{ maxWidth: 520, margin: '0 auto', width: '100%' }}>
           {/* Header */}
-          <div style={{ textAlign: 'left', marginBottom: 60 }}>
-            <div style={{ fontSize: 12, color: C.bright, fontWeight: 800, letterSpacing: '0.14em', textTransform: 'uppercase', marginBottom: 16 }}>🔐 Admin Portal</div>
-            <h1 style={{ fontSize: 52, fontWeight: 900, lineHeight: 1.08, letterSpacing: '-2px', margin: '0 0 16px', color: C.text }}>
+          <div style={{ marginBottom: 48, animation: 'fadeUp 0.7s ease both' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+              <div style={{ width: 40, height: 1, background: C.bright }} />
+              <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.2em', textTransform: 'uppercase', color: C.bright }}>
+                🔐 Admin Portal
+              </span>
+              <div style={{ width: 40, height: 1, background: C.bright }} />
+            </div>
+            <h1 style={{
+              fontFamily: "'Cormorant Garamond', serif",
+              fontSize: 52,
+              fontWeight: 600,
+              letterSpacing: '-1.5px',
+              margin: '0 0 16px',
+              color: C.text,
+              lineHeight: 1.1,
+            }}>
               Secure Access
             </h1>
-            <p style={{ fontSize: 16, lineHeight: 1.7, color: C.textMid, margin: 0 }}>
+            <p style={{ fontSize: 15, lineHeight: 1.6, color: C.textMid, margin: 0 }}>
               Enter your admin credentials to access the ScraPair management dashboard.
             </p>
           </div>
 
           {/* Form Container */}
-          <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 28, padding: 48 }}>
+          <div style={{
+            background: C.surface,
+            border: `1px solid ${C.border}`,
+            borderRadius: 16,
+            padding: 40,
+            boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+            animation: 'fadeUp 0.7s ease 0.1s both',
+          }}>
 
             {/* Error Message */}
             {error && (
               <div style={{
                 background: C.errorBg,
                 border: `1px solid ${C.errorBorder}`,
-                borderRadius: 16,
+                borderRadius: 12,
                 padding: '16px 20px',
-                marginBottom: 32,
+                marginBottom: 28,
                 display: 'flex',
                 alignItems: 'center',
                 gap: 12,
@@ -137,7 +268,17 @@ const LoginPage = () => {
             <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
               {/* Username Input */}
               <div>
-                <label style={{ display: 'block', fontSize: 13, fontWeight: 700, color: C.textMid, marginBottom: 10, letterSpacing: '0.05em', textTransform: 'uppercase' }}>Username</label>
+                <label style={{
+                  display: 'block',
+                  fontSize: 12,
+                  fontWeight: 600,
+                  color: C.primary,
+                  marginBottom: 8,
+                  letterSpacing: '0.08em',
+                  textTransform: 'uppercase'
+                }}>
+                  Username
+                </label>
                 <input
                   type="text"
                   value={username}
@@ -150,16 +291,17 @@ const LoginPage = () => {
                   autoFocus
                   style={{
                     width: '100%',
-                    padding: '14px 16px',
+                    padding: '12px 16px',
                     border: `1px solid ${focusedInput === 'username' ? C.borderHover : C.border}`,
-                    borderRadius: 14,
-                    background: 'rgba(100,255,67,0.03)',
+                    borderRadius: 8,
+                    background: C.surfaceHigh,
                     color: C.text,
                     fontSize: 14,
+                    fontFamily: "'Outfit', sans-serif",
                     boxSizing: 'border-box',
                     transition: 'all 0.2s ease',
                     outline: 'none',
-                    boxShadow: focusedInput === 'username' ? `0 0 0 3px rgba(100,255,67,0.1)` : 'none',
+                    boxShadow: focusedInput === 'username' ? `0 0 0 3px ${C.glow}` : 'none',
                     opacity: loading ? 0.6 : 1,
                     cursor: loading ? 'not-allowed' : 'text',
                   }}
@@ -168,7 +310,17 @@ const LoginPage = () => {
 
               {/* Password Input */}
               <div>
-                <label style={{ fontSize: 13, fontWeight: 700, color: C.textMid, marginBottom: 10, letterSpacing: '0.05em', textTransform: 'uppercase', display: 'block' }}>Password</label>
+                <label style={{
+                  fontSize: 12,
+                  fontWeight: 600,
+                  color: C.primary,
+                  marginBottom: 8,
+                  letterSpacing: '0.08em',
+                  textTransform: 'uppercase',
+                  display: 'block'
+                }}>
+                  Password
+                </label>
                 <input
                   type="password"
                   value={password}
@@ -180,16 +332,17 @@ const LoginPage = () => {
                   placeholder="••••••••"
                   style={{
                     width: '100%',
-                    padding: '14px 16px',
+                    padding: '12px 16px',
                     border: `1px solid ${focusedInput === 'password' ? C.borderHover : C.border}`,
-                    borderRadius: 14,
-                    background: 'rgba(100,255,67,0.03)',
+                    borderRadius: 8,
+                    background: C.surfaceHigh,
                     color: C.text,
                     fontSize: 14,
+                    fontFamily: "'Outfit', sans-serif",
                     boxSizing: 'border-box',
                     transition: 'all 0.2s ease',
                     outline: 'none',
-                    boxShadow: focusedInput === 'password' ? `0 0 0 3px rgba(100,255,67,0.1)` : 'none',
+                    boxShadow: focusedInput === 'password' ? `0 0 0 3px ${C.glow}` : 'none',
                     opacity: loading ? 0.6 : 1,
                     cursor: loading ? 'not-allowed' : 'text',
                   }}
@@ -202,39 +355,39 @@ const LoginPage = () => {
                 disabled={loading}
                 style={{
                   width: '100%',
-                  padding: '16px 24px',
-                  marginTop: 16,
-                  background: loading
-                    ? 'linear-gradient(135deg, rgba(100,255,67,0.4), rgba(100,255,67,0.3))'
-                    : 'linear-gradient(135deg, #64ff43, #4de029)',
-                  color: '#062400',
-                  fontSize: 15,
-                  fontWeight: 800,
+                  padding: '14px 24px',
+                  marginTop: 8,
+                  background: loading ? C.textLow : C.bright,
+                  color: '#ffffff',
+                  fontSize: 14,
+                  fontWeight: 600,
+                  letterSpacing: '0.08em',
+                  textTransform: 'uppercase',
                   border: 'none',
-                  borderRadius: 14,
+                  borderRadius: 8,
                   cursor: loading ? 'not-allowed' : 'pointer',
-                  transition: 'all 0.22s cubic-bezier(0.16,1,0.3,1)',
-                  boxShadow: loading
-                    ? '0 0 0 0px transparent, 0 4px 16px rgba(100,255,67,0.2)'
-                    : '0 0 0 0px transparent, 0 8px 24px rgba(100,255,67,0.35)',
+                  transition: 'all 0.25s cubic-bezier(0.16,1,0.3,1)',
+                  boxShadow: loading ? 'none' : `0 2px 8px ${C.glowStrong}`,
                   transform: loading ? 'scale(0.98)' : 'scale(1)',
                 }}
                 onMouseEnter={e => {
                   if (!loading) {
-                    e.target.style.boxShadow = '0 0 0 5px rgba(100,255,67,0.15), 0 12px 36px rgba(100,255,67,0.5)';
-                    e.target.style.transform = 'translateY(-2px) scale(1.01)';
+                    e.target.style.background = C.brightDark;
+                    e.target.style.transform = 'translateY(-1px)';
+                    e.target.style.boxShadow = `0 4px 12px ${C.glowStrong}`;
                   }
                 }}
                 onMouseLeave={e => {
                   if (!loading) {
-                    e.target.style.boxShadow = '0 0 0 0px transparent, 0 8px 24px rgba(100,255,67,0.35)';
+                    e.target.style.background = C.bright;
                     e.target.style.transform = 'scale(1)';
+                    e.target.style.boxShadow = `0 2px 8px ${C.glowStrong}`;
                   }
                 }}
               >
                 {loading ? (
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-                    <div style={{ width: 14, height: 14, border: '2px solid rgba(6,36,0,0.2)', borderTop: '2px solid #062400', borderRadius: '50%', animation: 'spin 0.6s linear infinite' }} />
+                    <div style={{ width: 14, height: 14, border: '2px solid rgba(255,255,255,0.3)', borderTop: '2px solid #ffffff', borderRadius: '50%', animation: 'spin 0.6s linear infinite' }} />
                     <span>Logging in...</span>
                   </div>
                 ) : (
@@ -246,15 +399,15 @@ const LoginPage = () => {
             {/* Divider */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '32px 0' }}>
               <div style={{ flex: 1, height: '1px', background: C.border }} />
-              <span style={{ color: C.textLow, fontSize: 12 }}>secure access</span>
+              <span style={{ color: C.textLow, fontSize: 11, letterSpacing: '0.05em' }}>secure access</span>
               <div style={{ flex: 1, height: '1px', background: C.border }} />
             </div>
 
             {/* Info Box */}
             <div style={{
-              background: 'rgba(100,255,67,0.08)',
+              background: C.glow,
               border: `1px solid ${C.border}`,
-              borderRadius: 16,
+              borderRadius: 12,
               padding: '16px 20px',
             }}>
               <p style={{ margin: 0, fontSize: 12, color: C.textMid, lineHeight: 1.6 }}>
@@ -271,12 +424,6 @@ const LoginPage = () => {
           </div>
         </div>
       </section>
-
-      <style>{`
-        @keyframes spin {
-          to { transform: rotate(360deg); }
-        }
-      `}</style>
     </div>
   );
 };

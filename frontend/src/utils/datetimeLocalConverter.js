@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Convert datetime-local input to Manila time format for backend
  * 
  * IMPORTANT: This is a Philippines app. Users input times in MANILA TIMEZONE regardless

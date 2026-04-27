@@ -1,4 +1,4 @@
-﻿import { Request, Response } from 'express';
+import { Request, Response } from 'express';
 import { sequelize } from '../models';
 import { logUserVerified, logUserDeleted } from '../utils/auditLogger';
 

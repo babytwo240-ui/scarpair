@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Box,
@@ -24,18 +24,30 @@ import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 
+/* ─── Color tokens – 70% White / 30% Green Palette ────────────────── */
 const C = {
-  bright: '#64ff43',
-  deep: '#124d05',
-  darker: '#0a2e03',
-  surface: '#0d3806',
-  border: 'rgba(100,255,67,0.18)',
-  borderHover: 'rgba(100,255,67,0.45)',
-  text: '#e6ffe0',
-  textMid: 'rgba(230,255,224,0.55)',
-  textLow: 'rgba(230,255,224,0.3)',
-  glow: 'rgba(100,255,67,0.22)',
-  glowStrong: 'rgba(100,255,67,0.45)',
+  // Primary green (30%)
+  bright: '#2e7d32',        // Deep green for primary actions
+  brightDark: '#1b5e20',    // Darker green for hover
+  brightLight: '#4caf50',   // Lighter green for accents
+  // Backgrounds (70% white/light tones)
+  deep: '#f8fafc',          // Light grey-white background
+  darker: '#f8fafc',        // Light grey-white background
+  surface: '#ffffff',       // Pure white surfaces
+  surfaceHigh: '#f1f5f9',   // Light grey for subtle contrast
+  // Borders
+  border: 'rgba(0,0,0,0.08)',
+  borderHover: 'rgba(46,125,50,0.25)',
+  // Text (Dark grey for high contrast on white)
+  text: '#0f172a',          // Slate 900
+  textMid: '#475569',       // Slate 600
+  textLow: '#94a3b8',       // Slate 400
+  // Status colors
+  error: '#dc2626',
+  errorBg: 'rgba(220,38,38,0.08)',
+  // Glows
+  glow: 'rgba(46,125,50,0.04)',
+  glowStrong: 'rgba(46,125,50,0.12)',
 };
 
 const AdminCategoriesPage = () => {
@@ -116,7 +128,7 @@ const AdminCategoriesPage = () => {
       });
 
       if (!res.ok) throw new Error('Failed to save category');
-      
+
       handleCloseDialog();
       fetchCategories();
     } catch (err) {
@@ -140,7 +152,7 @@ const AdminCategoriesPage = () => {
       });
 
       if (!res.ok) throw new Error('Failed to delete category');
-      
+
       fetchCategories();
     } catch (err) {
       setError(err.message);
@@ -150,22 +162,82 @@ const AdminCategoriesPage = () => {
   if (loading) {
     return (
       <Box sx={{ minHeight: '100vh', background: C.darker, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-        <CircularProgress sx={{ color: C.bright }} />
+        <Box sx={{ textAlign: 'center' }}>
+          <CircularProgress sx={{ color: C.bright }} />
+          <Typography sx={{ color: C.textMid, mt: 2, fontSize: '0.9rem' }}>Loading categories...</Typography>
+        </Box>
       </Box>
     );
   }
 
   return (
-    <Box sx={{ minHeight: '100vh', background: C.darker, color: C.text, fontFamily: "'DM Sans','Helvetica Neue',sans-serif", overflowX: 'hidden' }}>
-      {/* Grain overlay */}
-      <Box sx={{ position: 'fixed', inset: 0, backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.015'/%3E%3C/svg%3E")`, pointerEvents: 'none', zIndex: 1 }} />
+    <Box sx={{
+      minHeight: '100vh',
+      background: C.darker,
+      color: C.text,
+      fontFamily: "'Outfit', sans-serif",
+      overflowX: 'hidden',
+      position: 'relative',
+    }}>
+      {/* Ambient orbs */}
+      <Box sx={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 0, overflow: 'hidden' }}>
+        <Box sx={{
+          position: 'absolute', top: '-15%', right: '-10%',
+          width: 700, height: 700, borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(46,125,50,0.04) 0%, transparent 65%)',
+          animation: 'floatA 14s ease-in-out infinite',
+        }} />
+        <Box sx={{
+          position: 'absolute', bottom: '10%', left: '-8%',
+          width: 500, height: 500, borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(46,125,50,0.03) 0%, transparent 65%)',
+          animation: 'floatB 18s ease-in-out infinite',
+        }} />
+        <Box sx={{
+          position: 'absolute', inset: 0,
+          backgroundImage: `
+            linear-gradient(rgba(46,125,50,0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(46,125,50,0.03) 1px, transparent 1px)
+          `,
+          backgroundSize: '64px 64px',
+        }} />
+      </Box>
+
+      <style>{`
+        @keyframes floatA {
+          0%, 100% { transform: translateY(0px) rotate(0deg); }
+          50% { transform: translateY(-18px) rotate(3deg); }
+        }
+        @keyframes floatB {
+          0%, 100% { transform: translateY(0px) rotate(0deg); }
+          50% { transform: translateY(-12px) rotate(-2deg); }
+        }
+        @keyframes fadeUp {
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
 
       <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 10, py: 6 }}>
         {/* Header */}
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 5 }}>
-          <Box>
-            <Typography sx={{ fontSize: '3rem', fontWeight: 900, color: C.bright, mb: 1 }}>
-              ◐ Waste Categories
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 5, flexWrap: 'wrap', gap: 2 }}>
+          <Box sx={{ animation: 'fadeUp 0.7s ease both' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+              <Box sx={{ width: 40, height: 1, background: C.bright }} />
+              <Typography sx={{ fontSize: '0.75rem', fontWeight: 600, letterSpacing: '0.2em', textTransform: 'uppercase', color: C.bright }}>
+                Management
+              </Typography>
+              <Box sx={{ width: 40, height: 1, background: C.bright }} />
+            </Box>
+            <Typography sx={{
+              fontSize: '3rem',
+              fontWeight: 600,
+              fontFamily: "'Cormorant Garamond', serif",
+              color: C.text,
+              mb: 1,
+              letterSpacing: '-1px',
+            }}>
+              Waste Categories
             </Typography>
             <Typography sx={{ fontSize: '0.95rem', color: C.textMid }}>
               Manage material waste categories
@@ -175,57 +247,100 @@ const AdminCategoriesPage = () => {
             variant="contained"
             startIcon={<AddIcon />}
             onClick={() => handleOpenDialog()}
-            sx={{ background: C.bright, color: '#082800', fontWeight: 700, '&:hover': { background: '#7fff5c' } }}
+            sx={{
+              background: C.bright,
+              color: '#ffffff',
+              fontWeight: 700,
+              borderRadius: '8px',
+              textTransform: 'none',
+              px: 3,
+              py: 1,
+              boxShadow: `0 2px 8px ${C.glowStrong}`,
+              transition: 'all 0.2s',
+              '&:hover': {
+                background: C.brightDark,
+                transform: 'translateY(-1px)',
+                boxShadow: `0 4px 12px ${C.glowStrong}`
+              }
+            }}
           >
             Add Category
           </Button>
         </Box>
 
         {error && (
-          <Box sx={{ p: 2.5, background: 'rgba(255,67,67,0.12)', border: `1px solid rgba(255,67,67,0.35)`, borderRadius: '12px', mb: 3, color: '#ff9b9b' }}>
-            {error}
+          <Box sx={{
+            p: 2.5,
+            background: C.errorBg,
+            border: `1px solid ${C.error}33`,
+            borderRadius: '12px',
+            mb: 3,
+            color: C.error,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1.5,
+          }}>
+            <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
+              <circle cx="10" cy="10" r="9" stroke={C.error} strokeWidth="2" />
+              <path d="M10 6v4M10 14h.01" stroke={C.error} strokeWidth="2" strokeLinecap="round" />
+            </svg>
+            <Typography sx={{ fontSize: '0.9rem' }}>{error}</Typography>
           </Box>
         )}
 
         {/* Categories Table */}
         <Box sx={{
-          borderRadius: '14px',
+          borderRadius: '16px',
           overflow: 'hidden',
           border: `1px solid ${C.border}`,
-          background: `linear-gradient(135deg, ${C.surface} 0%, rgba(18,77,5,0.4) 100%)`,
-          backdropFilter: 'blur(8px)',
+          background: C.surface,
+          boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
         }}>
           {categories.length === 0 ? (
-            <Box sx={{ p: 4, textAlign: 'center', color: C.textMid }}>
-              No categories found
+            <Box sx={{ p: 6, textAlign: 'center', color: C.textMid }}>
+              <Box sx={{ fontSize: 48, mb: 2 }}>📦</Box>
+              <Typography>No categories found</Typography>
             </Box>
           ) : (
             <TableContainer sx={{ background: 'transparent' }}>
               <Table sx={{ '& .MuiTableCell-root': { borderColor: C.border } }}>
                 <TableHead>
-                  <TableRow sx={{ background: 'rgba(12,34,2,0.8)' }}>
-                    <TableCell sx={{ color: C.bright, fontWeight: 700 }}>Category Name</TableCell>
-                    <TableCell sx={{ color: C.bright, fontWeight: 700 }}>Description</TableCell>
-                    <TableCell align="right" sx={{ color: C.bright, fontWeight: 700 }}>Actions</TableCell>
+                  <TableRow sx={{ background: C.surfaceHigh }}>
+                    <TableCell sx={{ color: C.bright, fontWeight: 700, fontSize: '0.75rem', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Category Name</TableCell>
+                    <TableCell sx={{ color: C.bright, fontWeight: 700, fontSize: '0.75rem', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Description</TableCell>
+                    <TableCell align="right" sx={{ color: C.bright, fontWeight: 700, fontSize: '0.75rem', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Actions</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {categories.map((category) => (
-                    <TableRow key={category.id} sx={{ '&:hover': { background: `rgba(100,255,67,0.05)` } }}>
+                  {categories.map((category, index) => (
+                    <TableRow
+                      key={category.id}
+                      sx={{
+                        '&:hover': { background: C.glow },
+                        animation: `fadeUp 0.3s ease ${index * 0.05}s both`,
+                      }}
+                    >
                       <TableCell sx={{ color: C.bright, fontWeight: 600 }}>{category.name}</TableCell>
                       <TableCell sx={{ color: C.textMid }}>{category.description || 'N/A'}</TableCell>
                       <TableCell align="right">
                         <IconButton
                           size="small"
                           onClick={() => handleOpenDialog(category)}
-                          sx={{ color: C.bright, '&:hover': { background: `${C.bright}22` } }}
+                          sx={{
+                            color: C.bright,
+                            '&:hover': { background: C.glow },
+                            mr: 1
+                          }}
                         >
                           <EditIcon fontSize="small" />
                         </IconButton>
                         <IconButton
                           size="small"
                           onClick={() => handleDelete(category.id)}
-                          sx={{ color: '#ff6464', '&:hover': { background: 'rgba(255,100,100,0.15)' } }}
+                          sx={{
+                            color: C.error,
+                            '&:hover': { background: C.errorBg }
+                          }}
                         >
                           <DeleteIcon fontSize="small" />
                         </IconButton>
@@ -239,21 +354,28 @@ const AdminCategoriesPage = () => {
         </Box>
 
         {/* Add/Edit Dialog */}
-        <Dialog 
-          open={dialogOpen} 
-          onClose={handleCloseDialog} 
-          maxWidth="sm" 
+        <Dialog
+          open={dialogOpen}
+          onClose={handleCloseDialog}
+          maxWidth="sm"
           fullWidth
           PaperProps={{
             sx: {
-              background: `linear-gradient(135deg, ${C.surface} 0%, rgba(18,77,5,0.5) 100%)`,
+              background: C.surface,
               border: `1px solid ${C.border}`,
               color: C.text,
-              backdropFilter: 'blur(8px)',
+              borderRadius: '16px',
+              boxShadow: '0 20px 40px -12px rgba(0,0,0,0.15)',
             }
           }}
         >
-          <DialogTitle sx={{ color: C.bright, fontWeight: 700 }}>
+          <DialogTitle sx={{
+            color: C.bright,
+            fontWeight: 700,
+            fontFamily: "'Cormorant Garamond', serif",
+            fontSize: '1.5rem',
+            pb: 1
+          }}>
             {editingId ? '✎ Edit Category' : '◎ Add New Category'}
           </DialogTitle>
           <DialogContent sx={{ pt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -265,11 +387,13 @@ const AdminCategoriesPage = () => {
               sx={{
                 '& .MuiOutlinedInput-root': {
                   color: C.text,
+                  backgroundColor: C.surfaceHigh,
                   '& fieldset': { borderColor: C.border },
                   '&:hover fieldset': { borderColor: C.borderHover },
-                  background: 'rgba(13,56,6,0.6)',
+                  '&.Mui-focused fieldset': { borderColor: C.bright }
                 },
                 '& .MuiInputLabel-root': { color: C.textMid },
+                '& .MuiInputLabel-root.Mui-focused': { color: C.bright }
               }}
             />
             <TextField
@@ -282,25 +406,49 @@ const AdminCategoriesPage = () => {
               sx={{
                 '& .MuiOutlinedInput-root': {
                   color: C.text,
+                  backgroundColor: C.surfaceHigh,
                   '& fieldset': { borderColor: C.border },
                   '&:hover fieldset': { borderColor: C.borderHover },
-                  background: 'rgba(13,56,6,0.6)',
+                  '&.Mui-focused fieldset': { borderColor: C.bright }
                 },
                 '& .MuiInputLabel-root': { color: C.textMid },
+                '& .MuiInputLabel-root.Mui-focused': { color: C.bright }
               }}
             />
           </DialogContent>
           <DialogActions sx={{ p: 2, gap: 1 }}>
-            <Button 
+            <Button
               onClick={handleCloseDialog}
-              sx={{ color: C.textMid, '&:hover': { background: `${C.border}` } }}
+              sx={{
+                color: C.textMid,
+                textTransform: 'none',
+                borderRadius: '8px',
+                '&:hover': {
+                  background: C.glow,
+                  color: C.bright
+                }
+              }}
             >
               Cancel
             </Button>
-            <Button 
-              onClick={handleSave} 
+            <Button
+              onClick={handleSave}
               variant="contained"
-              sx={{ background: C.bright, color: '#082800', fontWeight: 700, '&:hover': { background: '#7fff5c' } }}
+              sx={{
+                background: C.bright,
+                color: '#ffffff',
+                fontWeight: 700,
+                textTransform: 'none',
+                borderRadius: '8px',
+                px: 3,
+                boxShadow: `0 2px 8px ${C.glowStrong}`,
+                transition: 'all 0.2s',
+                '&:hover': {
+                  background: C.brightDark,
+                  transform: 'translateY(-1px)',
+                  boxShadow: `0 4px 12px ${C.glowStrong}`
+                }
+              }}
             >
               {editingId ? 'Update' : 'Add'}
             </Button>
@@ -312,4 +460,3 @@ const AdminCategoriesPage = () => {
 };
 
 export default AdminCategoriesPage;
-

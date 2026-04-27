@@ -3,19 +3,22 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.validateResetPassword = exports.validateNewPassword = exports.deleteUserAccount = exports.updateUserProfile = exports.updateUserPassword = exports.setPasswordResetToken = exports.lockUserAccount = exports.resetLoginAttempts = exports.incrementLoginAttempts = exports.verifyUserEmail = exports.recyclerEmailExists = exports.businessEmailExists = exports.verifyRecyclerCredentials = exports.verifyBusinessCredentials = exports.findRecyclerByEmail = exports.findBusinessByEmail = exports.registerRecycler = exports.registerBusiness = void 0;
+exports.getAllUsersSummary = exports.countAllUsers = exports.validateResetPassword = exports.validateNewPassword = exports.deleteUserAccount = exports.updateUserProfile = exports.updateUserPassword = exports.setPasswordResetToken = exports.lockUserAccount = exports.resetLoginAttempts = exports.incrementLoginAttempts = exports.verifyUserEmail = exports.recyclerEmailExists = exports.businessEmailExists = exports.verifyRecyclerCredentials = exports.verifyBusinessCredentials = exports.findRecyclerByEmail = exports.findBusinessByEmail = exports.registerRecycler = exports.registerBusiness = void 0;
 const securityUtil_1 = require("../utils/securityUtil");
 const models_1 = require("../models");
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
+const logger_1 = __importDefault(require("../utils/logger"));
 const passwordSecurityUtil_1 = require("../utils/passwordSecurityUtil");
 const redis_1 = require("../config/redis");
 const businessEmailExists = async (email) => {
-    const user = await models_1.User.findOne({ where: { email, type: 'business' } });
+    const normalizedEmail = email.toLowerCase().trim();
+    const user = await models_1.User.findOne({ where: { email: normalizedEmail, type: 'business' } });
     return !!user;
 };
 exports.businessEmailExists = businessEmailExists;
 const recyclerEmailExists = async (email) => {
-    const user = await models_1.User.findOne({ where: { email, type: 'recycler' } });
+    const normalizedEmail = email.toLowerCase().trim();
+    const user = await models_1.User.findOne({ where: { email: normalizedEmail, type: 'recycler' } });
     return !!user;
 };
 exports.recyclerEmailExists = recyclerEmailExists;
@@ -86,7 +89,8 @@ const registerRecycler = async (recyclerData) => {
 exports.registerRecycler = registerRecycler;
 const findBusinessByEmail = async (email) => {
     try {
-        const user = await models_1.User.findOne({ where: { email, type: 'business' } });
+        const normalizedEmail = email.toLowerCase().trim();
+        const user = await models_1.User.findOne({ where: { email: normalizedEmail, type: 'business' } });
         if (!user)
             return null;
         return {
@@ -113,7 +117,8 @@ const findBusinessByEmail = async (email) => {
 exports.findBusinessByEmail = findBusinessByEmail;
 const findRecyclerByEmail = async (email) => {
     try {
-        const user = await models_1.User.findOne({ where: { email, type: 'recycler' } });
+        const normalizedEmail = email.toLowerCase().trim();
+        const user = await models_1.User.findOne({ where: { email: normalizedEmail, type: 'recycler' } });
         if (!user)
             return null;
         return {
@@ -141,24 +146,40 @@ const findRecyclerByEmail = async (email) => {
 exports.findRecyclerByEmail = findRecyclerByEmail;
 const verifyBusinessCredentials = async (email, password) => {
     try {
-        const user = await findBusinessByEmail(email);
-        if (!user)
+        const normalizedEmail = email.toLowerCase().trim();
+        logger_1.default.debug(`[AUTH-DEBUG] Verifying business credentials for: ${normalizedEmail}`);
+        const user = await findBusinessByEmail(normalizedEmail);
+        if (!user) {
+            logger_1.default.debug(`[AUTH-DEBUG] Business user lookup failed for email: ${normalizedEmail}`);
             return false;
-        return await bcryptjs_1.default.compare(password, user.password);
+        }
+        logger_1.default.debug(`[AUTH-DEBUG] Business user found. ID: ${user.id}, Hash length: ${user.password?.length || 0}`);
+        const isValid = await bcryptjs_1.default.compare(password, user.password);
+        logger_1.default.debug(`[AUTH-DEBUG] Password comparison result for ${normalizedEmail}: ${isValid}`);
+        return isValid;
     }
     catch (error) {
+        logger_1.default.error(`[AUTH-DEBUG] Error in verifyBusinessCredentials: ${error.message}`);
         return false;
     }
 };
 exports.verifyBusinessCredentials = verifyBusinessCredentials;
 const verifyRecyclerCredentials = async (email, password) => {
     try {
-        const user = await findRecyclerByEmail(email);
-        if (!user)
+        const normalizedEmail = email.toLowerCase().trim();
+        logger_1.default.debug(`[AUTH-DEBUG] Verifying recycler credentials for: ${normalizedEmail}`);
+        const user = await findRecyclerByEmail(normalizedEmail);
+        if (!user) {
+            logger_1.default.debug(`[AUTH-DEBUG] Recycler user lookup failed for email: ${normalizedEmail}`);
             return false;
-        return await bcryptjs_1.default.compare(password, user.password);
+        }
+        logger_1.default.debug(`[AUTH-DEBUG] Recycler user found. ID: ${user.id}, Hash length: ${user.password?.length || 0}`);
+        const isValid = await bcryptjs_1.default.compare(password, user.password);
+        logger_1.default.debug(`[AUTH-DEBUG] Password comparison result for ${normalizedEmail}: ${isValid}`);
+        return isValid;
     }
     catch (error) {
+        logger_1.default.error(`[AUTH-DEBUG] Error in verifyRecyclerCredentials: ${error.message}`);
         return false;
     }
 };
@@ -361,4 +382,16 @@ const validateResetPassword = async (email, newPassword) => {
     }
 };
 exports.validateResetPassword = validateResetPassword;
+const countAllUsers = async () => {
+    return await models_1.User.count();
+};
+exports.countAllUsers = countAllUsers;
+const getAllUsersSummary = async () => {
+    return await models_1.User.findAll({
+        attributes: ['id', 'email', 'type', 'isVerified', 'isLocked'],
+        limit: 200,
+        order: [['id', 'DESC']]
+    });
+};
+exports.getAllUsersSummary = getAllUsersSummary;
 //# sourceMappingURL=userService.js.map

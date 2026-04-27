@@ -1,6 +1,7 @@
-﻿import { calculateUnlockTime } from '../utils/securityUtil';
+import { calculateUnlockTime } from '../utils/securityUtil';
 import { User, sequelize } from '../models';
 import bcryptjs from 'bcryptjs';
+import logger from '../utils/logger';
 import { addPasswordToHistory, isPasswordInHistory } from '../utils/passwordSecurityUtil';
 import { redisClient } from '../config/redis';
 
@@ -40,11 +41,13 @@ interface UserResult {
   [key: string]: any;
 }
 const businessEmailExists = async (email: string): Promise<boolean> => {
-  const user = await User.findOne({ where: { email, type: 'business' } });
+  const normalizedEmail = email.toLowerCase().trim();
+  const user = await User.findOne({ where: { email: normalizedEmail, type: 'business' } });
   return !!user;
 };
 const recyclerEmailExists = async (email: string): Promise<boolean> => {
-  const user = await User.findOne({ where: { email, type: 'recycler' } });
+  const normalizedEmail = email.toLowerCase().trim();
+  const user = await User.findOne({ where: { email: normalizedEmail, type: 'recycler' } });
   return !!user;
 };
 const registerBusiness = async (businessData: BusinessData): Promise<UserResult | ErrorResult> => {
@@ -115,7 +118,8 @@ const registerRecycler = async (recyclerData: RecyclerData): Promise<UserResult 
 
 const findBusinessByEmail = async (email: string): Promise<UserResult | null> => {
   try {
-    const user = await User.findOne({ where: { email, type: 'business' } });
+    const normalizedEmail = email.toLowerCase().trim();
+    const user = await User.findOne({ where: { email: normalizedEmail, type: 'business' } });
     if (!user) return null;
     return {
       id: user.id!,
@@ -139,7 +143,8 @@ const findBusinessByEmail = async (email: string): Promise<UserResult | null> =>
 };
 const findRecyclerByEmail = async (email: string): Promise<UserResult | null> => {
   try {
-    const user = await User.findOne({ where: { email, type: 'recycler' } });
+    const normalizedEmail = email.toLowerCase().trim();
+    const user = await User.findOne({ where: { email: normalizedEmail, type: 'recycler' } });
     if (!user) return null;
     return {
       id: user.id!,
@@ -165,20 +170,46 @@ const findRecyclerByEmail = async (email: string): Promise<UserResult | null> =>
 
 const verifyBusinessCredentials = async (email: string, password: string): Promise<boolean> => {
   try {
-    const user = await findBusinessByEmail(email);
-    if (!user) return false;
-    return await bcryptjs.compare(password, user.password);
-  } catch (error) {
+    const normalizedEmail = email.toLowerCase().trim();
+    logger.debug(`[AUTH-DEBUG] Verifying business credentials for: ${normalizedEmail}`);
+    
+    const user = await findBusinessByEmail(normalizedEmail);
+    if (!user) {
+      logger.debug(`[AUTH-DEBUG] Business user lookup failed for email: ${normalizedEmail}`);
+      return false;
+    }
+    
+    logger.debug(`[AUTH-DEBUG] Business user found. ID: ${user.id}, Hash length: ${user.password?.length || 0}`);
+    
+    const isValid = await bcryptjs.compare(password, user.password);
+    logger.debug(`[AUTH-DEBUG] Password comparison result for ${normalizedEmail}: ${isValid}`);
+    
+    return isValid;
+  } catch (error: any) {
+    logger.error(`[AUTH-DEBUG] Error in verifyBusinessCredentials: ${error.message}`);
     return false;
   }
 };
 
 const verifyRecyclerCredentials = async (email: string, password: string): Promise<boolean> => {
   try {
-    const user = await findRecyclerByEmail(email);
-    if (!user) return false;
-    return await bcryptjs.compare(password, user.password);
-  } catch (error) {
+    const normalizedEmail = email.toLowerCase().trim();
+    logger.debug(`[AUTH-DEBUG] Verifying recycler credentials for: ${normalizedEmail}`);
+    
+    const user = await findRecyclerByEmail(normalizedEmail);
+    if (!user) {
+      logger.debug(`[AUTH-DEBUG] Recycler user lookup failed for email: ${normalizedEmail}`);
+      return false;
+    }
+    
+    logger.debug(`[AUTH-DEBUG] Recycler user found. ID: ${user.id}, Hash length: ${user.password?.length || 0}`);
+    
+    const isValid = await bcryptjs.compare(password, user.password);
+    logger.debug(`[AUTH-DEBUG] Password comparison result for ${normalizedEmail}: ${isValid}`);
+    
+    return isValid;
+  } catch (error: any) {
+    logger.error(`[AUTH-DEBUG] Error in verifyRecyclerCredentials: ${error.message}`);
     return false;
   }
 };
@@ -412,6 +443,18 @@ const validateResetPassword = async (
   }
 };
 
+const countAllUsers = async (): Promise<number> => {
+  return await User.count();
+};
+
+const getAllUsersSummary = async (): Promise<any[]> => {
+  return await User.findAll({
+    attributes: ['id', 'email', 'type', 'isVerified', 'isLocked'],
+    limit: 200,
+    order: [['id', 'DESC']]
+  });
+};
+
 export {
   registerBusiness,
   registerRecycler,
@@ -430,7 +473,9 @@ export {
   updateUserProfile,
   deleteUserAccount,
   validateNewPassword,
-  validateResetPassword
+  validateResetPassword,
+  countAllUsers,
+  getAllUsersSummary
 };
 export type { BusinessData, RecyclerData, UserResult };
 

@@ -1,4 +1,4 @@
-﻿import bcryptjs from 'bcryptjs';
+import bcryptjs from 'bcryptjs';
 
 /**
  * SECURITY UTILITY FOR PASSWORD HISTORY

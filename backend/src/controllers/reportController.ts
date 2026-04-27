@@ -1,4 +1,4 @@
-﻿import { Request, Response } from 'express';
+import { Request, Response } from 'express';
 import { sequelize } from '../models';
 import { validateReportReason, shouldAutoApprove, getPointDeduction } from '../utils/reportValidator';
 import { logReportSubmitted, logReportApproved, logReportRejected } from '../utils/systemLogger';

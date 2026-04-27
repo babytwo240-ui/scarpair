@@ -1,4 +1,4 @@
-﻿import { Request, Response } from 'express';
+import { Request, Response } from 'express';
 import { sequelize } from '../models';
 
 const getPostRating = async (req: Request, res: Response): Promise<any> => {

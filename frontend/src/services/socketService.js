@@ -1,4 +1,4 @@
-﻿import io from 'socket.io-client';
+import io from 'socket.io-client';
 
 // Determine socket URL based on environment
 const determineSocketUrl = () => {

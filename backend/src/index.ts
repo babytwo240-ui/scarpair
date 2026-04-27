@@ -94,11 +94,8 @@ app.use(cors({
     // Allow requests with no origin (same-origin requests, like mobile apps or curl requests)
     if (!origin) return callback(null, true);
     
-    if (corsOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
+    // Allow all origins for easier testing locally and online
+    callback(null, true);
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],

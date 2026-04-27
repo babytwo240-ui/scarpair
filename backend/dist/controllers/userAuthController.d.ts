@@ -7,6 +7,6 @@ declare const recyclerLogin: (req: Request, res: Response) => Promise<any>;
 declare const logout: (req: Request, res: Response) => Promise<any>;
 declare const forgotPassword: (req: Request, res: Response) => Promise<any>;
 declare const resetPassword: (req: Request, res: Response) => Promise<any>;
-declare const getDebugEmails: (req: Request, res: Response) => any;
-export { businessSignup, recyclerSignup, verifyEmail, businessLogin, recyclerLogin, logout, forgotPassword, resetPassword, getDebugEmails };
+declare const debugCheck: (req: Request, res: Response) => Promise<any>;
+export { businessSignup, recyclerSignup, verifyEmail, businessLogin, recyclerLogin, logout, forgotPassword, resetPassword, debugCheck };
 //# sourceMappingURL=userAuthController.d.ts.map

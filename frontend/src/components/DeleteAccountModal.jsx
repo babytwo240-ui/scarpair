@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import userService from '../services/userService';
 
 const DeleteAccountModal = ({ isOpen, onClose, onSuccess }) => {

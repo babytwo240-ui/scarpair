@@ -18,7 +18,7 @@ const PORT = process.env.PORT || 5498;
 const corsOrigins = (process.env.CORS_ORIGIN || 'http://localhost:4000,http://127.0.0.1:4000').split(',').map(origin => origin.trim());
 
 app.use(cors({
-  origin: corsOrigins,
+  origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => callback(null, true),
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
@@ -27,7 +27,7 @@ app.use(cors({
 
 // Explicit OPTIONS handler for preflight requests
 app.options('*', cors({
-  origin: corsOrigins,
+  origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => callback(null, true),
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],

@@ -1,4 +1,4 @@
-﻿import { Notification } from '../models';
+import { Notification } from '../models';
 import type { NotificationInstance } from '../models';
 
 export interface NotificationData {

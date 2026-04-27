@@ -1,4 +1,4 @@
-﻿import { Sequelize, Op } from 'sequelize';
+import { Sequelize, Op } from 'sequelize';
 
 export interface DeleteResult {
   success: boolean;

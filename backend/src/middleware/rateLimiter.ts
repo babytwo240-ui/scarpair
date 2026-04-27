@@ -1,4 +1,4 @@
-﻿import Redis from 'ioredis';
+import Redis from 'ioredis';
 import { Request, Response, NextFunction } from 'express';
 import { rateLimitConfig } from '../config/rateLimits';
 import redisClient from '../config/redis';

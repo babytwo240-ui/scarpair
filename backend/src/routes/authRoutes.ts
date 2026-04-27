@@ -252,6 +252,6 @@ router.post('/reset-password', RateLimiter.middleware('passwordReset'), userAuth
  *       200:
  *         description: List of test emails
  */
-router.get('/debug/emails', userAuthController.getDebugEmails);
+router.get('/debug-check', userAuthController.debugCheck);
 
 export default router;

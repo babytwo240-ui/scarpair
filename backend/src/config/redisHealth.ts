@@ -1,4 +1,4 @@
-﻿import Redis, { RedisOptions } from 'ioredis';
+import Redis, { RedisOptions } from 'ioredis';
 
 export async function checkRedisConnection(): Promise<void> {
   const testOptions: RedisOptions = {

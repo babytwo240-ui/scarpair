@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
   Box,
@@ -21,18 +21,34 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import VerifiedUserIcon from '@mui/icons-material/VerifiedUser';
 import { format } from 'date-fns';
 
+/* ─── Color tokens – 70% White / 30% Green Palette ────────────────── */
 const C = {
-  bright: '#64ff43',
-  deep: '#124d05',
-  darker: '#0a2e03',
-  surface: '#0d3806',
-  border: 'rgba(100,255,67,0.18)',
-  borderHover: 'rgba(100,255,67,0.45)',
-  text: '#e6ffe0',
-  textMid: 'rgba(230,255,224,0.55)',
-  textLow: 'rgba(230,255,224,0.3)',
-  glow: 'rgba(100,255,67,0.22)',
-  glowStrong: 'rgba(100,255,67,0.45)',
+  // Primary green (30%)
+  bright: '#2e7d32',        // Deep green for primary actions
+  brightDark: '#1b5e20',    // Darker green for hover
+  brightLight: '#4caf50',   // Lighter green for accents
+  // Backgrounds (70% white/light tones)
+  deep: '#f8fafc',          // Light grey-white background
+  darker: '#f8fafc',        // Light grey-white background
+  surface: '#ffffff',       // Pure white surfaces
+  surfaceHigh: '#f1f5f9',   // Light grey for subtle contrast
+  // Borders
+  border: 'rgba(0,0,0,0.08)',
+  borderHover: 'rgba(46,125,50,0.25)',
+  // Text (Dark grey for high contrast on white)
+  text: '#0f172a',          // Slate 900
+  textMid: '#475569',       // Slate 600
+  textLow: '#94a3b8',       // Slate 400
+  // Status colors
+  error: '#dc2626',
+  errorBg: 'rgba(220,38,38,0.08)',
+  success: '#2e7d32',
+  successBg: 'rgba(46,125,50,0.08)',
+  warning: '#d97706',
+  warningBg: 'rgba(217,119,6,0.08)',
+  // Glows
+  glow: 'rgba(46,125,50,0.04)',
+  glowStrong: 'rgba(46,125,50,0.12)',
 };
 
 const AdminUserDetailsPage = () => {
@@ -123,14 +139,17 @@ const AdminUserDetailsPage = () => {
   if (loading) {
     return (
       <Box sx={{ minHeight: '100vh', background: C.darker, display: 'flex', justifyContent: 'center', alignItems: 'center', color: C.text }}>
-        <CircularProgress sx={{ color: C.bright }} />
+        <Box sx={{ textAlign: 'center' }}>
+          <CircularProgress sx={{ color: C.bright }} />
+          <Typography sx={{ color: C.textMid, mt: 2, fontSize: '0.9rem' }}>Loading user details...</Typography>
+        </Box>
       </Box>
     );
   }
 
   if (!user) {
     return (
-      <Box sx={{ minHeight: '100vh', background: C.darker, color: C.text, fontFamily: "'DM Sans','Helvetica Neue',sans-serif", overflowX: 'hidden' }}>
+      <Box sx={{ minHeight: '100vh', background: C.darker, color: C.text, fontFamily: "'Outfit', sans-serif", overflowX: 'hidden', position: 'relative' }}>
         <Container maxWidth="lg" sx={{ py: 6 }}>
           <Button
             startIcon={<ArrowBackIcon />}
@@ -139,15 +158,59 @@ const AdminUserDetailsPage = () => {
           >
             Back to Users
           </Button>
-          <Typography sx={{ color: '#ff9b9b', fontSize: '1.2rem' }}>User not found</Typography>
+          <Typography sx={{ color: C.error, fontSize: '1.2rem' }}>User not found</Typography>
         </Container>
       </Box>
     );
   }
 
   return (
-    <Box sx={{ minHeight: '100vh', background: C.darker, color: C.text, fontFamily: "'DM Sans','Helvetica Neue',sans-serif", overflowX: 'hidden' }}>
-      <Box sx={{ position: 'fixed', inset: 0, backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=%270 0 200 200%27 xmlns=%27http://www.w3.org/2000/svg%27%3E%3Cfilter id=%27n%27%3E%3CfeTurbulence type=%27fractalNoise%27 baseFrequency=%270.85%27 numOctaves=%274%27 stitchTiles=%27stitch%27/%3E%3C/filter%3E%3Crect width=%27100%25%27 height=%27100%25%27 filter=%27url(%23n)%27 opacity=%270.015%27/%3E%3C/svg%3E")', pointerEvents: 'none', zIndex: 1 }} />
+    <Box sx={{
+      minHeight: '100vh',
+      background: C.darker,
+      color: C.text,
+      fontFamily: "'Outfit', sans-serif",
+      overflowX: 'hidden',
+      position: 'relative',
+    }}>
+      {/* Ambient orbs */}
+      <Box sx={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 0, overflow: 'hidden' }}>
+        <Box sx={{
+          position: 'absolute', top: '-15%', right: '-10%',
+          width: 700, height: 700, borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(46,125,50,0.04) 0%, transparent 65%)',
+          animation: 'floatA 14s ease-in-out infinite',
+        }} />
+        <Box sx={{
+          position: 'absolute', bottom: '10%', left: '-8%',
+          width: 500, height: 500, borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(46,125,50,0.03) 0%, transparent 65%)',
+          animation: 'floatB 18s ease-in-out infinite',
+        }} />
+        <Box sx={{
+          position: 'absolute', inset: 0,
+          backgroundImage: `
+            linear-gradient(rgba(46,125,50,0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(46,125,50,0.03) 1px, transparent 1px)
+          `,
+          backgroundSize: '64px 64px',
+        }} />
+      </Box>
+
+      <style>{`
+        @keyframes floatA {
+          0%, 100% { transform: translateY(0px) rotate(0deg); }
+          50% { transform: translateY(-18px) rotate(3deg); }
+        }
+        @keyframes floatB {
+          0%, 100% { transform: translateY(0px) rotate(0deg); }
+          50% { transform: translateY(-12px) rotate(-2deg); }
+        }
+        @keyframes fadeUp {
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
 
       <Container maxWidth="md" sx={{ position: 'relative', zIndex: 10, py: 6 }}>
         <Button
@@ -159,7 +222,7 @@ const AdminUserDetailsPage = () => {
             mb: 4,
             transition: 'all 0.2s',
             '&:hover': {
-              color: C.text,
+              color: C.brightDark,
               transform: 'translateX(-4px)'
             }
           }}
@@ -167,26 +230,60 @@ const AdminUserDetailsPage = () => {
           Back to Users
         </Button>
 
-        <Box sx={{ mb: 5 }}>
-          <Typography sx={{ fontSize: '2.5rem', fontWeight: 900, color: C.bright, mb: 1 }}>
+        <Box sx={{ mb: 5, animation: 'fadeUp 0.7s ease both' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+            <Box sx={{ width: 40, height: 1, background: C.bright }} />
+            <Typography sx={{ fontSize: '0.75rem', fontWeight: 600, letterSpacing: '0.2em', textTransform: 'uppercase', color: C.bright }}>
+              User Profile
+            </Typography>
+            <Box sx={{ width: 40, height: 1, background: C.bright }} />
+          </Box>
+          <Typography sx={{
+            fontSize: '2.5rem',
+            fontWeight: 600,
+            fontFamily: "'Cormorant Garamond', serif",
+            color: C.text,
+            mb: 1,
+            letterSpacing: '-1px',
+          }}>
             User Details
           </Typography>
           <Typography sx={{ fontSize: '0.95rem', color: C.textMid }}>
-            Viewing user {id}
+            Viewing user #{id}
           </Typography>
         </Box>
 
         {error && (
-          <Box sx={{ p: 2.5, background: 'rgba(255,67,67,0.12)', border: '1px solid rgba(255,67,67,0.35)', borderRadius: '12px', mb: 3, color: '#ff9b9b' }}>
+          <Box sx={{
+            p: 2.5,
+            background: C.errorBg,
+            border: `1px solid ${C.error}33`,
+            borderRadius: '12px',
+            mb: 3,
+            color: C.error,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1.5,
+          }}>
+            <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
+              <circle cx="10" cy="10" r="9" stroke={C.error} strokeWidth="2" />
+              <path d="M10 6v4M10 14h.01" stroke={C.error} strokeWidth="2" strokeLinecap="round" />
+            </svg>
             <Typography sx={{ fontSize: '0.9rem' }}>{error}</Typography>
           </Box>
         )}
 
-        <Card sx={{ backgroundColor: C.surface, border: `1px solid ${C.border}`, borderRadius: '12px', mb: 4 }}>
+        <Card sx={{
+          backgroundColor: C.surface,
+          border: `1px solid ${C.border}`,
+          borderRadius: '16px',
+          mb: 4,
+          boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+        }}>
           <CardContent sx={{ p: 3 }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', mb: 3, pb: 3, borderBottom: `1px solid ${C.border}` }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', mb: 3, pb: 3, borderBottom: `1px solid ${C.border}`, flexWrap: 'wrap', gap: 2 }}>
               <Box>
-                <Typography sx={{ color: C.text, fontSize: '1.3rem', fontWeight: 600, mb: 1 }}>
+                <Typography sx={{ color: C.text, fontSize: '1.3rem', fontWeight: 700, mb: 1 }}>
                   {user.name || user.businessName || user.companyName || 'N/A'}
                 </Typography>
                 <Typography sx={{ color: C.textMid, fontSize: '0.9rem' }}>
@@ -197,38 +294,39 @@ const AdminUserDetailsPage = () => {
                 icon={user.isVerified ? <VerifiedUserIcon /> : undefined}
                 label={user.isVerified ? 'Verified' : 'Unverified'}
                 sx={{
-                  background: user.isVerified ? 'rgba(100,255,67,0.25)' : 'rgba(255,107,107,0.2)',
-                  color: user.isVerified ? C.bright : '#ff9b9b',
-                  fontWeight: 500
+                  background: user.isVerified ? C.successBg : C.warningBg,
+                  color: user.isVerified ? C.success : C.warning,
+                  fontWeight: 600,
+                  borderRadius: '100px',
                 }}
               />
             </Box>
 
             <Grid container spacing={3} sx={{ mb: 3 }}>
               <Grid item xs={12} sm={6}>
-                <Typography sx={{ color: C.textLow, fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', mb: 1 }}>
+                <Typography sx={{ color: C.textLow, fontSize: '0.7rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', mb: 1 }}>
                   User Type
                 </Typography>
-                <Typography sx={{ color: C.text, fontSize: '1rem' }}>
+                <Typography sx={{ color: C.text, fontSize: '1rem', fontWeight: 500 }}>
                   {user.type === 'seller' ? 'Seller' : user.type === 'collector' ? 'Collector' : user.type}
                 </Typography>
               </Grid>
 
               <Grid item xs={12} sm={6}>
-                <Typography sx={{ color: C.textLow, fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', mb: 1 }}>
+                <Typography sx={{ color: C.textLow, fontSize: '0.7rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', mb: 1 }}>
                   Phone
                 </Typography>
-                <Typography sx={{ color: C.text, fontSize: '1rem' }}>
+                <Typography sx={{ color: C.text, fontSize: '1rem', fontWeight: 500 }}>
                   {user.phone || '—'}
                 </Typography>
               </Grid>
 
               {user.businessName && (
                 <Grid item xs={12} sm={6}>
-                  <Typography sx={{ color: C.textLow, fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', mb: 1 }}>
+                  <Typography sx={{ color: C.textLow, fontSize: '0.7rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', mb: 1 }}>
                     Business Name
                   </Typography>
-                  <Typography sx={{ color: C.text, fontSize: '1rem' }}>
+                  <Typography sx={{ color: C.text, fontSize: '1rem', fontWeight: 500 }}>
                     {user.businessName}
                   </Typography>
                 </Grid>
@@ -236,10 +334,10 @@ const AdminUserDetailsPage = () => {
 
               {user.companyName && (
                 <Grid item xs={12} sm={6}>
-                  <Typography sx={{ color: C.textLow, fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', mb: 1 }}>
+                  <Typography sx={{ color: C.textLow, fontSize: '0.7rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', mb: 1 }}>
                     Company Name
                   </Typography>
-                  <Typography sx={{ color: C.text, fontSize: '1rem' }}>
+                  <Typography sx={{ color: C.text, fontSize: '1rem', fontWeight: 500 }}>
                     {user.companyName}
                   </Typography>
                 </Grid>
@@ -247,20 +345,20 @@ const AdminUserDetailsPage = () => {
 
               {user.specialization && (
                 <Grid item xs={12} sm={6}>
-                  <Typography sx={{ color: C.textLow, fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', mb: 1 }}>
+                  <Typography sx={{ color: C.textLow, fontSize: '0.7rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', mb: 1 }}>
                     Specialization
                   </Typography>
-                  <Typography sx={{ color: C.text, fontSize: '1rem' }}>
+                  <Typography sx={{ color: C.text, fontSize: '1rem', fontWeight: 500 }}>
                     {user.specialization}
                   </Typography>
                 </Grid>
               )}
 
               <Grid item xs={12} sm={6}>
-                <Typography sx={{ color: C.textLow, fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', mb: 1 }}>
+                <Typography sx={{ color: C.textLow, fontSize: '0.7rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', mb: 1 }}>
                   Account Status
                 </Typography>
-                <Typography sx={{ color: user.isActive ? C.bright : '#ff9b9b', fontSize: '1rem', fontWeight: 500 }}>
+                <Typography sx={{ color: user.isActive ? C.success : C.error, fontSize: '1rem', fontWeight: 600 }}>
                   {user.isActive ? 'Active' : 'Inactive'}
                 </Typography>
               </Grid>
@@ -270,14 +368,14 @@ const AdminUserDetailsPage = () => {
 
             <Grid container spacing={2} sx={{ fontSize: '0.85rem' }}>
               <Grid item xs={12} sm={6}>
-                <Typography sx={{ color: C.textLow }}>Created:</Typography>
-                <Typography sx={{ color: C.textMid }}>
+                <Typography sx={{ color: C.textLow, fontSize: '0.7rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Created:</Typography>
+                <Typography sx={{ color: C.textMid, fontSize: '0.85rem' }}>
                   {format(new Date(user.createdAt), 'MMM dd, yyyy HH:mm')}
                 </Typography>
               </Grid>
               <Grid item xs={12} sm={6}>
-                <Typography sx={{ color: C.textLow }}>Last Updated:</Typography>
-                <Typography sx={{ color: C.textMid }}>
+                <Typography sx={{ color: C.textLow, fontSize: '0.7rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Last Updated:</Typography>
+                <Typography sx={{ color: C.textMid, fontSize: '0.85rem' }}>
                   {format(new Date(user.updatedAt), 'MMM dd, yyyy HH:mm')}
                 </Typography>
               </Grid>
@@ -285,21 +383,22 @@ const AdminUserDetailsPage = () => {
           </CardContent>
         </Card>
 
-        <Box sx={{ display: 'flex', gap: 2 }}>
+        <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
           <Button
             onClick={handleVerifyUser}
             startIcon={<VerifiedUserIcon />}
             sx={{
-              background: `linear-gradient(135deg, ${C.bright}22, ${C.bright}00)`,
+              background: C.glow,
               color: C.bright,
               border: `1px solid ${C.border}`,
               textTransform: 'none',
               px: 3,
+              py: 1,
               borderRadius: '8px',
               transition: 'all 0.3s ease',
               '&:hover': {
-                background: `linear-gradient(135deg, ${C.bright}33, ${C.bright}11)`,
-                borderColor: C.borderHover,
+                background: C.surfaceHigh,
+                borderColor: C.bright,
                 boxShadow: `0 0 20px ${C.glow}`
               }
             }}
@@ -311,17 +410,18 @@ const AdminUserDetailsPage = () => {
             onClick={() => setDeleteDialogOpen(true)}
             startIcon={<DeleteIcon />}
             sx={{
-              background: 'rgba(255,107,107,0.1)',
-              color: '#ff9b9b',
-              border: '1px solid rgba(255,107,107,0.3)',
+              background: C.errorBg,
+              color: C.error,
+              border: `1px solid ${C.error}33`,
               textTransform: 'none',
               px: 3,
+              py: 1,
               borderRadius: '8px',
               transition: 'all 0.3s ease',
               '&:hover': {
-                background: 'rgba(255,107,107,0.15)',
-                borderColor: 'rgba(255,107,107,0.6)',
-                boxShadow: '0 0 15px rgba(255,107,107,0.2)'
+                background: C.errorBg,
+                borderColor: C.error,
+                boxShadow: `0 0 15px ${C.error}33`
               }
             }}
           >
@@ -330,14 +430,60 @@ const AdminUserDetailsPage = () => {
         </Box>
       </Container>
 
-      <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)} sx={{ '& .MuiDialog-paper': { backgroundColor: C.surface, border: `1px solid ${C.border}`, borderRadius: '12px', color: C.text } }}>
-        <DialogTitle sx={{ color: C.bright, fontWeight: 600 }}>Delete User?</DialogTitle>
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={() => setDeleteDialogOpen(false)}
+        sx={{
+          '& .MuiDialog-paper': {
+            backgroundColor: C.surface,
+            border: `1px solid ${C.border}`,
+            borderRadius: '16px',
+            color: C.text,
+            boxShadow: '0 20px 40px -12px rgba(0,0,0,0.15)',
+          }
+        }}
+      >
+        <DialogTitle sx={{
+          color: C.error,
+          fontWeight: 700,
+          fontFamily: "'Cormorant Garamond', serif",
+          fontSize: '1.5rem',
+        }}>
+          Delete User?
+        </DialogTitle>
         <DialogContent>
-          <Typography sx={{ color: C.text, mt: 2 }}>Are you sure you want to delete this user and all their associated data? This action cannot be undone.</Typography>
+          <Typography sx={{ color: C.textMid, mt: 2 }}>
+            Are you sure you want to delete this user and all their associated data? This action cannot be undone.
+          </Typography>
         </DialogContent>
-        <DialogActions sx={{ p: 2 }}>
-          <Button onClick={() => setDeleteDialogOpen(false)} sx={{ color: C.textMid }}>Cancel</Button>
-          <Button onClick={handleDeleteUser} sx={{ color: '#ff9b9b', border: '1px solid rgba(255,107,107,0.3)', borderRadius: '6px', px: 2, '&:hover': { borderColor: 'rgba(255,107,107,0.6)', background: 'rgba(255,107,107,0.1)' } }}>Delete</Button>
+        <DialogActions sx={{ p: 2.5, gap: 1 }}>
+          <Button
+            onClick={() => setDeleteDialogOpen(false)}
+            sx={{
+              color: C.textMid,
+              border: `1px solid ${C.border}`,
+              borderRadius: '8px',
+              px: 2,
+              '&:hover': { borderColor: C.bright, color: C.bright }
+            }}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleDeleteUser}
+            sx={{
+              color: C.error,
+              border: `1px solid ${C.error}33`,
+              borderRadius: '8px',
+              px: 2,
+              '&:hover': {
+                borderColor: C.error,
+                background: C.errorBg
+              }
+            }}
+          >
+            Delete
+          </Button>
         </DialogActions>
       </Dialog>
     </Box>
@@ -345,4 +491,3 @@ const AdminUserDetailsPage = () => {
 };
 
 export default AdminUserDetailsPage;
-

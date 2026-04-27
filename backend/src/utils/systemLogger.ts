@@ -1,4 +1,4 @@
-﻿import { Request } from 'express';
+import { Request } from 'express';
 import { sequelize } from '../models';
 
 export const getClientIP = (req: Request): string => {

@@ -32,9 +32,13 @@ var __importStar = (this && this.__importStar) || (function () {
         return result;
     };
 })();
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getDebugEmails = exports.resetPassword = exports.forgotPassword = exports.logout = exports.recyclerLogin = exports.businessLogin = exports.verifyEmail = exports.recyclerSignup = exports.businessSignup = void 0;
+exports.debugCheck = exports.resetPassword = exports.forgotPassword = exports.logout = exports.recyclerLogin = exports.businessLogin = exports.verifyEmail = exports.recyclerSignup = exports.businessSignup = void 0;
 const userService = __importStar(require("../services/userService"));
+const logger_1 = __importDefault(require("../utils/logger"));
 const userJwt_1 = require("../config/userJwt");
 const validators_1 = require("../utils/validators");
 const passwordUtil_1 = require("../utils/passwordUtil");
@@ -209,27 +213,33 @@ const businessLogin = async (req, res) => {
         if (!email || !password) {
             return res.status(400).json({ error: 'Email and password are required' });
         }
-        const business = await userService.findBusinessByEmail(email);
+        const normalizedEmail = email.toLowerCase().trim();
+        logger_1.default.debug(`[AUTH-DEBUG] Business login attempt for: ${normalizedEmail}, password length: ${password?.length || 0}`);
+        const business = await userService.findBusinessByEmail(normalizedEmail);
         if (!business) {
+            logger_1.default.debug(`[AUTH-DEBUG] Business user not found in DB: ${normalizedEmail}`);
             return res.status(401).json({ error: 'Invalid email or password' });
         }
+        logger_1.default.debug(`[AUTH-DEBUG] Business user found: ${normalizedEmail}, isVerified: ${business.isVerified}, isLocked: ${business.isLocked}`);
         if ((0, securityUtil_1.isAccountLocked)(business.isLocked || false, business.lockedUntil || null)) {
+            logger_1.default.debug(`[AUTH-DEBUG] Business account locked for: ${normalizedEmail}`);
             return res.status(403).json({
                 error: (0, securityUtil_1.getLockedAccountMessage)(business.lockedUntil)
             });
         }
-        const isValid = await userService.verifyBusinessCredentials(email, password);
+        const isValid = await userService.verifyBusinessCredentials(normalizedEmail, password);
         if (!isValid) {
+            logger_1.default.debug(`[AUTH-DEBUG] Password MISMATCH for business: ${normalizedEmail}`);
             const maxAttempts = parseInt(process.env.MAX_LOGIN_ATTEMPTS || '5');
             const newAttempts = (business.loginAttempts || 0) + 1;
             if ((0, securityUtil_1.shouldLockAccount)(newAttempts, maxAttempts)) {
-                await userService.lockUserAccount(email, 'business');
+                await userService.lockUserAccount(normalizedEmail, 'business');
                 return res.status(403).json({
                     error: 'Too many failed attempts. Account locked for 30 minutes.'
                 });
             }
             else {
-                await userService.incrementLoginAttempts(email, 'business', newAttempts);
+                await userService.incrementLoginAttempts(normalizedEmail, 'business', newAttempts);
                 return res.status(401).json({
                     error: 'Invalid email or password',
                     remainingAttempts: maxAttempts - newAttempts
@@ -237,11 +247,13 @@ const businessLogin = async (req, res) => {
             }
         }
         if (!business.isVerified) {
+            logger_1.default.debug(`[AUTH-DEBUG] Business account not verified: ${normalizedEmail}`);
             return res.status(403).json({
                 error: 'Please verify your email before logging in'
             });
         }
-        await userService.resetLoginAttempts(email, 'business');
+        logger_1.default.debug(`[AUTH-DEBUG] Login SUCCESS for business: ${normalizedEmail}`);
+        await userService.resetLoginAttempts(normalizedEmail, 'business');
         const token = (0, userJwt_1.generateUserToken)({
             id: business.id,
             email: business.email,
@@ -283,27 +295,33 @@ const recyclerLogin = async (req, res) => {
         if (!email || !password) {
             return res.status(400).json({ error: 'Email and password are required' });
         }
-        const recycler = await userService.findRecyclerByEmail(email);
+        const normalizedEmail = email.toLowerCase().trim();
+        logger_1.default.debug(`[AUTH-DEBUG] Recycler login attempt for: ${normalizedEmail}, password length: ${password?.length || 0}`);
+        const recycler = await userService.findRecyclerByEmail(normalizedEmail);
         if (!recycler) {
+            logger_1.default.debug(`[AUTH-DEBUG] Recycler user not found in DB: ${normalizedEmail}`);
             return res.status(401).json({ error: 'Invalid email or password' });
         }
+        logger_1.default.debug(`[AUTH-DEBUG] Recycler user found: ${normalizedEmail}, isVerified: ${recycler.isVerified}, isLocked: ${recycler.isLocked}`);
         if ((0, securityUtil_1.isAccountLocked)(recycler.isLocked || false, recycler.lockedUntil || null)) {
+            logger_1.default.debug(`[AUTH-DEBUG] Recycler account locked for: ${normalizedEmail}`);
             return res.status(403).json({
                 error: (0, securityUtil_1.getLockedAccountMessage)(recycler.lockedUntil)
             });
         }
-        const isValid = await userService.verifyRecyclerCredentials(email, password);
+        const isValid = await userService.verifyRecyclerCredentials(normalizedEmail, password);
         if (!isValid) {
+            logger_1.default.debug(`[AUTH-DEBUG] Password MISMATCH for recycler: ${normalizedEmail}`);
             const maxAttempts = parseInt(process.env.MAX_LOGIN_ATTEMPTS || '5');
             const newAttempts = (recycler.loginAttempts || 0) + 1;
             if ((0, securityUtil_1.shouldLockAccount)(newAttempts, maxAttempts)) {
-                await userService.lockUserAccount(email, 'recycler');
+                await userService.lockUserAccount(normalizedEmail, 'recycler');
                 return res.status(403).json({
                     error: 'Too many failed attempts. Account locked for 30 minutes.'
                 });
             }
             else {
-                await userService.incrementLoginAttempts(email, 'recycler', newAttempts);
+                await userService.incrementLoginAttempts(normalizedEmail, 'recycler', newAttempts);
                 return res.status(401).json({
                     error: 'Invalid email or password',
                     remainingAttempts: maxAttempts - newAttempts
@@ -311,11 +329,13 @@ const recyclerLogin = async (req, res) => {
             }
         }
         if (!recycler.isVerified) {
+            logger_1.default.debug(`[AUTH-DEBUG] Recycler account not verified: ${normalizedEmail}`);
             return res.status(403).json({
                 error: 'Please verify your email before logging in'
             });
         }
-        await userService.resetLoginAttempts(email, 'recycler');
+        logger_1.default.debug(`[AUTH-DEBUG] Login SUCCESS for recycler: ${normalizedEmail}`);
+        await userService.resetLoginAttempts(normalizedEmail, 'recycler');
         const token = (0, userJwt_1.generateUserToken)({
             id: recycler.id,
             email: recycler.email,
@@ -467,16 +487,20 @@ const resetPassword = async (req, res) => {
     }
 };
 exports.resetPassword = resetPassword;
-const getDebugEmails = (req, res) => {
-    if (process.env.NODE_ENV === 'production') {
-        return res.status(403).json({ error: 'Not available in production' });
+const debugCheck = async (req, res) => {
+    try {
+        const count = await userService.countAllUsers();
+        const users = await userService.getAllUsersSummary();
+        res.status(200).json({
+            db_summary: {
+                total_users: count,
+                users_sample: users
+            }
+        });
     }
-    const emails = emailService.getSentEmails();
-    res.status(200).json({
-        message: 'Sent emails (mock service)',
-        count: emails.length,
-        emails
-    });
+    catch (error) {
+        res.status(500).json({ error: error.message });
+    }
 };
-exports.getDebugEmails = getDebugEmails;
+exports.debugCheck = debugCheck;
 //# sourceMappingURL=userAuthController.js.map

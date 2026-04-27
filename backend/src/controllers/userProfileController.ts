@@ -1,4 +1,4 @@
-﻿import { Request, Response } from 'express';
+import { Request, Response } from 'express';
 import * as userService from '../services/userService';
 import { isValidPhone, isStrongPassword } from '../utils/validators';
 import { generateExpiry } from '../utils/passwordUtil';

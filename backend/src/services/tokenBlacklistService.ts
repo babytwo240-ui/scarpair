@@ -1,4 +1,4 @@
-﻿import redis from '../config/redis';
+import redis from '../config/redis';
 
 /**
  * Blacklist a token (invalidate it on logout)

@@ -1,4 +1,4 @@
-﻿import { PasswordAudit } from '../models';
+import { PasswordAudit } from '../models';
 import { Request } from 'express';
 
 /**

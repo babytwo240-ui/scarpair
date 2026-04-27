@@ -1,42 +1,139 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-/* ─── Color tokens ────────────────────────────────────────────
-   bright  : #64ff43  (electric lime-green – CTA, glows, accents)
-   deep    : #124d05  (forest dark – surfaces, cards)
-   darker  : #0a2e03  (near-black base)
-   surface : #0d3806  (card backgrounds)
-   text    : #e6ffe0  (off-white tinted green)
-──────────────────────────────────────────────────────────── */
+/* ─── Color tokens – 70% White + 30% Green (matching LandingPage) ── */
 const C = {
-  bright:      '#64ff43',
-  deep:        '#124d05',
-  darker:      '#0a2e03',
-  surface:     '#0d3806',
-  border:      'rgba(100,255,67,0.18)',
-  borderHover: 'rgba(100,255,67,0.45)',
-  text:        '#e6ffe0',
-  textMid:     'rgba(230,255,224,0.55)',
-  textLow:     'rgba(230,255,224,0.3)',
-  glow:        'rgba(100,255,67,0.22)',
-  glowStrong:  'rgba(100,255,67,0.45)',
+  primary: '#2E7D32',
+  primaryDark: '#1B5E20',
+  primaryLight: '#4CAF50',
+  bg: '#FFFFFF',
+  bgDeep: '#F8FAFC',
+  surface: '#FFFFFF',
+  surfaceHigh: '#F9FAFB',
+  cardHover: '#F1F5F9',
+  text: '#1F2937',
+  textLight: '#4B5563',
+  textLighter: '#9CA3AF',
+  border: '#E5E7EB',
+  borderHover: '#2E7D32',
+  glowLight: 'rgba(46,125,50,0.08)',
+  glowStrong: 'rgba(46,125,50,0.2)',
 };
+
+/* ─── Inline keyframes (same as LandingPage) ──────────────────────── */
+const KEYFRAMES = `
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&family=Outfit:wght@300;400;500;600;700&display=swap');
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { background: #FFFFFF; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(32px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+  @keyframes floatA {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    50%       { transform: translateY(-18px) rotate(3deg); }
+  }
+  @keyframes floatB {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    50%       { transform: translateY(-12px) rotate(-2deg); }
+  }
+  @keyframes shimmer {
+    0%   { background-position: -400px 0; }
+    100% { background-position: 400px 0; }
+  }
+  @keyframes pulseRing {
+    0%   { transform: scale(0.9); opacity: 1; }
+    70%  { transform: scale(1.4); opacity: 0; }
+    100% { transform: scale(0.9); opacity: 0; }
+  }
+  .gold-shimmer {
+    background: linear-gradient(90deg, #2E7D32 0%, #4CAF50 40%, #2E7D32 60%, #1B5E20 100%);
+    background-size: 800px 100%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: shimmer 3s linear infinite;
+  }
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: #F1F5F9; }
+  ::-webkit-scrollbar-thumb { background: rgba(46,125,50,0.3); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(46,125,50,0.6); }
+`;
+
+/* ─── Ambient orb background (green tint) ───────────────── */
+function AmbientOrbs() {
+  return (
+    <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 0, overflow: 'hidden' }}>
+      <div style={{
+        position: 'absolute', top: '-15%', right: '-10%',
+        width: 700, height: 700, borderRadius: '50%',
+        background: 'radial-gradient(circle, rgba(46,125,50,0.06) 0%, transparent 65%)',
+        animation: 'floatA 14s ease-in-out infinite',
+      }} />
+      <div style={{
+        position: 'absolute', bottom: '10%', left: '-8%',
+        width: 500, height: 500, borderRadius: '50%',
+        background: 'radial-gradient(circle, rgba(46,125,50,0.04) 0%, transparent 65%)',
+        animation: 'floatB 18s ease-in-out infinite',
+      }} />
+      <div style={{
+        position: 'absolute', inset: 0,
+        backgroundImage: `
+          linear-gradient(rgba(46,125,50,0.03) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(46,125,50,0.03) 1px, transparent 1px)
+        `,
+        backgroundSize: '64px 64px',
+      }} />
+      <div style={{
+        position: 'absolute', inset: 0,
+        background: 'radial-gradient(ellipse 80% 70% at 50% 50%, transparent 40%, rgba(248,250,252,0.6) 100%)',
+      }} />
+    </div>
+  );
+}
+
+/* ─── Logo Mark (green gradient) ────────────────────────────── */
+function LogoMark({ size = 36 }) {
+  return (
+    <div style={{
+      width: size, height: size,
+      borderRadius: size * 0.28,
+      background: `linear-gradient(135deg, ${C.primary} 0%, ${C.primaryDark} 100%)`,
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      boxShadow: `0 4px 16px rgba(46,125,50,0.3), inset 0 1px 0 rgba(255,255,255,0.2)`,
+      flexShrink: 0,
+      position: 'relative',
+      overflow: 'hidden',
+    }}>
+      <div style={{
+        position: 'absolute', top: 0, left: 0, right: 0, height: '50%',
+        background: 'linear-gradient(180deg, rgba(255,255,255,0.25) 0%, transparent 100%)',
+        borderRadius: `${size * 0.28}px ${size * 0.28}px 0 0`,
+      }} />
+      <svg width={size * 0.48} height={size * 0.48} viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M4 8L12 3L20 8L12 13L4 8Z" />
+        <path d="M4 14L12 19L20 14" />
+        <path d="M4 11L12 16L20 11" />
+      </svg>
+    </div>
+  );
+}
 
 const RoleSelectionPage = () => {
   const navigate = useNavigate();
-  const [mouse, setMouse] = useState({ x: 0, y: 0 });
   const [scrollY, setScrollY] = useState(0);
   const [buttonHover, setButtonHover] = useState(null);
 
   useEffect(() => {
-    const mm = (e) => setMouse({ x: e.clientX, y: e.clientY });
     const sc = () => setScrollY(window.scrollY);
-    window.addEventListener('mousemove', mm);
     window.addEventListener('scroll', sc);
-    return () => { 
-      window.removeEventListener('mousemove', mm); 
-      window.removeEventListener('scroll', sc); 
-    };
+    return () => window.removeEventListener('scroll', sc);
   }, []);
 
   const roles = [
@@ -59,163 +156,287 @@ const RoleSelectionPage = () => {
   ];
 
   return (
-    <div style={{ minHeight: '100vh', background: C.darker, fontFamily: "'DM Sans','Helvetica Neue',sans-serif", overflowX: 'hidden', color: C.text }}>
+    <div style={{
+      minHeight: '100vh',
+      background: C.bg,
+      fontFamily: "'Outfit', system-ui, sans-serif",
+      overflowX: 'hidden',
+      color: C.text,
+      position: 'relative',
+    }}>
+      <style>{KEYFRAMES}</style>
+      <AmbientOrbs />
 
-      {/* Ambient cursor glow */}
-      <div style={{ position: 'fixed', top: mouse.y - 320, left: mouse.x - 320, width: 640, height: 640, background: 'radial-gradient(circle, rgba(100,255,67,0.055) 0%, transparent 65%)', borderRadius: '50%', pointerEvents: 'none', zIndex: 0, transition: 'top 0.35s ease, left 0.35s ease' }} />
-
-      {/* Grain overlay */}
-      <div style={{ position: 'fixed', inset: 0, backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E")`, pointerEvents: 'none', zIndex: 1 }} />
-
-      {/* ══════════ NAVBAR ══════════ */}
-      <nav style={{ position: 'sticky', top: 0, zIndex: 100, background: scrollY > 60 ? 'rgba(10,46,3,0.93)' : 'transparent', backdropFilter: scrollY > 60 ? 'blur(28px)' : 'none', borderBottom: scrollY > 60 ? `1px solid ${C.border}` : '1px solid transparent', transition: 'all 0.35s ease' }}>
-        <div style={{ maxWidth: 1360, margin: '0 auto', padding: '18px 40px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }} onClick={() => navigate('/')}>
-            <div style={{ width: 38, height: 38, borderRadius: 11, background: 'rgba(100,255,67,0.12)', border: '1px solid rgba(100,255,67,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                <path d="M10 2a8 8 0 1 0 0 16A8 8 0 0 0 10 2zm0 2a6 6 0 0 1 5.917 5H10V4zm-1 0v5H3.083A6 6 0 0 1 9 4zM3.444 11H9v5.472A6.002 6.002 0 0 1 3.444 11zm6.556 5.472V11h5.556A6.002 6.002 0 0 1 10 16.472z" fill={C.bright}/>
-              </svg>
+      {/* ══════════ NAVBAR (sticky, glass, matching LandingPage) ══════════ */}
+      <nav style={{
+        position: 'sticky', top: 0, zIndex: 100,
+        background: scrollY > 30
+          ? 'rgba(255,255,255,0.92)'
+          : 'transparent',
+        backdropFilter: scrollY > 30 ? 'blur(24px) saturate(1.5)' : 'none',
+        borderBottom: scrollY > 30 ? `1px solid ${C.border}` : '1px solid transparent',
+        transition: 'all 0.4s cubic-bezier(0.16,1,0.3,1)',
+      }}>
+        <div style={{ maxWidth: 1320, margin: '0 auto', padding: '18px 40px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer' }} onClick={() => navigate('/')}>
+            <LogoMark size={38} />
+            <div>
+              <span style={{
+                fontSize: 22, fontWeight: 700, letterSpacing: '-0.5px',
+                fontFamily: "'Cormorant Garamond', serif",
+                color: C.text,
+              }}>scrapair</span>
+              <div style={{ height: 1.5, background: `linear-gradient(90deg, ${C.primary}, transparent)`, marginTop: 1, width: '100%' }} />
             </div>
-            <span style={{ fontSize: 21, fontWeight: 800, letterSpacing: '-0.5px', color: C.text }}>ScraPair</span>
           </div>
-          <button onClick={() => navigate('/')}
-            style={{ padding: '10px 24px', fontSize: 14, fontWeight: 700, borderRadius: 100, border: 'none', background: C.bright, color: '#082800', cursor: 'pointer', transition: 'all 0.2s', boxShadow: '0 0 16px rgba(100,255,67,0.35)' }}
-            onMouseEnter={e => { e.target.style.boxShadow = '0 0 28px rgba(100,255,67,0.6)'; e.target.style.transform = 'translateY(-1px)'; }}
-            onMouseLeave={e => { e.target.style.boxShadow = '0 0 16px rgba(100,255,67,0.35)'; e.target.style.transform = 'translateY(0)'; }}
-          >Back to home</button>
+          <button
+            onClick={() => navigate('/')}
+            className="cta-btn"
+            style={{
+              padding: '10px 26px',
+              fontSize: 13,
+              fontWeight: 600,
+              letterSpacing: '0.06em',
+              textTransform: 'uppercase',
+              borderRadius: 4,
+              border: `1px solid ${C.primary}`,
+              background: 'transparent',
+              color: C.primary,
+              cursor: 'pointer',
+              fontFamily: "'Outfit', sans-serif",
+              transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+            }}
+            onMouseEnter={e => {
+              e.currentTarget.style.background = C.primary;
+              e.currentTarget.style.color = 'white';
+              e.currentTarget.style.transform = 'translateY(-2px)';
+              e.currentTarget.style.boxShadow = `0 8px 20px rgba(46,125,50,0.3)`;
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.background = 'transparent';
+              e.currentTarget.style.color = C.primary;
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = 'none';
+            }}
+          >
+            Back to home
+          </button>
         </div>
       </nav>
 
       {/* ══════════ MAIN CONTENT ══════════ */}
-      <section style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', position: 'relative', zIndex: 2, maxWidth: 1360, margin: '0 auto', padding: '60px 40px' }}>
-
-        {/* Decorative background elements */}
-        <div style={{ position: 'absolute', top: '10%', right: '-6%', width: 450, height: 450, border: '1px solid rgba(100,255,67,0.05)', borderRadius: '50%', pointerEvents: 'none' }} />
-        <div style={{ position: 'absolute', bottom: '15%', left: '-5%', width: 350, height: 350, border: '1px solid rgba(100,255,67,0.05)', borderRadius: '50%', pointerEvents: 'none' }} />
-
-        {/* Header */}
-        <div style={{ textAlign: 'center', marginBottom: 80 }}>
-          <div style={{ fontSize: 12, color: C.bright, fontWeight: 800, letterSpacing: '0.14em', textTransform: 'uppercase', marginBottom: 16 }}>Get started</div>
-          <h1 style={{ fontSize: 68, fontWeight: 900, lineHeight: 1.08, letterSpacing: '-2.4px', margin: '0 0 24px', color: C.text }}>
+      <section style={{
+        minHeight: '80vh',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        position: 'relative',
+        zIndex: 2,
+        maxWidth: 1320,
+        margin: '0 auto',
+        padding: '60px 40px 100px',
+      }}>
+        {/* Header with green accents */}
+        <div style={{ textAlign: 'center', marginBottom: 72, animation: 'fadeUp 0.7s ease both' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, marginBottom: 16 }}>
+            <div style={{ width: 40, height: 1, background: C.primary }} />
+            <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.2em', textTransform: 'uppercase', color: C.primary }}>
+              Get started
+            </span>
+            <div style={{ width: 40, height: 1, background: C.primary }} />
+          </div>
+          <h1 style={{
+            fontFamily: "'Cormorant Garamond', serif",
+            fontSize: 64,
+            fontWeight: 600,
+            lineHeight: 1.1,
+            letterSpacing: '-2px',
+            margin: '0 0 20px',
+            color: C.text,
+          }}>
             Select your<br />
-            <span style={{ color: C.bright, textShadow: '0 0 40px rgba(100,255,67,0.4)' }}>role</span>
+            <span className="gold-shimmer">role</span>
           </h1>
-          <p style={{ fontSize: 18, lineHeight: 1.75, color: C.textMid, maxWidth: 520, margin: '0 auto' }}>
+          <p style={{
+            fontSize: 17,
+            lineHeight: 1.6,
+            color: C.textLight,
+            maxWidth: 520,
+            margin: '0 auto',
+          }}>
             Join the circular economy. Choose your role to get started.
           </p>
         </div>
 
-        {/* Role Cards Grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: 28, marginBottom: 60 }}>
+        {/* Role Cards Grid – same hover effects as LandingPage feature/role cards */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))',
+          gap: 28,
+          marginBottom: 60,
+        }}>
           {roles.map((role) => (
             <div
               key={role.id}
               onClick={() => navigate(role.route)}
               onMouseEnter={() => setButtonHover(role.id)}
               onMouseLeave={() => setButtonHover(null)}
+              className="role-card"
               style={{
-                background: buttonHover === role.id ? 'rgba(100,255,67,0.09)' : C.surface,
-                border: `1px solid ${buttonHover === role.id ? 'rgba(100,255,67,0.35)' : C.border}`,
-                borderRadius: 28,
-                padding: '48px 40px',
+                background: C.surface,
+                border: `1px solid ${buttonHover === role.id ? C.borderHover : C.border}`,
+                borderRadius: 6,
+                padding: '40px 36px',
                 cursor: 'pointer',
-                transition: 'all 0.3s cubic-bezier(0.16,1,0.3,1)',
+                transition: 'all 0.35s cubic-bezier(0.16, 1, 0.3, 1)',
                 transform: buttonHover === role.id ? 'translateY(-8px)' : 'translateY(0)',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 24,
+                boxShadow: buttonHover === role.id
+                  ? `0 30px 60px rgba(0,0,0,0.08), 0 0 0 1px ${C.borderHover}`
+                  : 'none',
+                position: 'relative',
+                overflow: 'hidden',
               }}
             >
-              {/* Icon */}
+              {/* Green line on hover (like role-card::after) */}
+              <div style={{
+                position: 'absolute',
+                bottom: 0, left: 0, right: 0,
+                height: 2,
+                background: `linear-gradient(90deg, transparent, ${C.primary}, transparent)`,
+                transform: buttonHover === role.id ? 'scaleX(1)' : 'scaleX(0)',
+                transition: 'transform 0.4s ease',
+              }} />
+
+              {/* Icon container with green gradient accent */}
               <div style={{
                 width: 72,
                 height: 72,
-                background: 'rgba(100,255,67,0.12)',
-                border: '1px solid rgba(100,255,67,0.22)',
-                borderRadius: 18,
+                background: C.surfaceHigh,
+                borderRadius: 6,
+                border: `1px solid ${C.border}`,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 fontSize: 36,
-                color: C.bright,
-                transition: 'all 0.3s ease',
-                transform: buttonHover === role.id ? 'scale(1.1) rotate(8deg)' : 'scale(1) rotate(0deg)',
+                color: C.primary,
+                marginBottom: 28,
+                transition: 'all 0.25s ease',
+                transform: buttonHover === role.id ? 'scale(1.05)' : 'scale(1)',
               }}>
                 {role.icon}
               </div>
 
-              {/* Text content */}
               <div>
-                <h2 style={{ fontSize: 28, fontWeight: 900, letterSpacing: '-0.6px', color: C.text, margin: '0 0 10px' }}>
+                <h2 style={{
+                  fontFamily: "'Cormorant Garamond', serif",
+                  fontSize: 30,
+                  fontWeight: 600,
+                  letterSpacing: '-0.5px',
+                  color: C.text,
+                  margin: '0 0 12px',
+                }}>
                   {role.title}
                 </h2>
-                <p style={{ fontSize: 16, color: C.textMid, lineHeight: 1.7, margin: 0, marginBottom: 20 }}>
+                <p style={{
+                  fontSize: 15,
+                  color: C.textLight,
+                  lineHeight: 1.6,
+                  margin: '0 0 24px',
+                }}>
                   {role.desc}
                 </p>
 
-                {/* Details list */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                {/* Details as bullet list with green dots */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                   {role.details.map((detail, i) => (
-                    <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                       <div style={{
-                        width: 6,
-                        height: 6,
+                        width: 5,
+                        height: 5,
                         borderRadius: '50%',
-                        background: C.bright,
-                        boxShadow: `0 0 8px ${C.bright}`,
+                        background: C.primary,
                       }} />
-                      <span style={{ fontSize: 14, color: C.textMid }}>{detail}</span>
+                      <span style={{ fontSize: 14, color: C.textLight }}>{detail}</span>
                     </div>
                   ))}
                 </div>
               </div>
 
-              {/* CTA Arrow */}
+              {/* Continue arrow with slide effect */}
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
                 gap: 10,
-                marginTop: 16,
-                color: C.bright,
-                fontSize: 14,
-                fontWeight: 700,
-                transition: 'all 0.3s ease',
-                transform: buttonHover === role.id ? 'translateX(8px)' : 'translateX(0)',
+                marginTop: 32,
+                color: C.primary,
+                fontSize: 13,
+                fontWeight: 600,
+                letterSpacing: '0.06em',
+                textTransform: 'uppercase',
+                transition: 'all 0.25s ease',
+                transform: buttonHover === role.id ? 'translateX(6px)' : 'translateX(0)',
               }}>
                 <span>Continue</span>
-                <svg width="18" height="18" viewBox="0 0 18 18" fill="none" style={{ transition: 'transform 0.3s ease', transform: buttonHover === role.id ? 'translateX(3px)' : 'translateX(0)' }}>
-                  <path d="M3 9h12M9 3l6 6-6 6" stroke={C.bright} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M5 12h14M12 5l7 7-7 7" />
                 </svg>
               </div>
             </div>
           ))}
         </div>
 
-        {/* Bottom CTA */}
-        <div style={{ textAlign: 'center', padding: '32px', background: 'rgba(100,255,67,0.04)', border: `1px solid ${C.border}`, borderRadius: 22, marginTop: 40 }}>
-          <p style={{ fontSize: 15, color: C.textMid, margin: '0 0 16px' }}>
-            New to ScraPair?
+        {/* Bottom CTA – card style matching LandingPage final CTA but smaller */}
+        <div style={{
+          background: C.surface,
+          border: `1px solid ${C.border}`,
+          borderRadius: 6,
+          padding: '40px 32px',
+          textAlign: 'center',
+          position: 'relative',
+          overflow: 'hidden',
+          transition: 'all 0.25s ease',
+        }}
+          onMouseEnter={e => e.currentTarget.style.borderColor = C.borderHover}
+          onMouseLeave={e => e.currentTarget.style.borderColor = C.border}
+        >
+          {/* Subtle corner accents */}
+          <div style={{ position: 'absolute', top: 0, left: 0, width: 100, height: 100, background: `linear-gradient(135deg, ${C.glowLight} 0%, transparent 70%)` }} />
+          <div style={{ position: 'absolute', bottom: 0, right: 0, width: 100, height: 100, background: `linear-gradient(225deg, ${C.glowLight} 0%, transparent 70%)` }} />
+
+          <p style={{ fontSize: 14, color: C.textLight, margin: '0 0 16px' }}>
+            New to scrapair?
           </p>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 16, flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 20, flexWrap: 'wrap' }}>
             <button
               onClick={() => navigate('/')}
               style={{
                 padding: '12px 32px',
-                fontSize: 14,
-                fontWeight: 700,
-                borderRadius: 100,
-                border: `2px solid ${C.border}`,
+                fontSize: 13,
+                fontWeight: 600,
+                letterSpacing: '0.06em',
+                textTransform: 'uppercase',
+                borderRadius: 4,
+                border: `1px solid ${C.border}`,
                 background: 'transparent',
-                color: C.bright,
+                color: C.textLight,
                 cursor: 'pointer',
-                transition: 'all 0.2s',
+                fontFamily: "'Outfit', sans-serif",
+                transition: 'all 0.2s ease',
               }}
-              onMouseEnter={e => { e.target.style.borderColor = C.borderHover; e.target.style.background = 'rgba(100,255,67,0.08)'; }}
-              onMouseLeave={e => { e.target.style.borderColor = C.border; e.target.style.background = 'transparent'; }}
+              onMouseEnter={e => {
+                e.target.style.borderColor = C.primary;
+                e.target.style.color = C.primary;
+                e.target.style.background = C.glowLight;
+              }}
+              onMouseLeave={e => {
+                e.target.style.borderColor = C.border;
+                e.target.style.color = C.textLight;
+                e.target.style.background = 'transparent';
+              }}
             >
               ← Back home
             </button>
-            <span style={{ color: C.textLow, fontSize: 13 }}>Learn more before choosing</span>
+            <span style={{ color: C.textLighter, fontSize: 13, letterSpacing: '0.04em' }}>Learn more before choosing</span>
           </div>
         </div>
       </section>

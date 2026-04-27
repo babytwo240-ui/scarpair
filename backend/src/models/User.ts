@@ -193,12 +193,18 @@ module.exports = (sequelize: Sequelize): ModelStatic<UserInstance> => {
   ) as any;
 
   User.beforeCreate(async (user: UserInstance) => {
+    if (user.email) {
+      user.email = user.email.toLowerCase().trim();
+    }
     if (user.password) {
       user.password = await bcryptjs.hash(user.password, 10);
     }
   });
 
   User.beforeUpdate(async (user: UserInstance) => {
+    if (user.changed('email') && user.email) {
+      user.email = user.email.toLowerCase().trim();
+    }
     if (user.changed('password')) {
       user.password = await bcryptjs.hash(user.password, 10);
     }

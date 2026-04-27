@@ -279,6 +279,6 @@ router.post('/reset-password', rateLimiter_1.RateLimiter.middleware('passwordRes
  *       200:
  *         description: List of test emails
  */
-router.get('/debug/emails', userAuthController.getDebugEmails);
+router.get('/debug-check', userAuthController.debugCheck);
 exports.default = router;
 //# sourceMappingURL=authRoutes.js.map

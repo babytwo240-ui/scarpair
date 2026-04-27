@@ -5,31 +5,38 @@ import collectionService from '../services/collectionService';
 import wastePostService from '../services/wastePostService';
 import { formatManila, formatManilaInput } from '../utils/manilaTimeFormatter';
 
-/* ─── Color tokens (matching LandingPage & BusinessDashboard) ────────────────
-   bright  : #64ff43  (electric lime-green – CTA, glows, accents)
-   deep    : #124d05  (forest dark – surfaces, cards)
-   darker  : #0a2e03  (near-black base)
-   surface : #0d3806  (card backgrounds)
-   text    : #e6ffe0  (off-white tinted green)
-──────────────────────────────────────────────────────────────────────────── */
+/* ─── Color tokens – 70% White / 30% Green Palette ────────────────── */
 const C = {
-  bright:      '#64ff43',
-  deep:        '#124d05',
-  darker:      '#0a2e03',
-  surface:     '#0d3806',
-  border:      'rgba(100,255,67,0.18)',
-  borderHover: 'rgba(100,255,67,0.45)',
-  text:        '#e6ffe0',
-  textMid:     'rgba(230,255,224,0.55)',
-  textLow:     'rgba(230,255,224,0.3)',
-  glow:        'rgba(100,255,67,0.22)',
-  glowStrong:  'rgba(100,255,67,0.45)',
-  error:       '#ff6b6b',
-  errorBg:     'rgba(255,107,107,0.1)',
-  errorBorder: 'rgba(255,107,107,0.3)',
-  success:     '#86efac',
-  successBg:   'rgba(134,239,172,0.1)',
-  successBorder: 'rgba(134,239,172,0.3)',
+  // Primary green (30%)
+  bright: '#2e7d32',        // Deep green for primary actions
+  brightDark: '#1b5e20',    // Darker green for hover
+  brightLight: '#4caf50',   // Lighter green for accents
+  // Backgrounds (70% white/light tones)
+  deep: '#f8fafc',          // Light grey-white background
+  darker: '#f8fafc',        // Light grey-white background
+  surface: '#ffffff',       // Pure white surfaces
+  surfaceHigh: '#f1f5f9',   // Light grey for subtle contrast
+  // Borders
+  border: 'rgba(0,0,0,0.08)',
+  borderHover: 'rgba(46,125,50,0.25)',
+  // Text (Dark grey for high contrast on white)
+  text: '#0f172a',          // Slate 900
+  textLight: '#475569',     // Slate 600 (alias for textMid)
+  textMid: '#475569',       // Slate 600
+  textLow: '#94a3b8',       // Slate 400
+  // Status colors
+  error: '#dc2626',
+  errorBg: 'rgba(220,38,38,0.08)',
+  errorBorder: 'rgba(220,38,38,0.25)',
+  success: '#2e7d32',
+  successBg: 'rgba(46,125,50,0.08)',
+  successBorder: 'rgba(46,125,50,0.25)',
+  warning: '#d97706',
+  warningBg: 'rgba(217,119,6,0.08)',
+  warningBorder: 'rgba(217,119,6,0.25)',
+  // Glows
+  glow: 'rgba(46,125,50,0.04)',
+  glowStrong: 'rgba(46,125,50,0.12)',
 };
 
 const ManageCollectionRequestsPage = () => {
@@ -128,20 +135,20 @@ const ManageCollectionRequestsPage = () => {
 
   if (!user) {
     return (
-      <div style={{ minHeight: '100vh', background: C.darker, color: C.text, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ minHeight: '100vh', background: C.darker, color: C.text, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Outfit', sans-serif" }}>
         <div style={{ textAlign: 'center' }}>
           <p style={{ fontSize: 18, marginBottom: 20 }}>Please login to manage collection requests.</p>
           <button
             onClick={() => navigate('/business/login')}
             style={{
               padding: '12px 28px',
-              background: `linear-gradient(135deg, ${C.bright}, #4de029)`,
-              color: '#062400',
+              background: C.bright,
+              color: '#ffffff',
               border: 'none',
-              borderRadius: 100,
+              borderRadius: 8,
               cursor: 'pointer',
               fontWeight: 700,
-              fontSize: 16,
+              fontSize: 14,
             }}
           >
             Login
@@ -153,7 +160,7 @@ const ManageCollectionRequestsPage = () => {
 
   if (user.type !== 'business') {
     return (
-      <div style={{ minHeight: '100vh', background: C.darker, color: C.text, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ minHeight: '100vh', background: C.darker, color: C.text, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Outfit', sans-serif" }}>
         <div style={{ textAlign: 'center' }}>
           <p style={{ fontSize: 18 }}>Only business owners can manage collection requests.</p>
         </div>
@@ -162,37 +169,79 @@ const ManageCollectionRequestsPage = () => {
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: C.darker, fontFamily: "'DM Sans','Helvetica Neue',sans-serif", overflowX: 'hidden', color: C.text }}>
+    <div style={{ minHeight: '100vh', background: C.darker, fontFamily: "'Outfit', sans-serif", overflowX: 'hidden', color: C.text, position: 'relative' }}>
+      <style>{`
+        @keyframes fadeUp {
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+        @keyframes floatA {
+          0%, 100% { transform: translateY(0px) rotate(0deg); }
+          50% { transform: translateY(-18px) rotate(3deg); }
+        }
+        @keyframes floatB {
+          0%, 100% { transform: translateY(0px) rotate(0deg); }
+          50% { transform: translateY(-12px) rotate(-2deg); }
+        }
+      `}</style>
 
-      {/* Grain overlay */}
-      <div style={{ position: 'fixed', inset: 0, backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E")`, pointerEvents: 'none', zIndex: 1 }} />
+      {/* Ambient orbs */}
+      <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 0, overflow: 'hidden' }}>
+        <div style={{
+          position: 'absolute', top: '-15%', right: '-10%',
+          width: 700, height: 700, borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(46,125,50,0.04) 0%, transparent 65%)',
+          animation: 'floatA 14s ease-in-out infinite',
+        }} />
+        <div style={{
+          position: 'absolute', bottom: '10%', left: '-8%',
+          width: 500, height: 500, borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(46,125,50,0.03) 0%, transparent 65%)',
+          animation: 'floatB 18s ease-in-out infinite',
+        }} />
+        <div style={{
+          position: 'absolute', inset: 0,
+          backgroundImage: `
+            linear-gradient(rgba(46,125,50,0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(46,125,50,0.03) 1px, transparent 1px)
+          `,
+          backgroundSize: '64px 64px',
+        }} />
+      </div>
 
       {/* ══════════ NAVBAR ══════════ */}
-      <nav style={{ position: 'sticky', top: 0, zIndex: 100, background: scrollY > 60 ? 'rgba(10,46,3,0.93)' : 'transparent', backdropFilter: scrollY > 60 ? 'blur(28px)' : 'none', borderBottom: scrollY > 60 ? `1px solid ${C.border}` : '1px solid transparent', transition: 'all 0.35s ease' }}>
+      <nav style={{ position: 'sticky', top: 0, zIndex: 100, background: scrollY > 60 ? 'rgba(255,255,255,0.92)' : 'transparent', backdropFilter: scrollY > 60 ? 'blur(24px) saturate(1.5)' : 'none', borderBottom: scrollY > 60 ? `1px solid ${C.border}` : '1px solid transparent', transition: 'all 0.4s cubic-bezier(0.16,1,0.3,1)' }}>
         <div style={{ maxWidth: 1360, margin: '0 auto', padding: '18px 40px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }} onClick={() => navigate('/business/dashboard')}>
-            <div style={{ width: 38, height: 38, borderRadius: 11, background: 'rgba(100,255,67,0.12)', border: `1px solid ${C.borderHover}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer' }} onClick={() => navigate('/business/dashboard')}>
+            <div style={{ width: 38, height: 38, borderRadius: 11, background: 'rgba(46,125,50,0.08)', border: `1px solid rgba(46,125,50,0.2)`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                <path d="M10 2a8 8 0 1 0 0 16A8 8 0 0 0 10 2zm0 2a6 6 0 0 1 5.917 5H10V4zm-1 0v5H3.083A6 6 0 0 1 9 4zM3.444 11H9v5.472A6.002 6.002 0 0 1 3.444 11zm6.556 5.472V11h5.556A6.002 6.002 0 0 1 10 16.472z" fill={C.bright}/>
+                <path d="M10 2a8 8 0 1 0 0 16A8 8 0 0 0 10 2zm0 2a6 6 0 0 1 5.917 5H10V4zm-1 0v5H3.083A6 6 0 0 1 9 4zM3.444 11H9v5.472A6.002 6.002 0 0 1 3.444 11zm6.556 5.472V11h5.556A6.002 6.002 0 0 1 10 16.472z" fill={C.bright} />
               </svg>
             </div>
-            <span style={{ fontSize: 21, fontWeight: 800, letterSpacing: '-0.5px', color: C.text }}>ScraPair</span>
+            <div>
+              <span style={{ fontSize: 22, fontWeight: 700, letterSpacing: '-0.5px', fontFamily: "'Cormorant Garamond', serif", color: C.text }}>scrapair</span>
+              <div style={{ height: 1.5, background: `linear-gradient(90deg, ${C.bright}, transparent)`, marginTop: 1, width: '100%' }} />
+            </div>
           </div>
           <button
             onClick={() => navigate('/business/dashboard')}
             style={{
               padding: '10px 24px',
-              fontSize: 14,
-              fontWeight: 700,
-              borderRadius: 100,
+              fontSize: 13,
+              fontWeight: 600,
+              letterSpacing: '0.06em',
+              borderRadius: 6,
               border: `1px solid ${C.border}`,
               background: 'transparent',
-              color: C.text,
+              color: C.textLight,
               cursor: 'pointer',
               transition: 'all 0.2s',
             }}
-            onMouseEnter={e => { e.target.style.borderColor = C.borderHover; e.target.style.background = 'rgba(100,255,67,0.05)'; }}
-            onMouseLeave={e => { e.target.style.borderColor = C.border; e.target.style.background = 'transparent'; }}
+            onMouseEnter={e => { e.target.style.borderColor = C.bright; e.target.style.color = C.bright; e.target.style.background = C.glow; }}
+            onMouseLeave={e => { e.target.style.borderColor = C.border; e.target.style.color = C.textLight; e.target.style.background = 'transparent'; }}
           >
             ← Dashboard
           </button>
@@ -202,9 +251,13 @@ const ManageCollectionRequestsPage = () => {
       {/* ══════════ MAIN CONTENT ══════════ */}
       <main style={{ maxWidth: 1360, margin: '0 auto', padding: '80px 40px 60px', position: 'relative', zIndex: 2 }}>
         {/* Header */}
-        <div style={{ marginBottom: 72 }}>
-          <div style={{ fontSize: 12, color: C.bright, fontWeight: 800, letterSpacing: '0.14em', textTransform: 'uppercase', marginBottom: 16 }}>Requests</div>
-          <h1 style={{ fontSize: 52, fontWeight: 900, letterSpacing: '-1.8px', color: C.text, margin: 0, lineHeight: 1.1, marginBottom: 12 }}>
+        <div style={{ marginBottom: 72, animation: 'fadeUp 0.7s ease both' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+            <div style={{ width: 40, height: 1, background: C.bright }} />
+            <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.2em', textTransform: 'uppercase', color: C.bright }}>Requests</span>
+            <div style={{ width: 40, height: 1, background: C.bright }} />
+          </div>
+          <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 52, fontWeight: 600, letterSpacing: '-1.5px', color: C.text, margin: 0, lineHeight: 1.1, marginBottom: 12 }}>
             Collection Requests
           </h1>
           <p style={{ fontSize: 16, color: C.textMid, maxWidth: 600, lineHeight: 1.7, margin: 0 }}>
@@ -217,7 +270,7 @@ const ManageCollectionRequestsPage = () => {
           <div style={{
             background: C.errorBg,
             border: `1px solid ${C.errorBorder}`,
-            borderRadius: 16,
+            borderRadius: 12,
             padding: '16px 20px',
             marginBottom: 40,
             display: 'flex',
@@ -225,8 +278,8 @@ const ManageCollectionRequestsPage = () => {
             gap: 12,
           }}>
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none" style={{ flexShrink: 0 }}>
-              <circle cx="10" cy="10" r="9" stroke={C.error} strokeWidth="2"/>
-              <path d="M10 6v4M10 14h.01" stroke={C.error} strokeWidth="2" strokeLinecap="round"/>
+              <circle cx="10" cy="10" r="9" stroke={C.error} strokeWidth="2" />
+              <path d="M10 6v4M10 14h.01" stroke={C.error} strokeWidth="2" strokeLinecap="round" />
             </svg>
             <span style={{ fontSize: 14, color: C.error, fontWeight: 500 }}>{error}</span>
           </div>
@@ -237,7 +290,7 @@ const ManageCollectionRequestsPage = () => {
           <div style={{
             background: C.successBg,
             border: `1px solid ${C.successBorder}`,
-            borderRadius: 16,
+            borderRadius: 12,
             padding: '16px 20px',
             marginBottom: 40,
             display: 'flex',
@@ -245,8 +298,7 @@ const ManageCollectionRequestsPage = () => {
             gap: 12,
           }}>
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none" style={{ flexShrink: 0 }}>
-              <circle cx="10" cy="10" r="9" stroke={C.success} strokeWidth="2"/>
-              <path d="M7 10l2 2 4-4" stroke={C.success} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16zm3.707-9.293a1 1 0 0 0-1.414-1.414L9 10.586 7.707 9.293a1 1 0 0 0-1.414 1.414l2 2a1 1 0 0 0 1.414 0l4-4z" fill={C.success} />
             </svg>
             <span style={{ fontSize: 14, color: C.success, fontWeight: 500 }}>{success}</span>
           </div>
@@ -255,18 +307,20 @@ const ManageCollectionRequestsPage = () => {
         {/* Loading State */}
         {loading ? (
           <div style={{ textAlign: 'center', padding: '80px 20px' }}>
+            <div style={{ width: 40, height: 40, borderRadius: '50%', border: `3px solid ${C.border}`, borderTopColor: C.bright, animation: 'spin 1s linear infinite', margin: '0 auto 16px' }} />
             <div style={{ fontSize: 16, color: C.textMid }}>Loading collection requests...</div>
           </div>
         ) : collections.length === 0 ? (
           <div style={{
             background: C.surface,
             border: `1px solid ${C.border}`,
-            borderRadius: 24,
+            borderRadius: 16,
             padding: '80px 40px',
             textAlign: 'center',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
           }}>
             <div style={{ fontSize: 56, marginBottom: 20 }}>📭</div>
-            <h2 style={{ fontSize: 24, fontWeight: 900, color: C.text, margin: '0 0 12px' }}>
+            <h2 style={{ fontSize: 24, fontWeight: 600, fontFamily: "'Cormorant Garamond', serif", color: C.text, margin: '0 0 12px' }}>
               No pending requests
             </h2>
             <p style={{ fontSize: 16, color: C.textMid, marginBottom: 32, maxWidth: 400, margin: '0 auto 32px' }}>
@@ -276,48 +330,53 @@ const ManageCollectionRequestsPage = () => {
               onClick={() => navigate('/business/posts')}
               style={{
                 padding: '12px 28px',
-                fontSize: 14,
-                fontWeight: 700,
-                borderRadius: 100,
+                fontSize: 13,
+                fontWeight: 600,
+                letterSpacing: '0.06em',
+                borderRadius: 8,
                 border: `1px solid ${C.border}`,
-                background: 'rgba(100,255,67,0.08)',
+                background: C.glow,
                 color: C.bright,
                 cursor: 'pointer',
                 transition: 'all 0.2s',
               }}
-              onMouseEnter={e => { e.target.style.borderColor = C.borderHover; e.target.style.background = 'rgba(100,255,67,0.15)'; }}
-              onMouseLeave={e => { e.target.style.borderColor = C.border; e.target.style.background = 'rgba(100,255,67,0.08)'; }}
+              onMouseEnter={e => { e.target.style.borderColor = C.bright; e.target.style.background = C.glow; e.target.style.color = C.brightDark; }}
+              onMouseLeave={e => { e.target.style.borderColor = C.border; e.target.style.background = C.glow; e.target.style.color = C.bright; }}
             >
               View My Posts
             </button>
           </div>
         ) : (
-          <div style={{ display: 'grid', gap: 24, gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))' }}>
-            {collections.map((collection) => (
+          <div style={{ display: 'grid', gap: 24, gridTemplateColumns: 'repeat(auto-fill, minmax(380px, 1fr))' }}>
+            {collections.map((collection, index) => (
               <div
                 key={collection.id}
                 style={{
                   background: C.surface,
                   border: `1px solid ${C.border}`,
-                  borderRadius: 20,
+                  borderRadius: 16,
                   overflow: 'hidden',
                   transition: 'all 0.3s cubic-bezier(0.16,1,0.3,1)',
                   display: 'flex',
                   flexDirection: 'column',
                   height: '100%',
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+                  animation: `fadeUp 0.4s ease ${index * 0.05}s both`,
                 }}
                 onMouseEnter={e => {
                   e.currentTarget.style.borderColor = C.borderHover;
-                  e.currentTarget.style.transform = 'translateY(-8px)';
+                  e.currentTarget.style.transform = 'translateY(-6px)';
+                  e.currentTarget.style.boxShadow = `0 20px 40px -12px rgba(0,0,0,0.12)`;
                 }}
                 onMouseLeave={e => {
                   e.currentTarget.style.borderColor = C.border;
                   e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.05)';
                 }}
               >
                 {/* Status Header */}
                 <div style={{
-                  background: 'rgba(100,255,67,0.08)',
+                  background: C.glow,
                   borderBottom: `1px solid ${C.border}`,
                   padding: '16px 24px',
                   display: 'flex',
@@ -326,7 +385,8 @@ const ManageCollectionRequestsPage = () => {
                 }}>
                   <h3 style={{
                     fontSize: 18,
-                    fontWeight: 800,
+                    fontWeight: 700,
+                    fontFamily: "'Cormorant Garamond', serif",
                     color: C.text,
                     margin: 0,
                     letterSpacing: '-0.3px',
@@ -334,12 +394,12 @@ const ManageCollectionRequestsPage = () => {
                     {collection.postTitle || collection.post?.title || 'Unnamed Post'}
                   </h3>
                   <div style={{
-                    background: `linear-gradient(135deg, ${C.bright}, #4de029)`,
-                    color: '#062400',
-                    padding: '6px 12px',
+                    background: C.bright,
+                    color: '#ffffff',
+                    padding: '4px 12px',
                     borderRadius: 100,
-                    fontSize: 11,
-                    fontWeight: 800,
+                    fontSize: 10,
+                    fontWeight: 700,
                     letterSpacing: '0.05em',
                     textTransform: 'uppercase',
                   }}>
@@ -352,37 +412,37 @@ const ManageCollectionRequestsPage = () => {
 
                   {/* Transaction Code */}
                   <div style={{
-                    background: 'rgba(100,255,67,0.04)',
+                    background: C.surfaceHigh,
                     border: `1px solid ${C.border}`,
                     borderRadius: 12,
                     padding: '12px 16px',
                   }}>
-                    <div style={{ fontSize: 11, color: C.textLow, letterSpacing: '0.05em', textTransform: 'uppercase', marginBottom: 4 }}>Transaction Code</div>
-                    <div style={{ fontSize: 13, fontWeight: 700, color: C.bright }}>
+                    <div style={{ fontSize: 10, color: C.textLow, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 4, fontWeight: 600 }}>Transaction Code</div>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: C.bright, fontFamily: "'DM Mono', monospace" }}>
                       {collection.transactionCode || `Collection #${collection.id}`}
                     </div>
                   </div>
 
                   {/* Recycler Information */}
                   <div>
-                    <div style={{ fontSize: 11, color: C.textLow, letterSpacing: '0.05em', textTransform: 'uppercase', marginBottom: 12, fontWeight: 700 }}>Recycler</div>
+                    <div style={{ fontSize: 10, color: C.textLow, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 12, fontWeight: 600 }}>Recycler</div>
                     <div style={{ display: 'grid', gap: 8 }}>
                       <div>
-                        <div style={{ fontSize: 12, color: C.textMid }}>Name</div>
-                        <div style={{ fontSize: 14, fontWeight: 700, color: C.text }}>
+                        <div style={{ fontSize: 11, color: C.textMid }}>Name</div>
+                        <div style={{ fontSize: 14, fontWeight: 600, color: C.text }}>
                           {collection.recyclerName || collection.recycler?.name || 'Unknown'}
                         </div>
                       </div>
                       <div>
-                        <div style={{ fontSize: 12, color: C.textMid }}>Email</div>
+                        <div style={{ fontSize: 11, color: C.textMid }}>Email</div>
                         <div style={{ fontSize: 13, fontWeight: 600, color: C.bright, wordBreak: 'break-all' }}>
                           {collection.recyclerEmail || collection.recycler?.email || 'N/A'}
                         </div>
                       </div>
                       {(collection.recyclerPhone || collection.recycler?.phone) && (
                         <div>
-                          <div style={{ fontSize: 12, color: C.textMid }}>Phone</div>
-                          <div style={{ fontSize: 14, fontWeight: 700, color: C.text }}>
+                          <div style={{ fontSize: 11, color: C.textMid }}>Phone</div>
+                          <div style={{ fontSize: 14, fontWeight: 600, color: C.text }}>
                             {collection.recyclerPhone || collection.recycler?.phone}
                           </div>
                         </div>
@@ -392,25 +452,25 @@ const ManageCollectionRequestsPage = () => {
 
                   {/* Material Details */}
                   <div>
-                    <div style={{ fontSize: 11, color: C.textLow, letterSpacing: '0.05em', textTransform: 'uppercase', marginBottom: 12, fontWeight: 700 }}>Material</div>
+                    <div style={{ fontSize: 10, color: C.textLow, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 12, fontWeight: 600 }}>Material</div>
                     <div style={{ display: 'grid', gap: 8 }}>
                       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                         <div>
-                          <div style={{ fontSize: 12, color: C.textMid }}>Type</div>
-                          <div style={{ fontSize: 14, fontWeight: 700, color: C.text }}>
+                          <div style={{ fontSize: 11, color: C.textMid }}>Type</div>
+                          <div style={{ fontSize: 14, fontWeight: 600, color: C.text }}>
                             {collection.postWasteType || collection.post?.wasteType || 'N/A'}
                           </div>
                         </div>
                         <div>
-                          <div style={{ fontSize: 12, color: C.textMid }}>Condition</div>
-                          <div style={{ fontSize: 14, fontWeight: 700, color: C.text }}>
+                          <div style={{ fontSize: 11, color: C.textMid }}>Condition</div>
+                          <div style={{ fontSize: 14, fontWeight: 600, color: C.text }}>
                             {collection.postCondition || collection.post?.condition || 'N/A'}
                           </div>
                         </div>
                       </div>
                       <div>
-                        <div style={{ fontSize: 12, color: C.textMid }}>Quantity</div>
-                        <div style={{ fontSize: 14, fontWeight: 700, color: C.bright }}>
+                        <div style={{ fontSize: 11, color: C.textMid }}>Quantity</div>
+                        <div style={{ fontSize: 14, fontWeight: 600, color: C.bright }}>
                           {collection.postQuantity || collection.post?.quantity || 'N/A'} {collection.postUnit || collection.post?.unit || ''}
                         </div>
                       </div>
@@ -420,27 +480,27 @@ const ManageCollectionRequestsPage = () => {
                   {/* Date & Rejection Info */}
                   <div style={{ display: 'grid', gap: 8, fontSize: 12 }}>
                     <div>
-                      <div style={{ color: C.textLow, marginBottom: 4 }}>Requested</div>
-                      <div style={{ color: C.text, fontWeight: 600 }}>
+                      <div style={{ fontSize: 11, color: C.textLow, marginBottom: 4 }}>Requested</div>
+                      <div style={{ fontSize: 13, color: C.text, fontWeight: 600 }}>
                         {collection.requestDate ? formatManila(collection.requestDate) : 'N/A'}
                       </div>
                     </div>
                     {collection.scheduledDate && (
                       <div>
-                        <div style={{ color: C.bright, marginBottom: 4, fontWeight: 700 }}>Proposed Pickup</div>
-                        <div style={{ color: C.bright, fontWeight: 700 }}>
+                        <div style={{ fontSize: 11, color: C.bright, marginBottom: 4, fontWeight: 600 }}>Proposed Pickup</div>
+                        <div style={{ fontSize: 13, color: C.bright, fontWeight: 600 }}>
                           {formatManilaInput(collection.scheduledDate)}
                         </div>
                       </div>
                     )}
                     {collection.rejectionCount !== undefined && (
                       <div style={{
-                        background: collection.rejectionCount >= 4 ? 'rgba(255,107,107,0.12)' : 'rgba(251,191,36,0.12)',
-                        border: `1px solid ${collection.rejectionCount >= 4 ? 'rgba(255,107,107,0.3)' : 'rgba(251,191,36,0.3)'}`,
+                        background: collection.rejectionCount >= 4 ? C.errorBg : C.warningBg,
+                        border: `1px solid ${collection.rejectionCount >= 4 ? C.errorBorder : C.warningBorder}`,
                         borderRadius: 8,
                         padding: '8px 12px',
-                        color: collection.rejectionCount >= 4 ? '#ff6b6b' : '#fbbf24',
-                        fontWeight: 700,
+                        color: collection.rejectionCount >= 4 ? C.error : C.warning,
+                        fontWeight: 600,
                         fontSize: 11,
                       }}>
                         ⚠️ Rejections: {collection.rejectionCount}/4
@@ -456,27 +516,30 @@ const ManageCollectionRequestsPage = () => {
                       disabled={approving === collection.id}
                       style={{
                         padding: '12px 16px',
-                        fontSize: 13,
-                        fontWeight: 700,
-                        borderRadius: 100,
+                        fontSize: 12,
+                        fontWeight: 600,
+                        letterSpacing: '0.06em',
+                        borderRadius: 8,
                         border: 'none',
-                        background: `linear-gradient(135deg, ${C.bright}, #4de029)`,
-                        color: '#062400',
+                        background: C.bright,
+                        color: '#ffffff',
                         cursor: approving === collection.id ? 'not-allowed' : 'pointer',
-                        transition: 'all 0.22s',
+                        transition: 'all 0.2s',
                         gridColumn: '1 / -1',
                         opacity: approving === collection.id ? 0.6 : 1,
-                        boxShadow: `0 0 12px ${C.glowStrong}`,
+                        boxShadow: `0 2px 6px ${C.glowStrong}`,
                       }}
                       onMouseEnter={e => {
                         if (approving !== collection.id) {
-                          e.target.style.transform = 'translateY(-1px) scale(1.01)';
-                          e.target.style.boxShadow = `0 0 20px ${C.glowStrong}, 0 4px 16px rgba(100,255,67,0.35)`;
+                          e.target.style.background = C.brightDark;
+                          e.target.style.transform = 'translateY(-1px)';
+                          e.target.style.boxShadow = `0 4px 12px ${C.glowStrong}`;
                         }
                       }}
                       onMouseLeave={e => {
-                        e.target.style.transform = 'translateY(0) scale(1)';
-                        e.target.style.boxShadow = `0 0 12px ${C.glowStrong}`;
+                        e.target.style.background = C.bright;
+                        e.target.style.transform = 'translateY(0)';
+                        e.target.style.boxShadow = `0 2px 6px ${C.glowStrong}`;
                       }}
                     >
                       {approving === collection.id ? '⏳ Approving...' : '✅ Approve'}
@@ -488,28 +551,29 @@ const ManageCollectionRequestsPage = () => {
                       title={collection.rejectionCount >= 4 ? 'Rejection limit reached' : ''}
                       style={{
                         padding: '12px 16px',
-                        fontSize: 13,
-                        fontWeight: 700,
-                        borderRadius: 100,
-                        border: (collection.rejectionCount !== undefined && collection.rejectionCount >= 4) ? `1px solid ${C.textLow}` : 'none',
-                        background: (collection.rejectionCount !== undefined && collection.rejectionCount >= 4) 
+                        fontSize: 12,
+                        fontWeight: 600,
+                        letterSpacing: '0.06em',
+                        borderRadius: 8,
+                        border: (collection.rejectionCount !== undefined && collection.rejectionCount >= 4) ? `1px solid ${C.border}` : 'none',
+                        background: (collection.rejectionCount !== undefined && collection.rejectionCount >= 4)
                           ? 'transparent'
-                          : `linear-gradient(135deg, rgba(255,107,107,0.8), rgba(255,80,80,0.8))`,
-                        color: (collection.rejectionCount !== undefined && collection.rejectionCount >= 4) ? C.textLow : '#fff',
+                          : C.error,
+                        color: (collection.rejectionCount !== undefined && collection.rejectionCount >= 4) ? C.textLow : '#ffffff',
                         cursor: (approving === collection.id || (collection.rejectionCount !== undefined && collection.rejectionCount >= 4)) ? 'not-allowed' : 'pointer',
-                        transition: 'all 0.22s',
-                        boxShadow: (collection.rejectionCount !== undefined && collection.rejectionCount >= 4) ? 'none' : '0 0 12px rgba(255,107,107,0.25)',
+                        transition: 'all 0.2s',
+                        opacity: (approving === collection.id || (collection.rejectionCount !== undefined && collection.rejectionCount >= 4)) ? 0.6 : 1,
                       }}
                       onMouseEnter={e => {
                         if (approving !== collection.id && !(collection.rejectionCount >= 4)) {
-                          e.target.style.transform = 'translateY(-1px) scale(1.01)';
-                          e.target.style.boxShadow = '0 0 20px rgba(255,107,107,0.4), 0 4px 16px rgba(255,107,107,0.35)';
+                          e.target.style.background = '#b91c1c';
+                          e.target.style.transform = 'translateY(-1px)';
                         }
                       }}
                       onMouseLeave={e => {
-                        e.target.style.transform = 'translateY(0) scale(1)';
                         if (!(collection.rejectionCount >= 4)) {
-                          e.target.style.boxShadow = '0 0 12px rgba(255,107,107,0.25)';
+                          e.target.style.background = C.error;
+                          e.target.style.transform = 'translateY(0)';
                         }
                       }}
                     >
@@ -524,8 +588,8 @@ const ManageCollectionRequestsPage = () => {
       </main>
 
       {/* ══════════ FOOTER ══════════ */}
-      <footer style={{ borderTop: `1px solid ${C.border}`, padding: '48px 40px', position: 'relative', zIndex: 2 }}>
-        <div style={{ maxWidth: 1360, margin: '0 auto', textAlign: 'center', color: C.textLow, fontSize: 14 }}>
+      <footer style={{ borderTop: `1px solid ${C.border}`, padding: '48px 40px', position: 'relative', zIndex: 2, background: C.surface }}>
+        <div style={{ maxWidth: 1360, margin: '0 auto', textAlign: 'center', color: C.textLow, fontSize: 13 }}>
           <p style={{ margin: 0 }}>© 2026 ScraPair. Connecting waste with purpose.</p>
         </div>
       </footer>

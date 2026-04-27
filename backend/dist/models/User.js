@@ -159,11 +159,17 @@ module.exports = (sequelize) => {
         ]
     });
     User.beforeCreate(async (user) => {
+        if (user.email) {
+            user.email = user.email.toLowerCase().trim();
+        }
         if (user.password) {
             user.password = await bcryptjs_1.default.hash(user.password, 10);
         }
     });
     User.beforeUpdate(async (user) => {
+        if (user.changed('email') && user.email) {
+            user.email = user.email.toLowerCase().trim();
+        }
         if (user.changed('password')) {
             user.password = await bcryptjs_1.default.hash(user.password, 10);
         }

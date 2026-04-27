@@ -2,29 +2,130 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 
-/* ─── Color tokens ────────────────────────────────────────────
-   bright  : #64ff43  (electric lime-green – CTA, glows, accents)
-   deep    : #124d05  (forest dark – surfaces, cards)
-   darker  : #0a2e03  (near-black base)
-   surface : #0d3806  (card backgrounds)
-   text    : #e6ffe0  (off-white tinted green)
-──────────────────────────────────────────────────────────── */
+/* ─── Color tokens – 70% White + 30% Green (matching LandingPage) ── */
 const C = {
-  bright:      '#64ff43',
-  deep:        '#124d05',
-  darker:      '#0a2e03',
-  surface:     '#0d3806',
-  border:      'rgba(100,255,67,0.18)',
-  borderHover: 'rgba(100,255,67,0.45)',
-  text:        '#e6ffe0',
-  textMid:     'rgba(230,255,224,0.55)',
-  textLow:     'rgba(230,255,224,0.3)',
-  glow:        'rgba(100,255,67,0.22)',
-  glowStrong:  'rgba(100,255,67,0.45)',
-  error:       '#ff6b6b',
-  errorBg:     'rgba(255,107,107,0.1)',
-  errorBorder: 'rgba(255,107,107,0.3)',
+  primary: '#2E7D32',
+  primaryDark: '#1B5E20',
+  primaryLight: '#4CAF50',
+  bg: '#FFFFFF',
+  bgDeep: '#F8FAFC',
+  surface: '#FFFFFF',
+  surfaceHigh: '#F9FAFB',
+  cardHover: '#F1F5F9',
+  text: '#1F2937',
+  textLight: '#4B5563',
+  textLighter: '#9CA3AF',
+  border: '#E5E7EB',
+  borderHover: '#2E7D32',
+  error: '#ef4444',
+  errorBg: 'rgba(239,68,68,0.08)',
+  errorBorder: 'rgba(239,68,68,0.2)',
+  glowLight: 'rgba(46,125,50,0.08)',
+  glowStrong: 'rgba(46,125,50,0.2)',
 };
+
+/* ─── Inline keyframes (same as LandingPage) ──────────────────────── */
+const KEYFRAMES = `
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&family=Outfit:wght@300;400;500;600;700&display=swap');
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { background: #FFFFFF; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(32px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+  @keyframes floatA {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    50%       { transform: translateY(-18px) rotate(3deg); }
+  }
+  @keyframes floatB {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    50%       { transform: translateY(-12px) rotate(-2deg); }
+  }
+  @keyframes shimmer {
+    0%   { background-position: -400px 0; }
+    100% { background-position: 400px 0; }
+  }
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+  .gold-shimmer {
+    background: linear-gradient(90deg, #2E7D32 0%, #4CAF50 40%, #2E7D32 60%, #1B5E20 100%);
+    background-size: 800px 100%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: shimmer 3s linear infinite;
+  }
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: #F1F5F9; }
+  ::-webkit-scrollbar-thumb { background: rgba(46,125,50,0.3); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(46,125,50,0.6); }
+`;
+
+/* ─── Ambient orb background (green tint) ───────────────── */
+function AmbientOrbs() {
+  return (
+    <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 0, overflow: 'hidden' }}>
+      <div style={{
+        position: 'absolute', top: '-15%', right: '-10%',
+        width: 700, height: 700, borderRadius: '50%',
+        background: 'radial-gradient(circle, rgba(46,125,50,0.06) 0%, transparent 65%)',
+        animation: 'floatA 14s ease-in-out infinite',
+      }} />
+      <div style={{
+        position: 'absolute', bottom: '10%', left: '-8%',
+        width: 500, height: 500, borderRadius: '50%',
+        background: 'radial-gradient(circle, rgba(46,125,50,0.04) 0%, transparent 65%)',
+        animation: 'floatB 18s ease-in-out infinite',
+      }} />
+      <div style={{
+        position: 'absolute', inset: 0,
+        backgroundImage: `
+          linear-gradient(rgba(46,125,50,0.03) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(46,125,50,0.03) 1px, transparent 1px)
+        `,
+        backgroundSize: '64px 64px',
+      }} />
+      <div style={{
+        position: 'absolute', inset: 0,
+        background: 'radial-gradient(ellipse 80% 70% at 50% 50%, transparent 40%, rgba(248,250,252,0.6) 100%)',
+      }} />
+    </div>
+  );
+}
+
+/* ─── Logo Mark (green gradient) ────────────────────────────── */
+function LogoMark({ size = 36 }) {
+  return (
+    <div style={{
+      width: size, height: size,
+      borderRadius: size * 0.28,
+      background: `linear-gradient(135deg, ${C.primary} 0%, ${C.primaryDark} 100%)`,
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      boxShadow: `0 4px 16px rgba(46,125,50,0.3), inset 0 1px 0 rgba(255,255,255,0.2)`,
+      flexShrink: 0,
+      position: 'relative',
+      overflow: 'hidden',
+    }}>
+      <div style={{
+        position: 'absolute', top: 0, left: 0, right: 0, height: '50%',
+        background: 'linear-gradient(180deg, rgba(255,255,255,0.25) 0%, transparent 100%)',
+        borderRadius: `${size * 0.28}px ${size * 0.28}px 0 0`,
+      }} />
+      <svg width={size * 0.48} height={size * 0.48} viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M4 8L12 3L20 8L12 13L4 8Z" />
+        <path d="M4 14L12 19L20 14" />
+        <path d="M4 11L12 16L20 11" />
+      </svg>
+    </div>
+  );
+}
 
 const RecyclerLoginPage = () => {
   const navigate = useNavigate();
@@ -33,19 +134,13 @@ const RecyclerLoginPage = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [mouse, setMouse] = useState({ x: 0, y: 0 });
   const [scrollY, setScrollY] = useState(0);
   const [focusedInput, setFocusedInput] = useState(null);
 
   useEffect(() => {
-    const mm = (e) => setMouse({ x: e.clientX, y: e.clientY });
     const sc = () => setScrollY(window.scrollY);
-    window.addEventListener('mousemove', mm);
     window.addEventListener('scroll', sc);
-    return () => { 
-      window.removeEventListener('mousemove', mm); 
-      window.removeEventListener('scroll', sc); 
-    };
+    return () => window.removeEventListener('scroll', sc);
   }, []);
 
   const handleSubmit = async (e) => {
@@ -53,8 +148,10 @@ const RecyclerLoginPage = () => {
     setError('');
     setLoading(true);
 
+    const trimmedEmail = email.trim();
+
     try {
-      await recyclerLogin(email, password);
+      await recyclerLogin(trimmedEmail, password);
       navigate('/recycler/dashboard');
     } catch (err) {
       setError(err.message || 'Login failed. Please try again.');
@@ -64,79 +161,150 @@ const RecyclerLoginPage = () => {
   };
 
   return (
-    <div style={{ minHeight: '100vh', background: C.darker, fontFamily: "'DM Sans','Helvetica Neue',sans-serif", overflowX: 'hidden', color: C.text }}>
+    <div style={{
+      minHeight: '100vh',
+      background: C.bg,
+      fontFamily: "'Outfit', system-ui, sans-serif",
+      overflowX: 'hidden',
+      color: C.text,
+      position: 'relative',
+    }}>
+      <style>{KEYFRAMES}</style>
+      <AmbientOrbs />
 
-      {/* Ambient cursor glow */}
-      <div style={{ position: 'fixed', top: mouse.y - 320, left: mouse.x - 320, width: 640, height: 640, background: 'radial-gradient(circle, rgba(100,255,67,0.055) 0%, transparent 65%)', borderRadius: '50%', pointerEvents: 'none', zIndex: 0, transition: 'top 0.35s ease, left 0.35s ease' }} />
-
-      {/* Grain overlay */}
-      <div style={{ position: 'fixed', inset: 0, backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E")`, pointerEvents: 'none', zIndex: 1 }} />
-
-      {/* ══════════ NAVBAR ══════════ */}
-      <nav style={{ position: 'sticky', top: 0, zIndex: 100, background: scrollY > 60 ? 'rgba(10,46,3,0.93)' : 'transparent', backdropFilter: scrollY > 60 ? 'blur(28px)' : 'none', borderBottom: scrollY > 60 ? `1px solid ${C.border}` : '1px solid transparent', transition: 'all 0.35s ease' }}>
-        <div style={{ maxWidth: 1360, margin: '0 auto', padding: '18px 40px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }} onClick={() => navigate('/')}>
-            <div style={{ width: 38, height: 38, borderRadius: 11, background: 'rgba(100,255,67,0.12)', border: '1px solid rgba(100,255,67,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                <path d="M10 2a8 8 0 1 0 0 16A8 8 0 0 0 10 2zm0 2a6 6 0 0 1 5.917 5H10V4zm-1 0v5H3.083A6 6 0 0 1 9 4zM3.444 11H9v5.472A6.002 6.002 0 0 1 3.444 11zm6.556 5.472V11h5.556A6.002 6.002 0 0 1 10 16.472z" fill={C.bright}/>
-              </svg>
+      {/* ══════════ NAVBAR (sticky, glass, matching LandingPage) ══════════ */}
+      <nav style={{
+        position: 'sticky', top: 0, zIndex: 100,
+        background: scrollY > 30
+          ? 'rgba(255,255,255,0.92)'
+          : 'transparent',
+        backdropFilter: scrollY > 30 ? 'blur(24px) saturate(1.5)' : 'none',
+        borderBottom: scrollY > 30 ? `1px solid ${C.border}` : '1px solid transparent',
+        transition: 'all 0.4s cubic-bezier(0.16,1,0.3,1)',
+      }}>
+        <div style={{ maxWidth: 1320, margin: '0 auto', padding: '18px 40px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer' }} onClick={() => navigate('/')}>
+            <LogoMark size={38} />
+            <div>
+              <span style={{
+                fontSize: 22, fontWeight: 700, letterSpacing: '-0.5px',
+                fontFamily: "'Cormorant Garamond', serif",
+                color: C.text,
+              }}>scrapair</span>
+              <div style={{ height: 1.5, background: `linear-gradient(90deg, ${C.primary}, transparent)`, marginTop: 1, width: '100%' }} />
             </div>
-            <span style={{ fontSize: 21, fontWeight: 800, letterSpacing: '-0.5px', color: C.text }}>ScraPair</span>
           </div>
-          <button onClick={() => navigate('/role-selection')}
-            style={{ padding: '10px 24px', fontSize: 14, fontWeight: 700, borderRadius: 100, border: 'none', background: C.bright, color: '#082800', cursor: 'pointer', transition: 'all 0.2s', boxShadow: '0 0 16px rgba(100,255,67,0.35)' }}
-            onMouseEnter={e => { e.target.style.boxShadow = '0 0 28px rgba(100,255,67,0.6)'; e.target.style.transform = 'translateY(-1px)'; }}
-            onMouseLeave={e => { e.target.style.boxShadow = '0 0 16px rgba(100,255,67,0.35)'; e.target.style.transform = 'translateY(0)'; }}
-          >← Back</button>
+          <button
+            onClick={() => navigate('/role-selection')}
+            className="cta-btn"
+            style={{
+              padding: '10px 26px',
+              fontSize: 13,
+              fontWeight: 600,
+              letterSpacing: '0.06em',
+              textTransform: 'uppercase',
+              borderRadius: 4,
+              border: `1px solid ${C.primary}`,
+              background: 'transparent',
+              color: C.primary,
+              cursor: 'pointer',
+              fontFamily: "'Outfit', sans-serif",
+              transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+            }}
+            onMouseEnter={e => {
+              e.currentTarget.style.background = C.primary;
+              e.currentTarget.style.color = 'white';
+              e.currentTarget.style.transform = 'translateY(-2px)';
+              e.currentTarget.style.boxShadow = `0 8px 20px rgba(46,125,50,0.3)`;
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.background = 'transparent';
+              e.currentTarget.style.color = C.primary;
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = 'none';
+            }}
+          >
+            ← Back
+          </button>
         </div>
       </nav>
 
       {/* ══════════ MAIN CONTENT ══════════ */}
-      <section style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', position: 'relative', zIndex: 2, padding: '60px 40px' }}>
-
-        {/* Decorative background elements */}
-        <div style={{ position: 'fixed', top: '5%', right: '-8%', width: 500, height: 500, border: '1px solid rgba(100,255,67,0.05)', borderRadius: '50%', pointerEvents: 'none' }} />
-        <div style={{ position: 'fixed', bottom: '10%', left: '-10%', width: 400, height: 400, border: '1px solid rgba(100,255,67,0.05)', borderRadius: '50%', pointerEvents: 'none' }} />
-
-        <div style={{ maxWidth: 520, margin: '0 auto', width: '100%' }}>
-          {/* Header */}
-          <div style={{ textAlign: 'left', marginBottom: 60 }}>
-            <div style={{ fontSize: 12, color: C.bright, fontWeight: 800, letterSpacing: '0.14em', textTransform: 'uppercase', marginBottom: 16 }}>Recycler</div>
-            <h1 style={{ fontSize: 52, fontWeight: 900, lineHeight: 1.08, letterSpacing: '-2px', margin: '0 0 16px', color: C.text }}>
+      <section style={{
+        minHeight: '80vh',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        position: 'relative',
+        zIndex: 2,
+        padding: '60px 32px',
+      }}>
+        <div style={{ maxWidth: 480, margin: '0 auto', width: '100%' }}>
+          {/* Header with green accent */}
+          <div style={{ marginBottom: 48, animation: 'fadeUp 0.7s ease both' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+              <div style={{ width: 40, height: 1, background: C.primary }} />
+              <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.2em', textTransform: 'uppercase', color: C.primary }}>
+                Recycler
+              </span>
+              <div style={{ width: 40, height: 1, background: C.primary }} />
+            </div>
+            <h1 style={{
+              fontFamily: "'Cormorant Garamond', serif",
+              fontSize: 48,
+              fontWeight: 600,
+              lineHeight: 1.1,
+              letterSpacing: '-1.5px',
+              margin: '0 0 12px',
+              color: C.text,
+            }}>
               Welcome back
             </h1>
-            <p style={{ fontSize: 16, lineHeight: 1.7, color: C.textMid, margin: 0 }}>
-              Sign in to your ScraPair account and discover new recycling opportunities.
+            <p style={{
+              fontSize: 15,
+              lineHeight: 1.6,
+              color: C.textLight,
+              margin: 0,
+            }}>
+              Sign in to your account and discover new recycling opportunities.
             </p>
           </div>
 
-          {/* Form Container */}
-          <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 28, padding: 48 }}>
-
+          {/* Form Card */}
+          <div style={{
+            background: C.surface,
+            border: `1px solid ${C.border}`,
+            borderRadius: 6,
+            padding: 40,
+            transition: 'all 0.25s ease',
+            animation: 'fadeUp 0.7s ease 0.1s both',
+          }}>
             {/* Error Message */}
             {error && (
               <div style={{
                 background: C.errorBg,
                 border: `1px solid ${C.errorBorder}`,
-                borderRadius: 16,
-                padding: '16px 20px',
-                marginBottom: 32,
+                borderRadius: 4,
+                padding: '14px 18px',
+                marginBottom: 28,
                 display: 'flex',
                 alignItems: 'center',
-                gap: 12,
+                gap: 10,
               }}>
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" style={{ flexShrink: 0 }}>
-                  <circle cx="10" cy="10" r="9" stroke={C.error} strokeWidth="2"/>
-                  <path d="M10 6v4M10 14h.01" stroke={C.error} strokeWidth="2" strokeLinecap="round"/>
+                <svg width="18" height="18" viewBox="0 0 20 20" fill="none" style={{ flexShrink: 0 }}>
+                  <circle cx="10" cy="10" r="9" stroke={C.error} strokeWidth="1.5" />
+                  <path d="M10 6v4M10 14h.01" stroke={C.error} strokeWidth="1.8" strokeLinecap="round" />
                 </svg>
-                <span style={{ fontSize: 14, color: C.error, fontWeight: 500 }}>{error}</span>
+                <span style={{ fontSize: 13, color: C.error, fontWeight: 500 }}>{error}</span>
               </div>
             )}
 
-            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 22 }}>
               {/* Email Input */}
               <div>
-                <label style={{ display: 'block', fontSize: 13, fontWeight: 700, color: C.textMid, marginBottom: 10, letterSpacing: '0.05em', textTransform: 'uppercase' }}>Email</label>
+                <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: C.textLight, marginBottom: 8, letterSpacing: '0.04em' }}>
+                  Email
+                </label>
                 <input
                   type="email"
                   value={email}
@@ -147,27 +315,29 @@ const RecyclerLoginPage = () => {
                   placeholder="you@recycler.com"
                   style={{
                     width: '100%',
-                    padding: '14px 16px',
-                    border: `1px solid ${focusedInput === 'email' ? C.borderHover : C.border}`,
-                    borderRadius: 14,
-                    background: 'rgba(100,255,67,0.03)',
+                    padding: '12px 16px',
+                    background: C.bgDeep,
+                    border: `1px solid ${focusedInput === 'email' ? C.primary : C.border}`,
+                    borderRadius: 4,
                     color: C.text,
                     fontSize: 14,
-                    boxSizing: 'border-box',
+                    fontFamily: "'Outfit', sans-serif",
                     transition: 'all 0.2s ease',
                     outline: 'none',
-                    boxShadow: focusedInput === 'email' ? `0 0 0 3px rgba(100,255,67,0.1)` : 'none',
+                    boxShadow: focusedInput === 'email' ? `0 0 0 2px ${C.glowStrong}` : 'none',
                   }}
                 />
               </div>
 
               {/* Password Input */}
               <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-                  <label style={{ fontSize: 13, fontWeight: 700, color: C.textMid, letterSpacing: '0.05em', textTransform: 'uppercase' }}>Password</label>
-                  <Link 
-                    to="/forgot-password" 
-                    style={{ fontSize: 12, color: C.bright, fontWeight: 600, textDecoration: 'none', transition: 'all 0.2s' }}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                  <label style={{ fontSize: 12, fontWeight: 600, color: C.textLight, letterSpacing: '0.04em' }}>
+                    Password
+                  </label>
+                  <Link
+                    to="/forgot-password"
+                    style={{ fontSize: 12, color: C.primary, fontWeight: 500, textDecoration: 'none', transition: 'all 0.2s' }}
                     onMouseEnter={e => e.target.style.textDecoration = 'underline'}
                     onMouseLeave={e => e.target.style.textDecoration = 'none'}
                   >
@@ -184,16 +354,16 @@ const RecyclerLoginPage = () => {
                   placeholder="••••••••"
                   style={{
                     width: '100%',
-                    padding: '14px 16px',
-                    border: `1px solid ${focusedInput === 'password' ? C.borderHover : C.border}`,
-                    borderRadius: 14,
-                    background: 'rgba(100,255,67,0.03)',
+                    padding: '12px 16px',
+                    background: C.bgDeep,
+                    border: `1px solid ${focusedInput === 'password' ? C.primary : C.border}`,
+                    borderRadius: 4,
                     color: C.text,
                     fontSize: 14,
-                    boxSizing: 'border-box',
+                    fontFamily: "'Outfit', sans-serif",
                     transition: 'all 0.2s ease',
                     outline: 'none',
-                    boxShadow: focusedInput === 'password' ? `0 0 0 3px rgba(100,255,67,0.1)` : 'none',
+                    boxShadow: focusedInput === 'password' ? `0 0 0 2px ${C.glowStrong}` : 'none',
                   }}
                 />
               </div>
@@ -204,39 +374,46 @@ const RecyclerLoginPage = () => {
                 disabled={loading}
                 style={{
                   width: '100%',
-                  padding: '16px 24px',
-                  marginTop: 16,
-                  background: loading
-                    ? 'linear-gradient(135deg, rgba(100,255,67,0.4), rgba(100,255,67,0.3))'
-                    : 'linear-gradient(135deg, #64ff43, #4de029)',
-                  color: '#062400',
-                  fontSize: 15,
-                  fontWeight: 800,
+                  padding: '14px 24px',
+                  marginTop: 12,
+                  background: loading ? C.textLighter : C.primary,
+                  color: 'white',
+                  fontSize: 13,
+                  fontWeight: 600,
+                  letterSpacing: '0.08em',
+                  textTransform: 'uppercase',
                   border: 'none',
-                  borderRadius: 14,
+                  borderRadius: 4,
                   cursor: loading ? 'not-allowed' : 'pointer',
-                  transition: 'all 0.22s cubic-bezier(0.16,1,0.3,1)',
-                  boxShadow: loading
-                    ? '0 0 0 0px transparent, 0 4px 16px rgba(100,255,67,0.2)'
-                    : '0 0 0 0px transparent, 0 8px 24px rgba(100,255,67,0.35)',
+                  transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
+                  boxShadow: loading ? 'none' : `0 4px 12px ${C.glowStrong}`,
                   transform: loading ? 'scale(0.98)' : 'scale(1)',
                 }}
                 onMouseEnter={e => {
                   if (!loading) {
-                    e.target.style.boxShadow = '0 0 0 5px rgba(100,255,67,0.15), 0 12px 36px rgba(100,255,67,0.5)';
-                    e.target.style.transform = 'translateY(-2px) scale(1.01)';
+                    e.currentTarget.style.background = C.primaryDark;
+                    e.currentTarget.style.transform = 'translateY(-2px)';
+                    e.currentTarget.style.boxShadow = `0 8px 20px ${C.glowStrong}`;
                   }
                 }}
                 onMouseLeave={e => {
                   if (!loading) {
-                    e.target.style.boxShadow = '0 0 0 0px transparent, 0 8px 24px rgba(100,255,67,0.35)';
-                    e.target.style.transform = 'scale(1)';
+                    e.currentTarget.style.background = C.primary;
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = `0 4px 12px ${C.glowStrong}`;
                   }
                 }}
               >
                 {loading ? (
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-                    <div style={{ width: 14, height: 14, border: '2px solid rgba(6,36,0,0.2)', borderTop: '2px solid #062400', borderRadius: '50%', animation: 'spin 0.6s linear infinite' }} />
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
+                    <div style={{
+                      width: 14,
+                      height: 14,
+                      border: `2px solid white`,
+                      borderTop: `2px solid transparent`,
+                      borderRadius: '50%',
+                      animation: 'spin 0.6s linear infinite',
+                    }} />
                     <span>Signing in...</span>
                   </div>
                 ) : (
@@ -246,18 +423,18 @@ const RecyclerLoginPage = () => {
             </form>
 
             {/* Divider */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '32px 0' }}>
-              <div style={{ flex: 1, height: '1px', background: C.border }} />
-              <span style={{ color: C.textLow, fontSize: 12 }}>or</span>
-              <div style={{ flex: 1, height: '1px', background: C.border }} />
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '32px 0 28px' }}>
+              <div style={{ flex: 1, height: 1, background: C.border }} />
+              <span style={{ color: C.textLighter, fontSize: 12, letterSpacing: '0.04em' }}>or</span>
+              <div style={{ flex: 1, height: 1, background: C.border }} />
             </div>
 
             {/* Sign Up Link */}
-            <p style={{ textAlign: 'center', fontSize: 14, color: C.textMid, margin: 0 }}>
+            <p style={{ textAlign: 'center', fontSize: 14, color: C.textLight, margin: 0 }}>
               Don't have an account?{' '}
-              <Link 
-                to="/recycler/signup" 
-                style={{ color: C.bright, fontWeight: 700, textDecoration: 'none', transition: 'all 0.2s' }}
+              <Link
+                to="/recycler/signup"
+                style={{ color: C.primary, fontWeight: 600, textDecoration: 'none', transition: 'all 0.2s' }}
                 onMouseEnter={e => e.target.style.textDecoration = 'underline'}
                 onMouseLeave={e => e.target.style.textDecoration = 'none'}
               >
@@ -267,11 +444,11 @@ const RecyclerLoginPage = () => {
           </div>
 
           {/* Footer Info */}
-          <div style={{ textAlign: 'center', marginTop: 48 }}>
-            <p style={{ fontSize: 12, color: C.textLow, margin: 0 }}>
-              <Link 
-                to="/role-selection" 
-                style={{ color: C.bright, textDecoration: 'none', fontWeight: 600 }}
+          <div style={{ textAlign: 'center', marginTop: 32 }}>
+            <p style={{ fontSize: 13, color: C.textLighter, margin: 0 }}>
+              <Link
+                to="/role-selection"
+                style={{ color: C.primary, textDecoration: 'none', fontWeight: 500 }}
                 onMouseEnter={e => e.target.style.textDecoration = 'underline'}
                 onMouseLeave={e => e.target.style.textDecoration = 'none'}
               >
@@ -281,12 +458,6 @@ const RecyclerLoginPage = () => {
           </div>
         </div>
       </section>
-
-      <style>{`
-        @keyframes spin {
-          to { transform: rotate(360deg); }
-        }
-      `}</style>
     </div>
   );
 };

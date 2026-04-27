@@ -1,6 +1,131 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
+
+/* ─── Color tokens – 70% White + 30% Green (matching LandingPage) ── */
+const C = {
+  primary: '#2E7D32',
+  primaryDark: '#1B5E20',
+  primaryLight: '#4CAF50',
+  bg: '#FFFFFF',
+  bgDeep: '#F8FAFC',
+  surface: '#FFFFFF',
+  surfaceHigh: '#F9FAFB',
+  cardHover: '#F1F5F9',
+  text: '#1F2937',
+  textLight: '#4B5563',
+  textLighter: '#9CA3AF',
+  border: '#E5E7EB',
+  borderHover: '#2E7D32',
+  error: '#ef4444',
+  errorBg: 'rgba(239,68,68,0.08)',
+  errorBorder: 'rgba(239,68,68,0.2)',
+  glowLight: 'rgba(46,125,50,0.08)',
+  glowStrong: 'rgba(46,125,50,0.2)',
+};
+
+/* ─── Inline keyframes (same as LandingPage) ──────────────────────── */
+const KEYFRAMES = `
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&family=Outfit:wght@300;400;500;600;700&display=swap');
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { background: #FFFFFF; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(32px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+  @keyframes floatA {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    50%       { transform: translateY(-18px) rotate(3deg); }
+  }
+  @keyframes floatB {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    50%       { transform: translateY(-12px) rotate(-2deg); }
+  }
+  @keyframes shimmer {
+    0%   { background-position: -400px 0; }
+    100% { background-position: 400px 0; }
+  }
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+  .gold-shimmer {
+    background: linear-gradient(90deg, #2E7D32 0%, #4CAF50 40%, #2E7D32 60%, #1B5E20 100%);
+    background-size: 800px 100%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: shimmer 3s linear infinite;
+  }
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: #F1F5F9; }
+  ::-webkit-scrollbar-thumb { background: rgba(46,125,50,0.3); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(46,125,50,0.6); }
+`;
+
+/* ─── Ambient orb background (green tint) ───────────────── */
+function AmbientOrbs() {
+  return (
+    <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 0, overflow: 'hidden' }}>
+      <div style={{
+        position: 'absolute', top: '-15%', right: '-10%',
+        width: 700, height: 700, borderRadius: '50%',
+        background: 'radial-gradient(circle, rgba(46,125,50,0.06) 0%, transparent 65%)',
+        animation: 'floatA 14s ease-in-out infinite',
+      }} />
+      <div style={{
+        position: 'absolute', bottom: '10%', left: '-8%',
+        width: 500, height: 500, borderRadius: '50%',
+        background: 'radial-gradient(circle, rgba(46,125,50,0.04) 0%, transparent 65%)',
+        animation: 'floatB 18s ease-in-out infinite',
+      }} />
+      <div style={{
+        position: 'absolute', inset: 0,
+        backgroundImage: `
+          linear-gradient(rgba(46,125,50,0.03) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(46,125,50,0.03) 1px, transparent 1px)
+        `,
+        backgroundSize: '64px 64px',
+      }} />
+      <div style={{
+        position: 'absolute', inset: 0,
+        background: 'radial-gradient(ellipse 80% 70% at 50% 50%, transparent 40%, rgba(248,250,252,0.6) 100%)',
+      }} />
+    </div>
+  );
+}
+
+/* ─── Logo Mark (green gradient) ────────────────────────────── */
+function LogoMark({ size = 36 }) {
+  return (
+    <div style={{
+      width: size, height: size,
+      borderRadius: size * 0.28,
+      background: `linear-gradient(135deg, ${C.primary} 0%, ${C.primaryDark} 100%)`,
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      boxShadow: `0 4px 16px rgba(46,125,50,0.3), inset 0 1px 0 rgba(255,255,255,0.2)`,
+      flexShrink: 0,
+      position: 'relative',
+      overflow: 'hidden',
+    }}>
+      <div style={{
+        position: 'absolute', top: 0, left: 0, right: 0, height: '50%',
+        background: 'linear-gradient(180deg, rgba(255,255,255,0.25) 0%, transparent 100%)',
+        borderRadius: `${size * 0.28}px ${size * 0.28}px 0 0`,
+      }} />
+      <svg width={size * 0.48} height={size * 0.48} viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M4 8L12 3L20 8L12 13L4 8Z" />
+        <path d="M4 14L12 19L20 14" />
+        <path d="M4 11L12 16L20 11" />
+      </svg>
+    </div>
+  );
+}
 
 const BusinessSignupPage = () => {
   const navigate = useNavigate();
@@ -14,6 +139,14 @@ const BusinessSignupPage = () => {
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [scrollY, setScrollY] = useState(0);
+  const [focusedInput, setFocusedInput] = useState(null);
+
+  useEffect(() => {
+    const sc = () => setScrollY(window.scrollY);
+    window.addEventListener('scroll', sc);
+    return () => window.removeEventListener('scroll', sc);
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -26,6 +159,11 @@ const BusinessSignupPage = () => {
 
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match');
+      return;
+    }
+
+    if (formData.password.length < 6) {
+      setError('Password must be at least 6 characters');
       return;
     }
 
@@ -47,128 +185,384 @@ const BusinessSignupPage = () => {
   };
 
   return (
-    <div style={{ padding: '40px 20px', maxWidth: '400px', margin: '50px auto' }}>
-      <h2>Business Owner Signup</h2>
+    <div style={{
+      minHeight: '100vh',
+      background: C.bg,
+      fontFamily: "'Outfit', system-ui, sans-serif",
+      overflowX: 'hidden',
+      color: C.text,
+      position: 'relative',
+    }}>
+      <style>{KEYFRAMES}</style>
+      <AmbientOrbs />
 
-      {error && (
-        <div style={{ backgroundColor: '#fee', padding: '10px', borderRadius: '4px', color: '#c33', marginBottom: '20px' }}>
-          {error}
-        </div>
-      )}
-
-      <form onSubmit={handleSubmit}>
-        <div style={{ marginBottom: '15px' }}>
-          <label style={{ display: 'block', marginBottom: '5px' }}>Business Name *</label>
-          <input
-            type="text"
-            name="businessName"
-            value={formData.businessName}
-            onChange={handleChange}
-            required
+      {/* ══════════ NAVBAR (sticky, glass, matching LandingPage) ══════════ */}
+      <nav style={{
+        position: 'sticky', top: 0, zIndex: 100,
+        background: scrollY > 30
+          ? 'rgba(255,255,255,0.92)'
+          : 'transparent',
+        backdropFilter: scrollY > 30 ? 'blur(24px) saturate(1.5)' : 'none',
+        borderBottom: scrollY > 30 ? `1px solid ${C.border}` : '1px solid transparent',
+        transition: 'all 0.4s cubic-bezier(0.16,1,0.3,1)',
+      }}>
+        <div style={{ maxWidth: 1320, margin: '0 auto', padding: '18px 40px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer' }} onClick={() => navigate('/')}>
+            <LogoMark size={38} />
+            <div>
+              <span style={{
+                fontSize: 22, fontWeight: 700, letterSpacing: '-0.5px',
+                fontFamily: "'Cormorant Garamond', serif",
+                color: C.text,
+              }}>scrapair</span>
+              <div style={{ height: 1.5, background: `linear-gradient(90deg, ${C.primary}, transparent)`, marginTop: 1, width: '100%' }} />
+            </div>
+          </div>
+          <button
+            onClick={() => navigate('/role-selection')}
+            className="cta-btn"
             style={{
-              width: '100%',
-              padding: '8px',
-              border: '1px solid #ddd',
-              borderRadius: '4px',
-              boxSizing: 'border-box',
+              padding: '10px 26px',
+              fontSize: 13,
+              fontWeight: 600,
+              letterSpacing: '0.06em',
+              textTransform: 'uppercase',
+              borderRadius: 4,
+              border: `1px solid ${C.primary}`,
+              background: 'transparent',
+              color: C.primary,
+              cursor: 'pointer',
+              fontFamily: "'Outfit', sans-serif",
+              transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
             }}
-          />
-        </div>
-
-        <div style={{ marginBottom: '15px' }}>
-          <label style={{ display: 'block', marginBottom: '5px' }}>Email *</label>
-          <input
-            type="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            required
-            style={{
-              width: '100%',
-              padding: '8px',
-              border: '1px solid #ddd',
-              borderRadius: '4px',
-              boxSizing: 'border-box',
+            onMouseEnter={e => {
+              e.currentTarget.style.background = C.primary;
+              e.currentTarget.style.color = 'white';
+              e.currentTarget.style.transform = 'translateY(-2px)';
+              e.currentTarget.style.boxShadow = `0 8px 20px rgba(46,125,50,0.3)`;
             }}
-          />
-        </div>
-
-        <div style={{ marginBottom: '15px' }}>
-          <label style={{ display: 'block', marginBottom: '5px' }}>Phone *</label>
-          <input
-            type="tel"
-            name="phone"
-            value={formData.phone}
-            onChange={handleChange}
-            required
-            placeholder="e.g., +1234567890"
-            style={{
-              width: '100%',
-              padding: '8px',
-              border: '1px solid #ddd',
-              borderRadius: '4px',
-              boxSizing: 'border-box',
+            onMouseLeave={e => {
+              e.currentTarget.style.background = 'transparent';
+              e.currentTarget.style.color = C.primary;
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = 'none';
             }}
-          />
+          >
+            ← Back
+          </button>
         </div>
+      </nav>
 
-        <div style={{ marginBottom: '15px' }}>
-          <label style={{ display: 'block', marginBottom: '5px' }}>Password:</label>
-          <input
-            type="password"
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-            required
-            style={{
-              width: '100%',
-              padding: '8px',
-              border: '1px solid #ddd',
-              borderRadius: '4px',
-              boxSizing: 'border-box',
-            }}
-          />
+      {/* ══════════ MAIN CONTENT ══════════ */}
+      <section style={{
+        minHeight: '80vh',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        position: 'relative',
+        zIndex: 2,
+        padding: '60px 32px',
+      }}>
+        <div style={{ maxWidth: 480, margin: '0 auto', width: '100%' }}>
+          {/* Header with green accent */}
+          <div style={{ marginBottom: 48, animation: 'fadeUp 0.7s ease both' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+              <div style={{ width: 40, height: 1, background: C.primary }} />
+              <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.2em', textTransform: 'uppercase', color: C.primary }}>
+                Business Owner
+              </span>
+              <div style={{ width: 40, height: 1, background: C.primary }} />
+            </div>
+            <h1 style={{
+              fontFamily: "'Cormorant Garamond', serif",
+              fontSize: 48,
+              fontWeight: 600,
+              lineHeight: 1.1,
+              letterSpacing: '-1.5px',
+              margin: '0 0 12px',
+              color: C.text,
+            }}>
+              Create an account
+            </h1>
+            <p style={{
+              fontSize: 15,
+              lineHeight: 1.6,
+              color: C.textLight,
+              margin: 0,
+            }}>
+              Join Scrapair and start managing your waste materials efficiently.
+            </p>
+          </div>
+
+          {/* Form Card */}
+          <div style={{
+            background: C.surface,
+            border: `1px solid ${C.border}`,
+            borderRadius: 6,
+            padding: 40,
+            transition: 'all 0.25s ease',
+            animation: 'fadeUp 0.7s ease 0.1s both',
+          }}>
+            {/* Error Message */}
+            {error && (
+              <div style={{
+                background: C.errorBg,
+                border: `1px solid ${C.errorBorder}`,
+                borderRadius: 4,
+                padding: '14px 18px',
+                marginBottom: 28,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 10,
+              }}>
+                <svg width="18" height="18" viewBox="0 0 20 20" fill="none" style={{ flexShrink: 0 }}>
+                  <circle cx="10" cy="10" r="9" stroke={C.error} strokeWidth="1.5" />
+                  <path d="M10 6v4M10 14h.01" stroke={C.error} strokeWidth="1.8" strokeLinecap="round" />
+                </svg>
+                <span style={{ fontSize: 13, color: C.error, fontWeight: 500 }}>{error}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+              {/* Business Name Input */}
+              <div>
+                <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: C.textLight, marginBottom: 8, letterSpacing: '0.04em' }}>
+                  Business Name *
+                </label>
+                <input
+                  type="text"
+                  name="businessName"
+                  value={formData.businessName}
+                  onChange={handleChange}
+                  onFocus={() => setFocusedInput('businessName')}
+                  onBlur={() => setFocusedInput(null)}
+                  required
+                  placeholder="Acme Corp"
+                  style={{
+                    width: '100%',
+                    padding: '12px 16px',
+                    background: C.bgDeep,
+                    border: `1px solid ${focusedInput === 'businessName' ? C.primary : C.border}`,
+                    borderRadius: 4,
+                    color: C.text,
+                    fontSize: 14,
+                    fontFamily: "'Outfit', sans-serif",
+                    transition: 'all 0.2s ease',
+                    outline: 'none',
+                    boxShadow: focusedInput === 'businessName' ? `0 0 0 2px ${C.glowStrong}` : 'none',
+                  }}
+                />
+              </div>
+
+              {/* Email Input */}
+              <div>
+                <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: C.textLight, marginBottom: 8, letterSpacing: '0.04em' }}>
+                  Email *
+                </label>
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  onFocus={() => setFocusedInput('email')}
+                  onBlur={() => setFocusedInput(null)}
+                  required
+                  placeholder="you@company.com"
+                  style={{
+                    width: '100%',
+                    padding: '12px 16px',
+                    background: C.bgDeep,
+                    border: `1px solid ${focusedInput === 'email' ? C.primary : C.border}`,
+                    borderRadius: 4,
+                    color: C.text,
+                    fontSize: 14,
+                    fontFamily: "'Outfit', sans-serif",
+                    transition: 'all 0.2s ease',
+                    outline: 'none',
+                    boxShadow: focusedInput === 'email' ? `0 0 0 2px ${C.glowStrong}` : 'none',
+                  }}
+                />
+              </div>
+
+              {/* Phone Input */}
+              <div>
+                <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: C.textLight, marginBottom: 8, letterSpacing: '0.04em' }}>
+                  Phone *
+                </label>
+                <input
+                  type="tel"
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handleChange}
+                  onFocus={() => setFocusedInput('phone')}
+                  onBlur={() => setFocusedInput(null)}
+                  required
+                  placeholder="+1 234 567 8900"
+                  style={{
+                    width: '100%',
+                    padding: '12px 16px',
+                    background: C.bgDeep,
+                    border: `1px solid ${focusedInput === 'phone' ? C.primary : C.border}`,
+                    borderRadius: 4,
+                    color: C.text,
+                    fontSize: 14,
+                    fontFamily: "'Outfit', sans-serif",
+                    transition: 'all 0.2s ease',
+                    outline: 'none',
+                    boxShadow: focusedInput === 'phone' ? `0 0 0 2px ${C.glowStrong}` : 'none',
+                  }}
+                />
+              </div>
+
+              {/* Password Input */}
+              <div>
+                <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: C.textLight, marginBottom: 8, letterSpacing: '0.04em' }}>
+                  Password *
+                </label>
+                <input
+                  type="password"
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  onFocus={() => setFocusedInput('password')}
+                  onBlur={() => setFocusedInput(null)}
+                  required
+                  placeholder="••••••••"
+                  style={{
+                    width: '100%',
+                    padding: '12px 16px',
+                    background: C.bgDeep,
+                    border: `1px solid ${focusedInput === 'password' ? C.primary : C.border}`,
+                    borderRadius: 4,
+                    color: C.text,
+                    fontSize: 14,
+                    fontFamily: "'Outfit', sans-serif",
+                    transition: 'all 0.2s ease',
+                    outline: 'none',
+                    boxShadow: focusedInput === 'password' ? `0 0 0 2px ${C.glowStrong}` : 'none',
+                  }}
+                />
+                <p style={{ fontSize: 11, color: C.textLighter, marginTop: 6, letterSpacing: '0.03em' }}>
+                  Minimum 6 characters
+                </p>
+              </div>
+
+              {/* Confirm Password Input */}
+              <div>
+                <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: C.textLight, marginBottom: 8, letterSpacing: '0.04em' }}>
+                  Confirm Password *
+                </label>
+                <input
+                  type="password"
+                  name="confirmPassword"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  onFocus={() => setFocusedInput('confirmPassword')}
+                  onBlur={() => setFocusedInput(null)}
+                  required
+                  placeholder="••••••••"
+                  style={{
+                    width: '100%',
+                    padding: '12px 16px',
+                    background: C.bgDeep,
+                    border: `1px solid ${focusedInput === 'confirmPassword' ? C.primary : C.border}`,
+                    borderRadius: 4,
+                    color: C.text,
+                    fontSize: 14,
+                    fontFamily: "'Outfit', sans-serif",
+                    transition: 'all 0.2s ease',
+                    outline: 'none',
+                    boxShadow: focusedInput === 'confirmPassword' ? `0 0 0 2px ${C.glowStrong}` : 'none',
+                  }}
+                />
+              </div>
+
+              {/* Submit Button */}
+              <button
+                type="submit"
+                disabled={loading}
+                style={{
+                  width: '100%',
+                  padding: '14px 24px',
+                  marginTop: 12,
+                  background: loading ? C.textLighter : C.primary,
+                  color: 'white',
+                  fontSize: 13,
+                  fontWeight: 600,
+                  letterSpacing: '0.08em',
+                  textTransform: 'uppercase',
+                  border: 'none',
+                  borderRadius: 4,
+                  cursor: loading ? 'not-allowed' : 'pointer',
+                  transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
+                  boxShadow: loading ? 'none' : `0 4px 12px ${C.glowStrong}`,
+                  transform: loading ? 'scale(0.98)' : 'scale(1)',
+                }}
+                onMouseEnter={e => {
+                  if (!loading) {
+                    e.currentTarget.style.background = C.primaryDark;
+                    e.currentTarget.style.transform = 'translateY(-2px)';
+                    e.currentTarget.style.boxShadow = `0 8px 20px ${C.glowStrong}`;
+                  }
+                }}
+                onMouseLeave={e => {
+                  if (!loading) {
+                    e.currentTarget.style.background = C.primary;
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = `0 4px 12px ${C.glowStrong}`;
+                  }
+                }}
+              >
+                {loading ? (
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
+                    <div style={{
+                      width: 14,
+                      height: 14,
+                      border: `2px solid white`,
+                      borderTop: `2px solid transparent`,
+                      borderRadius: '50%',
+                      animation: 'spin 0.6s linear infinite',
+                    }} />
+                    <span>Creating account...</span>
+                  </div>
+                ) : (
+                  'Sign Up'
+                )}
+              </button>
+            </form>
+
+            {/* Divider */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '32px 0 28px' }}>
+              <div style={{ flex: 1, height: 1, background: C.border }} />
+              <span style={{ color: C.textLighter, fontSize: 12, letterSpacing: '0.04em' }}>or</span>
+              <div style={{ flex: 1, height: 1, background: C.border }} />
+            </div>
+
+            {/* Login Link */}
+            <p style={{ textAlign: 'center', fontSize: 14, color: C.textLight, margin: 0 }}>
+              Already have an account?{' '}
+              <Link
+                to="/business/login"
+                style={{ color: C.primary, fontWeight: 600, textDecoration: 'none', transition: 'all 0.2s' }}
+                onMouseEnter={e => e.target.style.textDecoration = 'underline'}
+                onMouseLeave={e => e.target.style.textDecoration = 'none'}
+              >
+                Sign in here
+              </Link>
+            </p>
+          </div>
+
+          {/* Footer Info */}
+          <div style={{ textAlign: 'center', marginTop: 32 }}>
+            <p style={{ fontSize: 12, color: C.textLighter, margin: 0, letterSpacing: '0.03em' }}>
+              By signing up, you agree to our{' '}
+              <Link to="/terms" style={{ color: C.primary, textDecoration: 'none' }} onMouseEnter={e => e.target.style.textDecoration = 'underline'} onMouseLeave={e => e.target.style.textDecoration = 'none'}>Terms</Link>
+              {' '}and{' '}
+              <Link to="/privacy" style={{ color: C.primary, textDecoration: 'none' }} onMouseEnter={e => e.target.style.textDecoration = 'underline'} onMouseLeave={e => e.target.style.textDecoration = 'none'}>Privacy Policy</Link>
+            </p>
+          </div>
         </div>
-
-        <div style={{ marginBottom: '20px' }}>
-          <label style={{ display: 'block', marginBottom: '5px' }}>Confirm Password:</label>
-          <input
-            type="password"
-            name="confirmPassword"
-            value={formData.confirmPassword}
-            onChange={handleChange}
-            required
-            style={{
-              width: '100%',
-              padding: '8px',
-              border: '1px solid #ddd',
-              borderRadius: '4px',
-              boxSizing: 'border-box',
-            }}
-          />
-        </div>
-
-        <button
-          type="submit"
-          disabled={loading}
-          style={{
-            width: '100%',
-            padding: '10px',
-            backgroundColor: '#28a745',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: loading ? 'not-allowed' : 'pointer',
-            opacity: loading ? 0.6 : 1,
-          }}
-        >
-          {loading ? 'Signing up...' : 'Sign Up'}
-        </button>
-      </form>
-
-      <p style={{ textAlign: 'center', marginTop: '20px', color: '#666' }}>
-        Already have an account? <Link to="/business/login" style={{ color: '#007bff' }}>Login</Link>
-      </p>
+      </section>
     </div>
   );
 };
