@@ -1101,12 +1101,6 @@ const AdminDashboard = () => {
                         value: 'Plastic', valueColor: C.blue,
                         change: '35% of total', up: null,
                       },
-                      {
-                        icon: '🌍', bg: C.accentSoft,
-                        label: 'CO₂ Offset Est.', sub: 'Based on collection data',
-                        value: '9.2 t', valueColor: C.accent,
-                        change: 'tonnes this month', up: null,
-                      },
                     ].map((ins, i) => (
                       <Box
                         key={i}

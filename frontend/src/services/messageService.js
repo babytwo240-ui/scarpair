@@ -6,7 +6,7 @@ const messageService = {
     conversations: null,
     conversationTimestamp: 0,
   },
-  
+
   CACHE_DURATION: 5 * 60 * 1000, // 5 minutes
 
   clearConversationsCache() {
@@ -39,11 +39,11 @@ const messageService = {
       return messageService._cache.conversations;
     }
     const response = await apiClient.get('/conversations');
-    
+
     // Update cache
     messageService._cache.conversations = response.data;
     messageService._cache.conversationTimestamp = Date.now();
-    
+
     return response.data;
   },
 

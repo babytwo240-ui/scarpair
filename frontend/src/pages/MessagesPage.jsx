@@ -4,32 +4,35 @@ import { useAuth } from '../context/AuthContext';
 import messageService from '../services/messageService';
 import socketService from '../services/socketService';
 
-/* ─── Color tokens – 70% White / 30% Green Palette ────────────────── */
+/* ─── Color tokens – Matching Landing Page Design System ────────────── */
 const C = {
-  // Primary green (30%)
-  bright: '#2e7d32',        // Deep green for primary actions
-  brightDark: '#1b5e20',    // Darker green for hover
-  brightLight: '#4caf50',   // Lighter green for accents
-  // Backgrounds (70% white/light tones)
-  darker: '#f8fafc',        // Light grey-white background
-  surface: '#ffffff',       // Pure white surfaces
-  surfaceHigh: '#f1f5f9',   // Light grey for subtle contrast
-  // Borders
-  border: 'rgba(0,0,0,0.08)',
-  borderHover: 'rgba(46,125,50,0.25)',
-  // Text (Dark grey for high contrast on white)
-  text: '#0f172a',          // Slate 900
-  textMid: '#475569',       // Slate 600
-  textLow: '#94a3b8',       // Slate 400
-  // Status colors
+  primary: '#2E7D32',
+  primaryDark: '#1B5E20',
+  primaryLight: '#4CAF50',
+  bright: '#2E7D32',
+  brightDark: '#1B5E20',
+  brightLight: '#4CAF50',
+  bg: '#FFFFFF',
+  darker: '#FFFFFF',
+  bgDeep: '#F8FAFC',
+  surface: '#FFFFFF',
+  surfaceHigh: '#F9FAFB',
+  cardHover: '#F1F5F9',
+  border: '#E5E7EB',
+  borderHover: '#2E7D32',
+  text: '#1F2937',
+  textLight: '#4B5563',
+  textMid: '#4B5563',
+  textLow: '#94a3b8',
+  textLighter: '#9CA3AF',
   error: '#dc2626',
   errorBg: 'rgba(220,38,38,0.08)',
   errorBorder: 'rgba(220,38,38,0.25)',
   info: '#2563eb',
   infoBg: 'rgba(37,99,235,0.08)',
   infoBorder: 'rgba(37,99,235,0.2)',
-  glowLight: 'rgba(46,125,50,0.04)',
-  glowStrong: 'rgba(46,125,50,0.12)',
+  glowLight: 'rgba(46,125,50,0.08)',
+  glowStrong: 'rgba(46,125,50,0.2)',
 };
 
 // Floating Chat Widget Component
@@ -589,49 +592,156 @@ const MessagesPage = () => {
   return (
     <div style={{ minHeight: '100vh', background: C.darker, fontFamily: "'Outfit', sans-serif", overflowX: 'hidden', color: C.text, position: 'relative' }}>
       <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&family=Outfit:wght@300;400;500;600;700&display=swap');
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+        body { background: #FFFFFF; }
         @keyframes spin { to { transform: rotate(360deg); } }
         @keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
         @keyframes slideInUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         @keyframes fadeUp {
-          from { opacity: 0; transform: translateY(20px); }
+          from { opacity: 0; transform: translateY(32px); }
           to { opacity: 1; transform: translateY(0); }
         }
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        @keyframes floatA {
+          0%, 100% { transform: translateY(0px) rotate(0deg); }
+          50% { transform: translateY(-18px) rotate(3deg); }
+        }
+        @keyframes floatB {
+          0%, 100% { transform: translateY(0px) rotate(0deg); }
+          50% { transform: translateY(-12px) rotate(-2deg); }
+        }
+        @keyframes shimmer {
+          0%   { background-position: -400px 0; }
+          100% { background-position: 400px 0; }
+        }
+        @keyframes pulseRing {
+          0%   { transform: scale(0.9); opacity: 1; }
+          70%  { transform: scale(1.4); opacity: 0; }
+          100% { transform: scale(0.9); opacity: 0; }
+        }
+        .conv-card {
+          transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+          position: relative;
+          overflow: hidden;
+        }
+        .conv-card::after {
+          content: '';
+          position: absolute;
+          bottom: 0; left: 0; right: 0;
+          height: 2px;
+          background: linear-gradient(90deg, transparent, #2E7D32, transparent);
+          transform: scaleX(0);
+          transition: transform 0.4s ease;
+        }
+        .conv-card:hover::after { transform: scaleX(1); }
+        .conv-card:hover {
+          transform: translateY(-4px) !important;
+          background: #F9FAFB !important;
+          box-shadow: 0 20px 50px rgba(0,0,0,0.08), 0 0 0 1px rgba(46,125,50,0.15) !important;
+        }
+        .cta-btn {
+          position: relative;
+          overflow: hidden;
+          transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .cta-btn::after {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(135deg, rgba(255,255,255,0.25) 0%, transparent 50%);
+          opacity: 0;
+          transition: opacity 0.3s;
+        }
+        .cta-btn:hover::after { opacity: 1; }
+        .cta-btn:hover {
+          transform: translateY(-2px) scale(1.02) !important;
+          box-shadow: 0 12px 32px rgba(46,125,50,0.3), 0 4px 12px rgba(0,0,0,0.1) !important;
+        }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #F1F5F9; }
+        ::-webkit-scrollbar-thumb { background: rgba(46,125,50,0.3); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(46,125,50,0.6); }
       `}</style>
+
+      {/* Ambient orbs */}
+      <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 0, overflow: 'hidden' }}>
+        <div style={{
+          position: 'absolute', top: '-15%', right: '-10%',
+          width: 700, height: 700, borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(46,125,50,0.04) 0%, transparent 65%)',
+          animation: 'floatA 14s ease-in-out infinite',
+        }} />
+        <div style={{
+          position: 'absolute', bottom: '10%', left: '-8%',
+          width: 500, height: 500, borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(46,125,50,0.03) 0%, transparent 65%)',
+          animation: 'floatB 18s ease-in-out infinite',
+        }} />
+        <div style={{
+          position: 'absolute', inset: 0,
+          backgroundImage: `
+            linear-gradient(rgba(46,125,50,0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(46,125,50,0.03) 1px, transparent 1px)
+          `,
+          backgroundSize: '64px 64px',
+        }} />
+        {/* Vignette */}
+        <div style={{
+          position: 'absolute', inset: 0,
+          background: 'radial-gradient(ellipse 80% 70% at 50% 50%, transparent 40%, rgba(248,250,252,0.6) 100%)',
+        }} />
+      </div>
 
       {/* Background Effects */}
       <div style={{ position: 'fixed', top: mouse.y - 320, left: mouse.x - 320, width: 640, height: 640, background: `radial-gradient(circle, ${C.glowLight} 0%, transparent 65%)`, borderRadius: '50%', pointerEvents: 'none', zIndex: 0, transition: 'top 0.35s ease, left 0.35s ease' }} />
       <div style={{ position: 'fixed', inset: 0, backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.015'/%3E%3C/svg%3E")`, pointerEvents: 'none', zIndex: 1 }} />
 
       {/* Navigation */}
-      <nav style={{ position: 'sticky', top: 0, zIndex: 100, background: scrollY > 60 ? 'rgba(255,255,255,0.92)' : 'transparent', backdropFilter: scrollY > 60 ? 'blur(24px) saturate(1.5)' : 'none', borderBottom: scrollY > 60 ? `1px solid ${C.border}` : '1px solid transparent', transition: 'all 0.4s cubic-bezier(0.16,1,0.3,1)' }}>
-        <div style={{ maxWidth: 900, margin: '0 auto', padding: '16px 40px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <nav style={{ position: 'sticky', top: 0, zIndex: 100, background: scrollY > 30 ? 'rgba(255,255,255,0.92)' : 'transparent', backdropFilter: scrollY > 30 ? 'blur(24px) saturate(1.5)' : 'none', borderBottom: scrollY > 30 ? `1px solid ${C.border}` : '1px solid transparent', transition: 'all 0.4s cubic-bezier(0.16,1,0.3,1)' }}>
+        <div style={{ maxWidth: 1320, margin: '0 auto', padding: '18px 40px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer' }} onClick={() => navigate('/')}>
-            <div style={{ width: 32, height: 32, borderRadius: 8, background: 'rgba(46,125,50,0.08)', border: `1px solid rgba(46,125,50,0.2)`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <div style={{ width: 6, height: 6, backgroundColor: C.bright, borderRadius: '50%' }} />
+            {/* LogoMark matching landing page */}
+            <div style={{
+              width: 38, height: 38, borderRadius: 11,
+              background: `linear-gradient(135deg, ${C.primary} 0%, ${C.primaryDark} 100%)`,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              boxShadow: '0 4px 16px rgba(46,125,50,0.3), inset 0 1px 0 rgba(255,255,255,0.2)',
+              flexShrink: 0, position: 'relative', overflow: 'hidden',
+            }}>
+              <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '50%', background: 'linear-gradient(180deg, rgba(255,255,255,0.25) 0%, transparent 100%)', borderRadius: '11px 11px 0 0' }} />
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M4 8L12 3L20 8L12 13L4 8Z" />
+                <path d="M4 14L12 19L20 14" />
+                <path d="M4 11L12 16L20 11" />
+              </svg>
             </div>
             <div>
-              <span style={{ fontSize: 18, fontWeight: 700, letterSpacing: '-0.5px', fontFamily: "'Cormorant Garamond', serif", color: C.text }}>scrapair</span>
-              <div style={{ height: 1.5, background: `linear-gradient(90deg, ${C.bright}, transparent)`, marginTop: 1, width: '100%' }} />
+              <span style={{ fontSize: 22, fontWeight: 700, letterSpacing: '-0.5px', fontFamily: "'Cormorant Garamond', serif", color: C.text }}>scrapair</span>
+              <div style={{ height: 1.5, background: `linear-gradient(90deg, ${C.primary}, transparent)`, marginTop: 1, width: '100%' }} />
             </div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <button onClick={handleManualRefresh} style={{ padding: '8px 18px', fontSize: 12, fontWeight: 600, letterSpacing: '0.05em', borderRadius: 6, border: `1px solid ${C.border}`, background: 'transparent', color: C.bright, cursor: 'pointer', transition: 'all 0.2s' }} onMouseEnter={e => { e.target.style.borderColor = C.bright; e.target.style.background = C.glowLight; }} onMouseLeave={e => { e.target.style.borderColor = C.border; e.target.style.background = 'transparent'; }}>↻ Refresh</button>
-            <button onClick={() => navigate(-1)} style={{ padding: '8px 18px', fontSize: 12, fontWeight: 600, letterSpacing: '0.05em', borderRadius: 6, border: 'none', background: C.bright, color: '#ffffff', cursor: 'pointer', transition: 'all 0.2s', boxShadow: `0 2px 6px ${C.glowStrong}` }} onMouseEnter={e => { e.target.style.background = C.brightDark; e.target.style.transform = 'translateY(-1px)'; e.target.style.boxShadow = `0 4px 12px ${C.glowStrong}`; }} onMouseLeave={e => { e.target.style.background = C.bright; e.target.style.transform = 'translateY(0)'; e.target.style.boxShadow = `0 2px 6px ${C.glowStrong}`; }}>← Back</button>
+            <button onClick={handleManualRefresh} style={{ padding: '10px 22px', fontSize: 13, fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', borderRadius: 4, border: `1px solid ${C.border}`, background: 'transparent', color: C.textLight, cursor: 'pointer', fontFamily: "'Outfit', sans-serif", transition: 'all 0.25s ease' }} onMouseEnter={e => { e.currentTarget.style.borderColor = C.primary; e.currentTarget.style.color = C.primary; }} onMouseLeave={e => { e.currentTarget.style.borderColor = C.border; e.currentTarget.style.color = C.textLight; }}>↻ Refresh</button>
+            <button className="cta-btn" onClick={() => navigate(-1)} style={{ padding: '10px 26px', fontSize: 13, fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', borderRadius: 4, border: 'none', background: `linear-gradient(135deg, ${C.primary} 0%, ${C.primaryDark} 100%)`, color: 'white', cursor: 'pointer', fontFamily: "'Outfit', sans-serif", boxShadow: '0 4px 20px rgba(46,125,50,0.25)' }}>← Back</button>
           </div>
         </div>
       </nav>
 
       {/* Main Content */}
-      <section style={{ maxWidth: 900, margin: '0 auto', padding: '40px 40px', position: 'relative', zIndex: 2 }}>
+      <section style={{ maxWidth: 1320, margin: '0 auto', padding: '60px 40px 100px', position: 'relative', zIndex: 2 }}>
         {/* Header */}
-        <div style={{ marginBottom: 32, animation: 'fadeUp 0.7s ease both' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
-            <div style={{ width: 40, height: 1, background: C.bright }} />
-            <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.2em', textTransform: 'uppercase', color: C.bright }}>Messages</span>
-            <div style={{ width: 40, height: 1, background: C.bright }} />
+        <div style={{ marginBottom: 48, animation: 'fadeUp 0.7s ease both' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+            <div style={{ width: 40, height: 1, background: C.primary }} />
+            <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.2em', textTransform: 'uppercase', color: C.primary }}>Communication</span>
           </div>
-          <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 48, fontWeight: 600, letterSpacing: '-1.5px', margin: '0 0 8px', color: C.text }}>Conversations</h1>
-          <p style={{ fontSize: 15, lineHeight: 1.6, color: C.textMid, margin: 0 }}>Click on any conversation to start chatting</p>
+          <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 56, fontWeight: 600, letterSpacing: '-1.5px', margin: '0 0 12px', color: C.text, lineHeight: 1.1 }}>Your Messages</h1>
+          <p style={{ fontSize: 17, lineHeight: 1.75, color: C.textLight, margin: 0, maxWidth: 460 }}>Click on any conversation to start chatting</p>
         </div>
 
         {/* Info Messages */}
@@ -659,56 +769,59 @@ const MessagesPage = () => {
             <p style={{ fontSize: 12, color: C.textMid, margin: 0 }}>Start a conversation by posting waste or requesting a collection</p>
           </div>
         ) : (
-          <div style={{ display: 'grid', gap: 12 }}>
+          <div style={{ display: 'grid', gap: 16 }}>
             {conversations.map((conversation, index) => {
               const unreadCount = unreadCounts[conversation.id] || 0;
               const otherParticipant = conversation.participant1?.id === user.id ? conversation.participant2 : conversation.participant1;
-              const isHovered = hoveredConv === conversation.id;
               const isActive = selectedConversationId === conversation.id;
 
               return (
                 <div
                   key={conversation.id}
+                  className="conv-card"
                   onClick={() => handleOpenChat(conversation.id, otherParticipant?.businessName || otherParticipant?.name)}
-                  onMouseEnter={() => setHoveredConv(conversation.id)}
-                  onMouseLeave={() => setHoveredConv(null)}
                   style={{
-                    background: isActive ? C.glowLight : C.surface,
-                    border: `1px solid ${isActive ? C.bright : isHovered ? C.borderHover : C.border}`,
-                    borderRadius: 12,
-                    padding: 18,
+                    background: isActive ? 'rgba(46,125,50,0.04)' : C.surface,
+                    border: `1px solid ${isActive ? C.primary : C.border}`,
+                    borderRadius: 6,
+                    padding: '24px 28px',
                     cursor: 'pointer',
-                    transition: 'all 0.25s cubic-bezier(0.16,1,0.3,1)',
-                    transform: isHovered ? 'translateY(-2px)' : 'translateY(0)',
-                    boxShadow: isHovered || isActive ? `0 8px 20px rgba(0,0,0,0.08)` : '0 1px 3px rgba(0,0,0,0.05)',
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center',
-                    gap: 14,
-                    animation: `fadeUp 0.4s ease ${index * 0.05}s both`,
+                    gap: 16,
+                    animation: `fadeUp 0.5s ease ${index * 0.06}s both`,
                   }}
                 >
+                  {/* Avatar */}
+                  <div style={{
+                    width: 48, height: 48, borderRadius: 4,
+                    border: `1px solid ${C.border}`,
+                    background: C.surfaceHigh,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: 20, flexShrink: 0,
+                  }}>💬</div>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <h3 style={{ fontSize: 14, fontWeight: 700, color: C.bright, margin: '0 0 6px', display: 'flex', alignItems: 'center', gap: 8, fontFamily: "'Outfit', sans-serif" }}>
+                    <h3 style={{ fontSize: 16, fontWeight: 600, color: C.text, margin: '0 0 6px', display: 'flex', alignItems: 'center', gap: 10, fontFamily: "'Cormorant Garamond', serif", letterSpacing: '-0.3px' }}>
                       {otherParticipant?.businessName || otherParticipant?.companyName || otherParticipant?.email || 'Unknown'}
                       {unreadCount > 0 && (
-                        <span style={{ fontSize: 10, background: C.bright, color: '#ffffff', padding: '2px 6px', borderRadius: 10, fontWeight: 700 }}>
-                          {unreadCount}
+                        <span style={{ fontSize: 10, background: `linear-gradient(135deg, ${C.primary} 0%, ${C.primaryDark} 100%)`, color: '#ffffff', padding: '2px 8px', borderRadius: 2, fontWeight: 700, fontFamily: "'Outfit', sans-serif", letterSpacing: '0.04em' }}>
+                          {unreadCount} new
                         </span>
                       )}
                     </h3>
                     {conversation.wastePost && (
-                      <p style={{ fontSize: 12, color: C.bright, margin: '0 0 4px', fontWeight: 600 }}>
-                        📦 {conversation.wastePost.title}
+                      <p style={{ fontSize: 12, color: C.primary, margin: '0 0 4px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <span style={{ opacity: 0.7 }}>📦</span> {conversation.wastePost.title}
                       </p>
                     )}
                     {conversation.lastMessage && (
-                      <p style={{ fontSize: 12, color: C.textMid, margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      <p style={{ fontSize: 14, color: C.textLight, margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', lineHeight: 1.7 }}>
                         {conversation.lastMessage}
                       </p>
                     )}
                   </div>
-                  <div style={{ color: C.bright, flexShrink: 0, transition: 'transform 0.2s', transform: isHovered ? 'translateX(4px)' : 'translateX(0)' }}>
+                  <div style={{ color: C.primary, flexShrink: 0, fontSize: 18, fontWeight: 300 }}>
                     →
                   </div>
                 </div>
@@ -758,6 +871,41 @@ const MessagesPage = () => {
           💬 {minimizedLabel}
         </button>
       )}
+
+      {/* ══════════ FOOTER ══════════ */}
+      <footer style={{
+        borderTop: `1px solid ${C.border}`,
+        padding: '48px 40px',
+        position: 'relative',
+        zIndex: 2,
+        marginTop: 60,
+      }}>
+        <div style={{ maxWidth: 1320, margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 20 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <div style={{
+              width: 32, height: 32, borderRadius: 9,
+              background: `linear-gradient(135deg, ${C.primary} 0%, ${C.primaryDark} 100%)`,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              boxShadow: '0 2px 8px rgba(46,125,50,0.2)',
+            }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M4 8L12 3L20 8L12 13L4 8Z" />
+                <path d="M4 14L12 19L20 14" />
+              </svg>
+            </div>
+            <span style={{ fontSize: 18, fontWeight: 700, fontFamily: "'Cormorant Garamond', serif", color: C.text, letterSpacing: '-0.3px' }}>scrapair</span>
+          </div>
+          <div style={{ display: 'flex', gap: 32 }}>
+            {['Privacy', 'Terms', 'Contact'].map(l => (
+              <span key={l} style={{ fontSize: 13, color: C.textLighter, cursor: 'pointer', fontFamily: "'Outfit', sans-serif", fontWeight: 500, letterSpacing: '0.06em', textTransform: 'uppercase', transition: 'color 0.2s' }}
+                onMouseEnter={e => e.target.style.color = C.primary}
+                onMouseLeave={e => e.target.style.color = C.textLighter}
+              >{l}</span>
+            ))}
+          </div>
+          <span style={{ fontSize: 12, color: C.textLighter }}>© 2025 Scrapair · Building a circular future.</span>
+        </div>
+      </footer>
     </div>
   );
 };
